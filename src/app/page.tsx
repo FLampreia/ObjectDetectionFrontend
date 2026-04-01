@@ -1,5 +1,6 @@
 "use client";
 
+import AppTitle from "@/components/textTitles";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
@@ -8,9 +9,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-blue-950 px-4 text-center">
       
-      <h1 className="text-4xl sm:text-6xl lg:text-8xl font-bold text-white">
-        ObjectDetection
-      </h1>
+      <AppTitle size="lg"/>
 
       <h2 className="text-lg sm:text-xl lg:text-2xl font-medium text-blue-200 my-5">
         Software to detect objects using Yolo Ultralytics

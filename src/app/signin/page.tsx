@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import AppTitle from "@/components/textTitles";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -21,12 +22,15 @@ export default function LoginPage() {
 
         console.log({ email, password, username });
 
-        // router.push("/dashboard");
+        router.push("/login");
     };
 
     return (
-        <main className="flex min-h-screen items-center justify-center bg-blue-950 px-4">
-            <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+        <main className="flex flex-col min-h-screen items-center justify-center bg-blue-950 px-4">
+
+            <AppTitle size="lg"/>
+
+            <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 my-8">
 
                 <h1 className="text-2xl sm:text-3xl font-bold text-center text-blue-950">
                     Sign in
