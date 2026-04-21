@@ -1,0 +1,51 @@
+"use client";
+
+import { createContext, useEffect, useState } from "react";
+import { getCurrentUser, login as loginApi, logout as logoutApi, User } from "@/services/auth";
+
+type AuthContextType = {
+  user: User | null;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
+  refreshUser: () => Promise<void>;
+};
+
+export const AuthContext = createContext<AuthContextType | null>(null);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  async function refreshUser() {
+    try {
+      const data = await getCurrentUser();
+      setUser(data);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function login(email: string, password: string) {
+    await loginApi(email, password);
+    await refreshUser();
+  }
+
+  function logout() {
+    logoutApi();
+    setUser(null);
+  }
+
+  useEffect(() => {
+    refreshUser();
+  }, []);
+
+  return (
+    <AuthContext.Provider value={{ user, loading, login, logout, refreshUser }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+

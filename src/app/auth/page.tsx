@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AppTitle from "@/components/textTitles";
-import GreenBtn from "@/components/greenBtn";
+import { signup } from "@/services/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AuthPage() {
     const router = useRouter();
@@ -13,47 +14,71 @@ export default function AuthPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [fullName, setFullName] = useState("");
 
-    const handleAuth = (e: React.FormEvent<HTMLFormElement>) => {
+    const { login } = useAuth();
+
+    const handleAuth = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        if (password !== confirmPassword) {
-            alert("Passwords do not match");
-            return;
+        try {
+            if (mode === "signup") {
+                if (password !== confirmPassword) {
+                    alert("Passwords do not match");
+                    return;
+                }
+
+                await signup(username, email, password, fullName);
+
+                setUsername("");
+                setEmail("");
+                setPassword("");
+                setConfirmPassword("");
+
+                setMode("login");
+                return;
+            }
+
+            await login(email, password);
+
+            router.push("/dashboard");
+
+        } catch (error: any) {
+            alert(error.message);
         }
-
-        // TODO: call backend API
-        console.log({ username, email, password });
-
-        router.push("/login");
     };
-
     return (
         <div className="flex flex-col items-center justify-center min-h-screen px-4">
             <AppTitle size="lg" />
 
-            <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 mt-6">
+            <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 mt-6 min-h-140 min-w-100 flex flex-col">
                 {/* Toggle */}
-                <div className="flex rounded-xl bg-gray-100 p-1 mb-6">
+                <div className="relative grid grid-cols-2 rounded-xl bg-gray-100 p-1 mb-6">
+
+                    {/* Sliding indicator */}
+                    <div
+                        className={`absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-lg bg-white shadow-md transition-all duration-300 ease-in-out ${mode === "login" ? "translate-x-0" : "translate-x-full"
+                            }`}
+                    />
+
                     <button
+                        type="button"
                         onClick={() => setMode("login")}
-                        className={`flex-1 py-2 text-sm font-medium rounded-lg transition ${mode === "login"
-                            ? "bg-white text-blue-950 shadow"
-                            : "text-gray-500"
+                        className={`relative z-10 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${mode === "login" ? "text-blue-950" : "text-gray-500"
                             }`}
                     >
                         Login
                     </button>
 
                     <button
+                        type="button"
                         onClick={() => setMode("signup")}
-                        className={`flex-1 py-2 text-sm font-medium rounded-lg transition ${mode === "signup"
-                            ? "bg-white text-blue-950 shadow"
-                            : "text-gray-500"
+                        className={`relative z-10 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${mode === "signup" ? "text-blue-950" : "text-gray-500"
                             }`}
                     >
                         Sign up
                     </button>
+
                 </div>
 
                 {/* Content */}
@@ -63,12 +88,12 @@ export default function AuthPage() {
                             Welcome back
                         </h1>
 
-                        <p className="text-center text-gray-500 mt-2 mb-6">
+                        {/* <p className="text-center text-gray-500 mt-2 mb-6">
                             Enter your credentials to access your account
-                        </p>
+                        </p> */}
 
                         {/* TODO: login form */}
-                        <form onSubmit={handleAuth} className="flex flex-col gap-4">
+                        <form onSubmit={handleAuth} className="flex flex-col gap-4 py-5">
 
                             <input
                                 type="email"
@@ -101,11 +126,11 @@ export default function AuthPage() {
                             Create account
                         </h1>
 
-                        <p className="text-center text-gray-500 mt-2 mb-6">
+                        {/* <p className="text-center text-gray-500 mt-2 mb-6">
                             Sign up to start detecting
-                        </p>
+                        </p> */}
 
-                        <form onSubmit={handleAuth} className="flex flex-col gap-4">
+                        <form onSubmit={handleAuth} className="flex flex-col gap-4 py-5">
 
                             <input
                                 type="username"
@@ -121,6 +146,15 @@ export default function AuthPage() {
                                 placeholder="Email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
+                                className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-black"
+                                required
+                            />
+
+                            <input
+                                type="fullName"
+                                placeholder="Full Name"
+                                value={fullName}
+                                onChange={(e) => setFullName(e.target.value)}
                                 className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-black"
                                 required
                             />
@@ -156,7 +190,7 @@ export default function AuthPage() {
 
                 <button
                     onClick={() => router.push("/")}
-                    className="mt-6 text-sm text-blue-600 hover:underline w-full"
+                    className=" text-sm text-blue-600 hover:underline w-full"
                 >
                     Back to home
                 </button>

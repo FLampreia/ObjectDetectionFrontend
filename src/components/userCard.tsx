@@ -1,7 +1,10 @@
 
 export type User = {
-  name: string;
+  id: string;
   email: string;
+  role: string;
+  username: string;
+  full_name: string;
 };
 
 export function UserCard({ user }: { user: User }) {
@@ -11,7 +14,7 @@ export function UserCard({ user }: { user: User }) {
       <UserAvatar user={user} />
 
       <div className="text-sm text-left">
-        <p className="text-white font-semibold leading-tight">{user.name}</p>
+        <p className="text-white font-semibold leading-tight">{user.username}</p>
         <p className="text-blue-300 text-xs leading-tight">{user.email}</p>
       </div>
     </div>
@@ -21,7 +24,7 @@ export function UserCard({ user }: { user: User }) {
 export function UserAvatar({ user }: { user: User }) {
   return (
     <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-black font-bold">
-      {user.name.charAt(0).toUpperCase()}
+      {user.username.charAt(0).toUpperCase()}
     </div>
   );
 }

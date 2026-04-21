@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import AppTitle from "@/components/textTitles";
 import { UserCard, UserAvatar, type User} from "./userCard";
 import GreenBtn from "./greenBtn";

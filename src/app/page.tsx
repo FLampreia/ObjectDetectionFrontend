@@ -2,6 +2,7 @@
 
 import Header from "@/components/header";
 import FeatureCard from "@/components/featureCard";
+import { useAuth } from "@/hooks/useAuth";
 
 import {
   Cpu,
@@ -38,18 +39,14 @@ export default function Home() {
     { title: "Analyze", desc: "View real-time counting and stream" },
   ];
 
-  // const user = {
-  //   name: "Francisco",
-  //   email: "francisco@gmail.com"
-  // }; // TODO simulação (substituir por auth real)
-
-  const user = null;
+  const { user } = useAuth();
 
   return (
     <>
-      <Header user={user} />
       {/* <Header/> */}
+      <Header user={user} />
 
+      {/* Welcome section */}
       <section
         id="#"
         className="flex flex-col items-center justify-center text-center py-24 max-w-3xl"
