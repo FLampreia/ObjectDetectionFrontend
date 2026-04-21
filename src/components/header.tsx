@@ -45,7 +45,7 @@ export default function Header({ user }: Props) {
               </div>
             </>
           ) : (
-            <GreenBtn desc="Get started" href="/signin"/>
+            <GreenBtn desc="Get started" href="/auth"/>
           )}
         </div>
       </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import Header from "@/components/header";
-import Link from "next/link";
 import FeatureCard from "@/components/featureCard";
 
 import {
@@ -39,12 +38,12 @@ export default function Home() {
     { title: "Analyze", desc: "View real-time counting and stream" },
   ];
 
-  const user = {
-    name: "Francisco",
-    email: "francisco@gmail.com"
-  }; // TODO simulação (substituir por auth real)
+  // const user = {
+  //   name: "Francisco",
+  //   email: "francisco@gmail.com"
+  // }; // TODO simulação (substituir por auth real)
 
-  // const user = null;
+  const user = null;
 
   return (
     <>
@@ -72,7 +71,7 @@ export default function Home() {
               <GreenBtn desc="Dashboard" href="/dashboard" />  {/*TODO colocar url de referencia para dashboard*/}
             </>
           ) : (
-            <GreenBtn desc="Get started" href="/signin" />
+            <GreenBtn desc="Get started" href="/auth" />
           )}
         </div>
 
