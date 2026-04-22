@@ -43,8 +43,12 @@ export default function AuthPage() {
 
             router.push("/dashboard");
 
-        } catch (error: any) {
-            alert(error.message);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                alert(error.message);
+            } else {
+                alert("An unexpected error occurred");
+            }
         }
     };
     return (
@@ -88,15 +92,11 @@ export default function AuthPage() {
                             Welcome back
                         </h1>
 
-                        {/* <p className="text-center text-gray-500 mt-2 mb-6">
-                            Enter your credentials to access your account
-                        </p> */}
-
-                        {/* TODO: login form */}
                         <form onSubmit={handleAuth} className="flex flex-col gap-4 py-5">
 
                             <input
                                 type="email"
+                                name="email"
                                 placeholder="Email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -125,10 +125,6 @@ export default function AuthPage() {
                         <h1 className="text-2xl font-bold text-center text-blue-950">
                             Create account
                         </h1>
-
-                        {/* <p className="text-center text-gray-500 mt-2 mb-6">
-                            Sign up to start detecting
-                        </p> */}
 
                         <form onSubmit={handleAuth} className="flex flex-col gap-4 py-5">
 

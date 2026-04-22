@@ -19,7 +19,7 @@ export default function HomePage() {
 
     return (
         <div>
-            <h1>Home</h1>
+            <h1>Dashboard</h1>
 
             <div>
                 <p><strong>ID:</strong> {user.id}</p>
@@ -28,11 +28,11 @@ export default function HomePage() {
 
                 {/* só aparece se vier do /me */}
                 {"username" in user && (
-                    <p><strong>Username:</strong> {(user as any).username}</p>
+                    <p><strong>Username:</strong> {user.username}</p>
                 )}
 
                 {"full_name" in user && (
-                    <p><strong>Full name:</strong> {(user as any).full_name}</p>
+                    <p><strong>Full name:</strong> {user.full_name}</p>
                 )}
             </div>
 
@@ -41,8 +41,7 @@ export default function HomePage() {
                     logout();
                     router.push("/");
                 }}
-                className="cursor-pointer bg-emerald-200"
-            >
+                className="w-full text-left px-4 py-3 text-sm text-white hover:bg-blue-900/40 transition"            >
                 Logout
             </button>
 
@@ -50,7 +49,7 @@ export default function HomePage() {
                 onClick={() => {
                     router.push("/");
                 }}
-                className="cursor-pointer bg-emerald-200"
+                className="w-full text-left px-4 py-3 text-sm text-white hover:bg-blue-900/40 transition"
             >
                 Welcome page
             </button>

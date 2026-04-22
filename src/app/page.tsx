@@ -65,7 +65,7 @@ export default function Home() {
         <div className="mt-8">
           {user ? (
             <>
-              <GreenBtn desc="Dashboard" href="/dashboard" />  {/*TODO colocar url de referencia para dashboard*/}
+              <GreenBtn desc="Dashboard" href="/dashboard" />
             </>
           ) : (
             <GreenBtn desc="Get started" href="/auth" />

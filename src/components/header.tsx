@@ -1,9 +1,11 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import AppTitle from "@/components/textTitles";
-import { UserCard, UserAvatar, type User} from "./userCard";
+import { UserCard, UserAvatar, type User } from "./userCard";
 import GreenBtn from "./greenBtn";
+import { useAuth } from "@/hooks/useAuth";
 
 type Props = {
   user?: User | null;
@@ -12,6 +14,21 @@ type Props = {
 
 export default function Header({ user }: Props) {
   const router = useRouter();
+
+  const { logout } = useAuth();
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <header className="w-full py-4 px-6 border-b border-blue-900 bg-black/30 backdrop-blur-md sticky top-0 z-50">
@@ -31,20 +48,52 @@ export default function Header({ user }: Props) {
         {/* Right - Auth/User + Mobile Toggle */}
         <div className="flex items-center gap-4">
           {user ? (
-            // TODO colocar overlay para terminar sessão ou ir para definições
-            <>
+            // TODO colocar no overlay para ir para definições
+            <div className="relative" ref={menuRef}>
               {/* Desktop */}
-              <div className="hidden md:block">
+              <div className="hidden md:block"
+                onClick={() => setOpen(!open)}
+              >
                 <UserCard user={user} />
               </div>
 
               {/* Mobile - only avatar */}
-              <div className="md:hidden">
+              <div className="md:hidden"
+                onClick={() => setOpen(!open)}
+              >
                 <UserAvatar user={user} />
               </div>
-            </>
+              
+              {/* Logout overlay */}
+              {open && (
+                <div className="absolute right-0 top-full mt-2 w-52 rounded-2xl border border-blue-900 bg-slate-950 shadow-xl overflow-hidden z-50">
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      router.push("/settings");
+                    }}
+                    className="w-full text-left px-4 py-3 text-sm text-white hover:bg-blue-900/40 transition"
+                  >
+                    Settings
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      logout();
+                      router.push("/");
+                    }}
+                    className="w-full text-left px-4 py-3 text-sm text-white hover:bg-blue-900/40 transition"
+
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+
+            </div>
           ) : (
-            <GreenBtn desc="Get started" href="/auth"/>
+            <GreenBtn desc="Get started" href="/auth" />
           )}
         </div>
       </div>
