@@ -1,31 +1,7 @@
 import { jwtDecode } from "jwt-decode";
+import type { User, TokenPayload } from "@/types/index"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-/* =========================
-   TYPES
-========================= */
-
-export type TokenUser = {
-  user: {
-    user: {
-      email: string;
-      user_id: string;
-      role: string;
-    };
-  };
-  exp: number;
-  jti: string;
-  refresh: boolean;
-};
-
-export type User = {
-  id: string;
-  email: string;
-  username: string;
-  full_name: string;
-  role: string;
-};
 
 /* =========================
    TOKEN HANDLING
@@ -58,7 +34,7 @@ export function isTokenExpired(): boolean {
   if (!token) return true;
 
   try {
-    const decoded = jwtDecode<TokenUser>(token);
+    const decoded = jwtDecode<TokenPayload>(token);
 
     if (!decoded.exp) return true;
 

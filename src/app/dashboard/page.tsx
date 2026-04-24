@@ -26,7 +26,6 @@ export default function HomePage() {
                 <p><strong>Email:</strong> {user.email}</p>
                 <p><strong>Role:</strong> {user.role}</p>
 
-                {/* só aparece se vier do /me */}
                 {"username" in user && (
                     <p><strong>Username:</strong> {user.username}</p>
                 )}

@@ -1,7 +1,8 @@
 "use client";
 
 import { createContext, useEffect, useState } from "react";
-import { getCurrentUser, login as loginApi, logout as logoutApi, User } from "@/services/auth";
+import { getCurrentUser, login as loginApi, logout as logoutApi } from "@/services/auth";
+import { User } from "@/types/user";
 
 type AuthContextType = {
   user: User | null;
@@ -18,6 +19,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   async function refreshUser() {
+    setLoading(true);
+
     try {
       const data = await getCurrentUser();
       setUser(data);

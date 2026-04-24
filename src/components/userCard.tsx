@@ -1,11 +1,5 @@
 
-export type User = {
-  id: string;
-  email: string;
-  role: string;
-  username: string;
-  full_name: string;
-};
+import { User } from "@/types/user";
 
 export function UserCard({ user }: { user: User }) {
   return (

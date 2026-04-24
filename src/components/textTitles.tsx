@@ -11,7 +11,7 @@ export default function AppTitle({ size = "md" }: AppTitleProps) {
     };
 
     return (
-        <h1 className={`${sizes[size]} font-bold text-white text-center`}>
+        <h1 className={`${sizes[size]} font-bold text-blue-100 text-center`}>
             ObjectDetection
         </h1>
     );

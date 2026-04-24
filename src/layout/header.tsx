@@ -3,19 +3,16 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import AppTitle from "@/components/textTitles";
-import { UserCard, UserAvatar, type User } from "./userCard";
-import GreenBtn from "./greenBtn";
+import { UserCard, UserAvatar } from "@/components/userCard";
+import GreenBtn from "@/components/greenBtn";
 import { useAuth } from "@/hooks/useAuth";
 
-type Props = {
-  user?: User | null;
-};
 
 
-export default function Header({ user }: Props) {
+export default function Header() {
   const router = useRouter();
 
-  const { logout } = useAuth();
+  const { user ,logout } = useAuth();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -51,7 +48,7 @@ export default function Header({ user }: Props) {
             // TODO colocar no overlay para ir para definições
             <div className="relative" ref={menuRef}>
               {/* Desktop */}
-              <div className="hidden md:block"
+              <div className="hidden md:block cursor-pointer"
                 onClick={() => setOpen(!open)}
               >
                 <UserCard user={user} />

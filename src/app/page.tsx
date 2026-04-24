@@ -1,6 +1,6 @@
 "use client";
 
-import Header from "@/components/header";
+import Header from "@/layout/header";
 import FeatureCard from "@/components/featureCard";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -18,7 +18,7 @@ import {
 
 import GreenBtn from "@/components/greenBtn";
 
-export default function Home() {
+export default function Welcome() {
   const mainFeatures = [
     { title: "Model Selection", desc: "Choose between multiple YOLO versions.", icon: Cpu },
     { title: "Object Filtering", desc: "Select which objects to count.", icon: Filter },
@@ -44,7 +44,7 @@ export default function Home() {
   return (
     <>
       {/* <Header/> */}
-      <Header user={user} />
+      <Header/>
 
       {/* Welcome section */}
       <section

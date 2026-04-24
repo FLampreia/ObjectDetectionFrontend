@@ -6,6 +6,7 @@ import AppTitle from "@/components/textTitles";
 import { signup } from "@/services/auth";
 import { useAuth } from "@/hooks/useAuth";
 
+
 export default function AuthPage() {
     const router = useRouter();
     const [mode, setMode] = useState<"login" | "signup">("login");
@@ -51,11 +52,12 @@ export default function AuthPage() {
             }
         }
     };
+    
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen px-4">
+        <div className="flex flex-col items-center min-h-screen pt-10 px-4">
             <AppTitle size="lg" />
 
-            <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 mt-6 min-h-140 min-w-100 flex flex-col">
+            <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 mt-6 flex flex-col transition-all duration-300">
                 {/* Toggle */}
                 <div className="relative grid grid-cols-2 rounded-xl bg-gray-100 p-1 mb-6">
 
@@ -123,7 +125,7 @@ export default function AuthPage() {
                 ) : (
                     <>
                         <h1 className="text-2xl font-bold text-center text-blue-950">
-                            Create account
+                            Create an account
                         </h1>
 
                         <form onSubmit={handleAuth} className="flex flex-col gap-4 py-5">
