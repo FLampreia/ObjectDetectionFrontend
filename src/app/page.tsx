@@ -42,7 +42,7 @@ export default function Welcome() {
   const { user } = useAuth();
 
   return (
-    <>
+    <div className="flex flex-col items-center">
       {/* <Header/> */}
       <Header/>
 
@@ -143,6 +143,6 @@ export default function Welcome() {
           Developed by Francisco Lampreia
         </p>
       </footer>
-    </>
+    </div>
   );
 }

@@ -3,18 +3,23 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import AppTitle from "@/components/textTitles";
-import { UserCard, UserAvatar } from "@/components/userCard";
+import { UserCard } from "@/components/userCard";
+import { UserAvatar } from "@/components/userAvatar";
 import GreenBtn from "@/components/greenBtn";
 import { useAuth } from "@/hooks/useAuth";
+import { UserDropdown } from "@/components/userDropdown";
 
 
 
 export default function Header() {
   const router = useRouter();
 
-  const { user ,logout } = useAuth();
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const toggle = () => setOpen(v => !v);
+  const close = () => setOpen(false);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -45,8 +50,9 @@ export default function Header() {
         {/* Right - Auth/User + Mobile Toggle */}
         <div className="flex items-center gap-4">
           {user ? (
-            // TODO colocar no overlay para ir para definições
+
             <div className="relative" ref={menuRef}>
+
               {/* Desktop */}
               <div className="hidden md:block cursor-pointer"
                 onClick={() => setOpen(!open)}
@@ -60,33 +66,8 @@ export default function Header() {
               >
                 <UserAvatar user={user} />
               </div>
-              
-              {/* Logout overlay */}
-              {open && (
-                <div className="absolute right-0 top-full mt-2 w-52 rounded-2xl border border-blue-900 bg-slate-950 shadow-xl overflow-hidden z-50">
-                  <button
-                    onClick={() => {
-                      setOpen(false);
-                      router.push("/settings");
-                    }}
-                    className="w-full text-left px-4 py-3 text-sm text-white hover:bg-blue-900/40 transition"
-                  >
-                    Settings
-                  </button>
 
-                  <button
-                    onClick={() => {
-                      setOpen(false);
-                      logout();
-                      router.push("/");
-                    }}
-                    className="w-full text-left px-4 py-3 text-sm text-white hover:bg-blue-900/40 transition"
-
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
+              {open && <UserDropdown onClose={close} placement="bottom" />}
 
             </div>
           ) : (
