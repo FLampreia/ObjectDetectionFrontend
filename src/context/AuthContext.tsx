@@ -3,14 +3,7 @@
 import { createContext, useEffect, useState } from "react";
 import { getCurrentUser, login as loginApi, logout as logoutApi } from "@/services/auth";
 import { User } from "@/types/user";
-
-type AuthContextType = {
-  user: User | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-  refreshUser: () => Promise<void>;
-};
+import { AuthContextType } from "@/types";
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 

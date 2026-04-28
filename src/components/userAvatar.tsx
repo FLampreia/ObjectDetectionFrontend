@@ -17,3 +17,5 @@ export function UserAvatar({
     </div>
   );
 }
+
+// todo arranjar o overlay quando carrega no avatar

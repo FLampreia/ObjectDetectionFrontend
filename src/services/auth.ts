@@ -25,6 +25,8 @@ export function logout() {
   localStorage.removeItem("refresh_token");
 }
 
+// TODO fazer refresh token
+
 /* =========================
    AUTH STATUS
 ========================= */
@@ -121,3 +123,5 @@ export async function getCurrentUser(): Promise<User | null> {
     return null;
   }
 }
+
+// TODO verifica se é possivel colocar as informações em cache para nao estar constantemente a fazer /me, tavez fazer um (React Query / TanStack Query)

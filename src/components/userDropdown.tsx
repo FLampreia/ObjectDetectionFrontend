@@ -1,7 +1,6 @@
-"use client";
-
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { Settings, LogOut } from "lucide-react";
 
 type UserDropdownProps = {
   onClose: () => void;
@@ -22,16 +21,17 @@ export function UserDropdown({
 
   return (
     <div
-      className={`absolute right-0 ${positionClass} w-52 rounded-2xl border border-blue-900 bg-slate-950 shadow-xl overflow-hidden z-50`}
+      className={`absolute left-0 right-0 ${positionClass} rounded-2xl border border-blue-900 bg-slate-950 shadow-xl overflow-hidden z-50`}
     >
       <button
         onClick={() => {
           onClose();
           router.push("/settings");
         }}
-        className="w-full text-left px-4 py-3 text-sm text-white hover:bg-blue-900/40"
+        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-blue-900/40 cursor-pointer"
       >
-        Settings
+        <Settings size={18} />
+        <span>Settings</span>
       </button>
 
       <button
@@ -40,12 +40,11 @@ export function UserDropdown({
           logout();
           router.push("/");
         }}
-        className="w-full text-left px-4 py-3 text-sm text-white hover:bg-blue-900/40"
+        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-blue-900/40 cursor-pointer"
       >
-        Logout
+        <LogOut size={18} />
+        <span>Logout</span>
       </button>
     </div>
   );
 }
-
-// TODO Verify if its better do do everything as a component only, without, userCard, userAvatar and userDropsown beeing separated

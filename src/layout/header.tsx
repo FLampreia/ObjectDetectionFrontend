@@ -18,7 +18,6 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const toggle = () => setOpen(v => !v);
   const close = () => setOpen(false);
 
   useEffect(() => {
@@ -33,7 +32,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="w-full py-4 px-6 border-b border-blue-900 bg-black/30 backdrop-blur-md sticky top-0 z-50">
+    <header className="w-full py-4 px-6 border-b border-blue-900 bg-slate-950/40 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
 
         {/* Left - Title */}
