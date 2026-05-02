@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
-import { Sidebar } from "@/layout/sideBar";
 
 
 export default function HomePage() {

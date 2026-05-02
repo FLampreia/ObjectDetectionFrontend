@@ -3,28 +3,89 @@
 import { useState } from "react";
 import { Save, Trash2, User, Lock, BadgeInfo } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { UserAvatar } from "@/components/userAvatar";
+import { updateUsername, updateFullName, updatePassword, deletePassword } from "@/services/user";
+import { useRouter } from "next/navigation";
 
 export default function Settings() {
-    const { user } = useAuth();
+    const { user, refreshUser, logout } = useAuth();
 
-    const [username, setUsername] = useState(user?.username);
-    const [fullName, setFullName] = useState(user?.full_name);
+    const [username, setUsername] = useState(() => user?.username ?? "");
+    const [fullName, setFullName] = useState(() => user?.full_name ?? "");
+
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [confirmDelete, setConfirmDelete] = useState("");
 
-    const handleProfileSave = () => {
-        console.log("Guardar perfil");
+    const router = useRouter();
+
+    const handleProfileSave = async () => {
+        if (!user?.id) return;
+
+        try {
+
+            if (username != user?.username) {
+                await updateUsername(user.id, username);
+                await refreshUser();
+            }
+
+            if (fullName != user?.full_name) {
+                await updateFullName(user.id, fullName);
+                await refreshUser();
+            }
+
+
+
+        } catch (err) {
+            console.error(err);
+        }
     };
 
-    const handlePasswordChange = () => {
-        console.log("Alterar password");
+    const handlePasswordChange = async () => {
+        if (!user?.id) return;
+
+        if (newPassword !== confirmPassword) {
+            alert("Passwords do not match");
+            return;
+        }
+
+        try {
+            await updatePassword(user.id, newPassword, currentPassword);
+            await refreshUser();
+
+            alert("Password updated successfully");
+        } catch (err) {
+            if (err instanceof Error) {
+                alert(err.message);
+            } else {
+                alert("Failed to update password");
+            }
+        }
+
+        //TODO utilizar set error ou forma mais otimizada
+
+        // TODO
+        // invalidar refresh tokens
+        // obrigar re-login
+        // ou regenerar access token
+
+
     };
 
-    const handleDeleteAccount = () => {
-        console.log("Eliminar conta");
-    };
+    const handleDeleteAccount = async () => {
+    if (!user?.id) return;
+
+    try {
+        await deletePassword(user.id);
+
+        logout();
+
+        router.replace("/welcome");
+
+    } catch (err) {
+        console.error(err);
+    }
+};
 
     // TODO FAZER OS ENPOINTS
 
@@ -130,8 +191,8 @@ export default function Settings() {
                                 <input
                                     type="password"
                                     placeholder="••••••••"
-                                    value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
                                     className="w-full border border-blue-900 rounded-xl px-4 py-3 outline-none focus:border-green-500"
                                 />
                             </div>
@@ -141,7 +202,7 @@ export default function Settings() {
                                 className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-green-700 transition px-5 py-3 rounded-xl font-medium"
                             >
                                 <Save className="w-4 h-4" />
-                                Atualizar Password
+                                Update Password
                             </button>
                         </div>
                     </section>
@@ -161,7 +222,7 @@ export default function Settings() {
 
                         <div className="mb-4">
                             <label className="text-sm text-zinc-400 block mb-2">
-                                Write <span className="font-semibold text-white">DELETE</span>{" "}
+                                Write <span className="font-semibold text-white">{user?.username}</span>{" "}
                                 to confirm
                             </label>
 
@@ -175,7 +236,7 @@ export default function Settings() {
 
                         <button
                             onClick={handleDeleteAccount}
-                            disabled={confirmDelete !== "DELETE"}
+                            disabled={confirmDelete !== user?.username}
                             className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-zinc-700 disabled:text-zinc-400 transition px-5 py-3 rounded-xl font-medium"
                         >
                             <Trash2 className="w-4 h-4" />

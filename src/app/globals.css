@@ -1,24 +1,29 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@layer base {
 
-@media (prefers-color-scheme: dark) {
+  /* TODO fazer light mode */
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg-gradient: linear-gradient(to bottom, #ffffff, #0a0a0a);
+    --text-primary: #fefefe;
+
   }
+
+  .dark {
+    --bg-gradient: linear-gradient(to bottom, #162456, #020618);
+
+    --text-primary: #fefefe;
+  }
+
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-gradient);
+  color: var(--text-primary);
   font-family: Arial, Helvetica, sans-serif;
+  background-attachment: fixed;
 }
 
 html {
   scroll-behavior: smooth;
 }
-/* TODO fazer themes para alteração de cores e variaveis globais para facilitar as cores */

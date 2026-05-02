@@ -52,7 +52,7 @@ export default function Welcome() {
         className="flex flex-col items-center justify-center text-center py-24 max-w-3xl"
       >
 
-        <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-blue-100 mt-6 leading-snug">
+        <h2 className="text-xl sm:text-3xl lg:text-4xl font-semibold mt-6 leading-snug">
           Smart Object Counting with{" "}
           <span className="text-emerald-400">Real-Time AI</span>
         </h2>

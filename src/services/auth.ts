@@ -1,7 +1,6 @@
 import { jwtDecode } from "jwt-decode";
 import type { User, TokenPayload } from "@/types/index"
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import API_URL from "@/config/api";
 
 /* =========================
    TOKEN HANDLING

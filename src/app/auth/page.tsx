@@ -18,7 +18,20 @@ export default function AuthPage() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [fullName, setFullName] = useState("");
 
-    const { login } = useAuth();
+
+    const [usernameError, setUsernameError] = useState(false);
+
+
+    const { login } = useAuth()
+
+    const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+
+        const hasSpace = value.includes(" ");
+
+        setUsername(value);
+        setUsernameError(hasSpace);
+    };
 
     const handleAuth = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -63,21 +76,19 @@ export default function AuthPage() {
 
                     {/* Sliding indicator */}
                     <div
-                        className={`absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-lg bg-emerald-500 shadow-md transition-all duration-300 ease-in-out ${
-                            mode === "login"
-                                ? "translate-x-0"
-                                : "translate-x-full"
-                        }`}
+                        className={`absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-lg bg-emerald-500 shadow-md transition-all duration-300 ease-in-out ${mode === "login"
+                            ? "translate-x-0"
+                            : "translate-x-full"
+                            }`}
                     />
 
                     <button
                         type="button"
                         onClick={() => setMode("login")}
-                        className={`relative z-10 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
-                            mode === "login"
-                                ? "text-white"
-                                : "text-slate-400"
-                        }`}
+                        className={`relative z-10 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${mode === "login"
+                            ? "text-white"
+                            : "text-slate-400"
+                            }`}
                     >
                         Login
                     </button>
@@ -85,11 +96,10 @@ export default function AuthPage() {
                     <button
                         type="button"
                         onClick={() => setMode("signup")}
-                        className={`relative z-10 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
-                            mode === "signup"
-                                ? "text-white"
-                                : "text-slate-400"
-                        }`}
+                        className={`relative z-10 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${mode === "signup"
+                            ? "text-white"
+                            : "text-slate-400"
+                            }`}
                     >
                         Sign up
                     </button>
@@ -145,10 +155,19 @@ export default function AuthPage() {
                                 type="text"
                                 placeholder="Username"
                                 value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                className="bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                onChange={handleUsernameChange}
+                                className={`bg-slate-800 border rounded-lg px-4 py-2 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition
+                                            ${usernameError ? "border-red-500 focus:ring-red-500" : "border-slate-700"}
+                                        `}
                                 required
                             />
+                            {usernameError && (
+                                <p className="text-red-400 text-sm mt-1">
+                                    Username cannot contain spaces.
+                                </p>
+                            )} 
+
+                            {/* TODO fazer erro para formulário como fiz para este  e rever esta questão dos inputs  */}
 
                             <input
                                 type="email"

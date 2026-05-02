@@ -27,14 +27,14 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`} /* para aletrar entre modos é so retirar o dark */
     >
       <body className="min-h-full ">
-        <main className="bg-linear-to-b from-blue-950 to-black text-white">
+        
           <AuthProvider>
             {children}
           </AuthProvider>
-        </main>
+        
       </body>
     </html>
   );
