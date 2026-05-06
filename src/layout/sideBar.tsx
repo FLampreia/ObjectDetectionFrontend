@@ -64,24 +64,28 @@ export function Sidebar({
                     icon={<Dash size={20} />}
                     label="Dashboard"
                     to="/dashboard"
+                    onClick={mobile ? handleCloseSidebar : undefined}
                 />
 
                 <MenuItem
                     icon={<Video size={20} />}
                     label="Detections"
                     to="/detect"
+                    onClick={mobile ? handleCloseSidebar : undefined}
                 />
 
                 <MenuItem
                     icon={<ClipboardClock size={20} />}
                     label="History"
                     to="/history"
+                    onClick={mobile ? handleCloseSidebar : undefined}
                 />
 
                 <MenuItem
                     icon={<Users size={20} />}
                     label="Team"
                     to="/team"
+                    onClick={mobile ? handleCloseSidebar : undefined}
                 />
             </nav>
 
@@ -98,7 +102,7 @@ export function Sidebar({
 
                 {open && (
                     <UserDropdown
-                        onClose={closeDropdown}
+                        onClose={handleCloseSidebar}
                         placement="top"
                     />
                 )}

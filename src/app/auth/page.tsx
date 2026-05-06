@@ -38,13 +38,14 @@ export default function AuthPage() {
 
         try {
             if (mode === "signup") {
+
                 if (password !== confirmPassword) {
                     alert("Passwords do not match");
                     return;
                 }
-
+                
                 await signup(username, email, password, fullName);
-
+                
                 setUsername("");
                 setEmail("");
                 setPassword("");

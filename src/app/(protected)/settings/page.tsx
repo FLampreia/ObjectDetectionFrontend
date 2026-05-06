@@ -86,9 +86,6 @@ export default function Settings() {
         console.error(err);
     }
 };
-
-    // TODO FAZER OS ENPOINTS
-
     return (
         <div className="flex min-h-screen">
 

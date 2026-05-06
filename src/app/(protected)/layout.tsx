@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Sidebar } from "@/layout/sideBar";
 import { Menu } from "lucide-react";
 
+
 export default function ProtectedLayout({
     children,
 }: {

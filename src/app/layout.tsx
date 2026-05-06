@@ -27,7 +27,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`} /* para aletrar entre modos é so retirar o dark */
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`} /* TODO para alterar entre modos é so retirar o dark */
     >
       <body className="min-h-full ">
         
