@@ -20,6 +20,8 @@ export function setTokens(access: string, refresh?: string) {
 }
 
 export function logout() {
+
+  // TODO colocar o endpoint para logout
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import AppTitle from "@/components/textTitles";
 import { signup } from "@/services/auth";
 import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
 
 // TODO se houver uma conta logada, nao permite aceder À pagina de auth
 
@@ -22,7 +23,13 @@ export default function AuthPage() {
     const [usernameError, setUsernameError] = useState(false);
 
 
-    const { login } = useAuth()
+    const { login, user, loading } = useAuth();
+
+    useEffect(() => {
+        if (!loading && user) {
+            router.push("/dashboard");
+        }
+    }, [user, loading, router]);
 
     const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -43,9 +50,9 @@ export default function AuthPage() {
                     alert("Passwords do not match");
                     return;
                 }
-                
+
                 await signup(username, email, password, fullName);
-                
+
                 setUsername("");
                 setEmail("");
                 setPassword("");
@@ -166,7 +173,7 @@ export default function AuthPage() {
                                 <p className="text-red-400 text-sm mt-1">
                                     Username cannot contain spaces.
                                 </p>
-                            )} 
+                            )}
 
                             {/* TODO fazer erro para formulário como fiz para este  e rever esta questão dos inputs  */}
 

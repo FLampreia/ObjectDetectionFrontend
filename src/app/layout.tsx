@@ -1,7 +1,9 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { AuthProvider } from "@/context/AuthContext";
+import type { Metadata, Viewport } from "next";
+import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { RouteProvider } from "@/providers/route-provider";
+import { ThemeProvider } from "@/providers/theme-provider";
+import "@/styles/globals.css";
+import { AuthProvider } from "@/providers/auth-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,28 +15,36 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
+
 export const metadata: Metadata = {
   title: "Object Detection App",
   description: "Software to detect objects using Yolo Utralytics",
 };
 
+export const viewport: Viewport = {
+  colorScheme: "light",
+};
+
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html
-      lang="en"
-      data-scroll-behavior="smooth"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`} /* TODO para alterar entre modos é so retirar o dark */
-    >
-      <body className="min-h-full ">
-        
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        
+    <html lang="en" className={`${inter.variable} scroll-smooth`}>
+      <body className="bg-primary antialiased">
+        <RouteProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </ThemeProvider>
+        </RouteProvider>
       </body>
     </html>
   );

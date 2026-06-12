@@ -22,21 +22,21 @@ export default function Welcome() {
   const mainFeatures = [
     { title: "Model Selection", desc: "Choose between multiple YOLO versions.", icon: Cpu },
     { title: "Object Filtering", desc: "Select which objects to count.", icon: Filter },
-    { title: "Live & Video", desc: "Supports recorded video or live streams.", icon: Video },
+    { title: "Video & Stream", desc: "Supports recorded video or live streams.", icon: Video },
     { title: "Real-time Counting", desc: "Instant processing with visual feedback.", icon: Activity },
   ];
 
   const advancedFeatures = [
     { title: "Counting Zones", desc: "Draw custom areas before starting detection.", icon: Map },
-    { title: "Team Roles", desc: "Admin, Operator and Viewer permissions.", icon: Users },
+    { title: "Team Roles", desc: "Admin, Operator and Viewer permissions.", icon: Users }, //TODO change 
     { title: "Reports", desc: "Export counting data and analytics.", icon: FileBarChart },
   ];
 
   const steps = [
     { title: "Select Model", desc: "Choose the detection algorithm" },
     { title: "Choose Objects", desc: "Pick what you want to count" },
-    { title: "Input Source", desc: "Upload video or use live stream" },
-    { title: "Analyze", desc: "View real-time counting and stream" },
+    { title: "Input Source", desc: "Upload image, video or use live stream URL" },
+    { title: "Analyze", desc: "View real-time detection and tracking" },
   ];
 
   const { user } = useAuth();

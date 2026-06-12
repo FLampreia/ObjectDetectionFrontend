@@ -64,8 +64,7 @@ export default function Settings() {
 
         //TODO utilizar set error ou forma mais otimizada
 
-        // TODO
-        // invalidar refresh tokens
+        // TODO invalidar refresh tokens
         // obrigar re-login
         // ou regenerar access token
 
