@@ -25,18 +25,18 @@ export default function ProtectedLayout({
     if (!user) return null;
 
     return (
-        <div className="felx min-h-screen">
-
-            {/* Sidebar Desktop */}
+        <>
+            <Sidebar user={user} />
+            {/* Sidebar Desktop
             <div className="hidden md:block border-r">
-                <Sidebar user={user}/>
-            </div>
+
+            </div> */}
 
 
 
             {children}
 
 
-        </div>
+        </>
     );
 }
