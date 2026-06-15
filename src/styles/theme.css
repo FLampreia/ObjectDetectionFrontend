@@ -498,6 +498,7 @@
     /* DARK MODE VARIABLES */
 
     .dark-mode {
+        /* TODO VER O DARK MODE linear-gradient(to bottom, #162456, #020618); */
         --color-alpha-white: rgb(12 14 18);
         --color-alpha-black: rgb(255 255 255);
 
