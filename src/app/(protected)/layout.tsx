@@ -25,18 +25,11 @@ export default function ProtectedLayout({
     if (!user) return null;
 
     return (
-        <>
+        <div className="min-h-screen">
             <Sidebar user={user} />
-            {/* Sidebar Desktop
-            <div className="hidden md:block border-r">
-
-            </div> */}
-
-
-
-            {children}
-
-
-        </>
+            <main className="lg:pl-70">
+                {children}
+            </main>
+        </div>
     );
 }

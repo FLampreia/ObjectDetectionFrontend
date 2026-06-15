@@ -10,16 +10,16 @@ import {
     ModalOverlay as AriaModalOverlay,
 } from "react-aria-components";
 import { cx } from "@/utils/cx";
+import AppTitle from "@/components/custom/textTitles";
 
 export const MobileNavigationHeader = ({ children }: PropsWithChildren) => {
     return (
         <AriaDialogTrigger>
-            <header className="flex h-14 items-center justify-between border-b border-secondary bg-primary p-3 pl-4 lg:hidden">
-                ObjectDetection
-
+            <header className="flex h-14 items-center justify-between border-b border-secondary bg-primary/40 p-3 pl-4 lg:hidden ">
+                    <AppTitle size="xs" /> {/* FIXME  arranjar o titulo*/}
                 <AriaButton
                     aria-label="Expand navigation menu"
-                    className="group flex items-center justify-center rounded-lg bg-primary p-2 text-fg-secondary outline-focus-ring hover:bg-primary_hover hover:text-fg-secondary_hover focus-visible:outline-2 focus-visible:outline-offset-2"
+                    className="group flex items-center justify-center rounded-lg p-2 text-fg-secondary outline-focus-ring hover:bg-primary_hover hover:text-fg-secondary_hover focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
                     <Menu02 className="size-6 transition duration-200 ease-in-out group-aria-expanded:opacity-0" />
                     <CloseIcon className="absolute size-6 opacity-0 transition duration-200 ease-in-out group-aria-expanded:opacity-100" />
