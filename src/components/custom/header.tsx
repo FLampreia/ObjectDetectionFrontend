@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import AppTitle from "@/components/custom/textTitles";
 import { UserCard } from "@/components/custom/userCard";
 import { UserAvatar } from "@/components/custom/userAvatar";
-import GreenBtn from "@/components/custom/greenBtn";
 import { useAuth } from "@/hooks/useAuth";
 import { UserDropdown } from "@/components/custom/userDropdown";
+import { Button } from "../base/buttons/button";
 
 
 
@@ -70,7 +70,10 @@ export default function Header() {
 
             </div>
           ) : (
-            <GreenBtn desc="Get started" href="/auth" />
+            <Button size="lg" onClick={() => router.push("/auth")}>
+              Get Started
+            </Button>
+            // <GreenBtn desc="Get started" href="/auth" />
           )}
         </div>
       </div>

@@ -1,8 +1,10 @@
 "use client";
-
-import Header from "@/layout/header";
+import { useRouter } from "next/navigation";
+import Header from "@/components/custom/header";
 import FeatureCard from "@/components/custom/featureCard";
 import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/base/buttons/button";
+
 
 import {
     Cpu,
@@ -16,11 +18,9 @@ import {
     ChevronRight,
 } from "lucide-react";
 
-import GreenBtn from "@/components/custom/greenBtn";
-
-
 
 export const WelcomeScreen = () => {
+    const router = useRouter();
 
     const mainFeatures = [
         { title: "Model Selection", desc: "Choose between multiple YOLO versions.", icon: Cpu },
@@ -67,11 +67,14 @@ export const WelcomeScreen = () => {
 
                 <div className="mt-8">
                     {user ? (
-                        <>
-                            <GreenBtn desc="Dashboard" href="/dashboard" />
-                        </>
+                        <Button size="lg" onClick={() => router.push("/auth")}>
+                            Dashboard
+                        </Button>
                     ) : (
-                        <GreenBtn desc="Get started" href="/auth" />
+                        <Button size="lg" onClick={() => router.push("/auth")}>
+                            Get started
+                        </Button>
+                        // <GreenBtn desc="Get started" href="/auth" />
                     )}
                 </div>
 

@@ -28,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cx(inter.variable, "--background-color-gradient antialiased scroll-smooth")}>
+      <body className={cx(inter.variable, "dark-mode antialiased scroll-smooth")}>
         <RouteProvider>
           <ThemeProvider>
             <AuthProvider>

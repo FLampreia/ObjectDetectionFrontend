@@ -8,7 +8,7 @@ export default function NotFound() {
     const router = useRouter();
     // TODO temrinar o not found
     return (
-        <section className="flex min-h-screen items-start bg-primary py-16 md:items-center md:py-24">
+        <section className="flex min-h-screen items-start py-16 md:items-center md:py-24">
             <div className="mx-auto max-w-container grow px-4 md:px-8">
                 <div className="flex w-full max-w-3xl flex-col gap-8 md:gap-12">
                     <div className="flex flex-col gap-4 md:gap-6">
@@ -23,7 +23,7 @@ export default function NotFound() {
                         <Button color="secondary" size="xl" iconLeading={ArrowLeft} onClick={() => router.back()}>
                             Go back
                         </Button>
-                        <Button size="xl" onClick={() => router.back()}>
+                        <Button size="xl" onClick={() => router.push("/")}>
                             Take me home
                         </Button>
                     </div>
