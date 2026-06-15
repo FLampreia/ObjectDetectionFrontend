@@ -67,7 +67,7 @@ export const WelcomeScreen = () => {
 
                 <div className="mt-8">
                     {user ? (
-                        <Button size="lg" onClick={() => router.push("/auth")}>
+                        <Button size="lg" onClick={() => router.push("/dashboard")}>
                             Dashboard
                         </Button>
                     ) : (
