@@ -1,19 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Inter } from "next/font/google";
 import { RouteProvider } from "@/providers/route-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import "@/styles/globals.css";
 import { AuthProvider } from "@/providers/auth-provider";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { cx } from "@/utils/cx";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -23,7 +14,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Object Detection App",
-  description: "Software to detect objects using Yolo Utralytics",
+  description: "Software to detect objects using YOLO models",
 };
 
 export const viewport: Viewport = {
@@ -36,10 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning
-      className={`${inter.variable} scroll-smooth`}
-    >
-      <body className="bg-primary antialiased">
+    <html lang="en" suppressHydrationWarning>
+      <body className={cx(inter.variable, "--background-color-gradient antialiased scroll-smooth")}>
         <RouteProvider>
           <ThemeProvider>
             <AuthProvider>

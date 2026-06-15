@@ -8,12 +8,12 @@ import {
     X,
 } from "lucide-react";
 
-import { MenuItem } from "@/components/menuitem";
+import { MenuItem } from "@/components/custom/menuitem";
 import { useAuth } from "@/hooks/useAuth";
-import AppTitle from "@/components/textTitles";
-import { UserCard } from "@/components/userCard";
+import AppTitle from "@/components/custom/textTitles";
+import { UserCard } from "@/components/custom/userCard";
 import { useState } from "react";
-import { UserDropdown } from "@/components/userDropdown";
+import { UserDropdown } from "@/components/custom/userDropdown";
 
 interface SidebarProps {
     mobile?: boolean;

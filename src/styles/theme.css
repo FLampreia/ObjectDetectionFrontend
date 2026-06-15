@@ -95,16 +95,19 @@
         0% {
             transform: translateX(0);
         }
+
         100% {
             transform: translateX(-100%);
         }
     }
 
     @keyframes caret-blink {
+
         0%,
         50% {
             opacity: 1;
         }
+
         51%,
         100% {
             opacity: 0;
@@ -137,6 +140,12 @@
 
     --color-alpha-white: rgb(255 255 255);
     --color-alpha-black: rgb(0 0 0);
+
+    --background-gradient: linear-gradient(
+        to bottom,
+        #f8fafc,
+        #e2e8f0
+    );
 
     /* UTILITY COLORS */
     --color-utility-blue-50: var(--color-blue-50);
@@ -498,9 +507,14 @@
     /* DARK MODE VARIABLES */
 
     .dark-mode {
-        /* TODO VER O DARK MODE linear-gradient(to bottom, #162456, #020618); */
         --color-alpha-white: rgb(12 14 18);
         --color-alpha-black: rgb(255 255 255);
+
+        --background-gradient: linear-gradient(
+            to bottom,
+            oklch(28.2% 0.091 267.935),
+            rgb(0, 0, 0)
+        );
 
         /* UTILITY COLORS */
 

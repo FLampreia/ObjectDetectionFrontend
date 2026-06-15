@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import AppTitle from "@/components/textTitles";
+import AppTitle from "@/components/custom/textTitles";
 import { signup } from "@/services/auth";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";

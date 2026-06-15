@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import AppTitle from "@/components/textTitles";
-import { UserCard } from "@/components/userCard";
-import { UserAvatar } from "@/components/userAvatar";
-import GreenBtn from "@/components/greenBtn";
+import AppTitle from "@/components/custom/textTitles";
+import { UserCard } from "@/components/custom/userCard";
+import { UserAvatar } from "@/components/custom/userAvatar";
+import GreenBtn from "@/components/custom/greenBtn";
 import { useAuth } from "@/hooks/useAuth";
-import { UserDropdown } from "@/components/userDropdown";
+import { UserDropdown } from "@/components/custom/userDropdown";
 
 
 

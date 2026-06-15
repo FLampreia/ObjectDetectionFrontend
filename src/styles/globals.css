@@ -35,6 +35,7 @@ body {
     font-variant-ligatures: contextual;
     -webkit-font-kerning: normal;
     font-kerning: normal;
+    background: var(--background-gradient) fixed;
 }
 
 /* Hide the default expand arrow on Safari.  */
