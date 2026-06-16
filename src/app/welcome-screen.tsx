@@ -1,8 +1,8 @@
 "use client";
 import { useRouter } from "next/navigation";
-import Header from "@/components/custom/header";
-import FeatureCard from "@/components/custom/featureCard";
-import { useAuth } from "@/hooks/useAuth";
+import Header from "@/components/custom/layout/header";
+import FeatureCard from "@/components/custom/welcome/featureCard";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/base/buttons/button";
 
 

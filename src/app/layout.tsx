@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/providers/theme-provider";
 import "@/styles/globals.css";
 import { AuthProvider } from "@/providers/auth-provider";
 import { cx } from "@/utils/cx";
+import { ReactQueryProvider } from "@/providers/query-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,7 +33,9 @@ export default function RootLayout({
         <RouteProvider>
           <ThemeProvider>
             <AuthProvider>
-              {children}
+              <ReactQueryProvider>
+                {children}
+              </ReactQueryProvider>
             </AuthProvider>
           </ThemeProvider>
         </RouteProvider>

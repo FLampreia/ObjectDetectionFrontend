@@ -1,6 +1,6 @@
 import { BarChartSquare02, Camera01, Calendar, CheckDone01, ChevronRight, File05, PieChart03, Rows01, Users01 } from "@untitledui/icons";
 import type { NavItemType } from "@/components/application/app-navigation/config";
-import { SidebarNavigationSectionsSubheadings } from "../application/app-navigation/sidebar-navegation/sidebar-sections-subheadings";
+import { SidebarNavigationSectionsSubheadings } from "../../application/app-navigation/sidebar-navegation/sidebar-sections-subheadings";
 import { Avatar } from "@/components/base/avatar/avatar";
 import { Badge } from "@/components/base/badges/badges";
 import { usePathname } from "next/navigation";

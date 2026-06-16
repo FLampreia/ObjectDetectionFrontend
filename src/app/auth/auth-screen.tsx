@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import AppTitle from "@/components/custom/textTitles";
+import AppTitle from "@/components/custom/welcome/textTitles";
 import { signup } from "@/services/auth";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
 import { Button } from "@/components/base/buttons/button";
 import { ArrowLeft } from "@untitledui/icons";

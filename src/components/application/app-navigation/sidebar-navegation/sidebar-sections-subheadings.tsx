@@ -1,6 +1,5 @@
 "use client";
 
-import { SearchLg } from "@untitledui/icons";
 import { ButtonUtility } from "@/components/base/buttons/button-utility";
 import { MobileNavigationHeader } from "../base-components/mobile-header";
 import { NavAccountCard } from "../base-components/nav-account-card";
@@ -17,7 +16,7 @@ interface SidebarNavigationSectionsSubheadingsProps {
     user: User;
 }
 
-export const SidebarNavigationSectionsSubheadings = ({ activeUrl = "/", items, user  }: SidebarNavigationSectionsSubheadingsProps) => {
+export const SidebarNavigationSectionsSubheadings = ({ activeUrl = "/", items, user }: SidebarNavigationSectionsSubheadingsProps) => {
     const MAIN_SIDEBAR_WIDTH = 276;
 
     const content = (
@@ -30,8 +29,9 @@ export const SidebarNavigationSectionsSubheadings = ({ activeUrl = "/", items, u
             className="flex h-full w-full max-w-full flex-col justify-between overflow-auto bg-primary pt-4 shadow-xs ring-secondary ring-inset lg:w-(--width) lg:rounded-xl lg:ring-1"
         >
             <div className="flex items-center justify-between gap-5 px-4 lg:pl-5">
-                ObjectDetection
-                <ButtonUtility size="xs" color="tertiary" tooltip="Search" icon={SearchLg} />
+                <strong>
+                    ObjectDetection
+                </strong>
             </div>
 
             <ul className="mt-6 md:mt-5">
@@ -54,7 +54,7 @@ export const SidebarNavigationSectionsSubheadings = ({ activeUrl = "/", items, u
             </ul>
 
             <div className="mt-auto flex flex-col gap-5 px-2 py-4 lg:gap-6 lg:px-4 lg:py-4">
-                <NavAccountCard user={user}/>
+                <NavAccountCard user={user} />
             </div>
         </aside>
     );

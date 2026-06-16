@@ -10,7 +10,7 @@ import {
     ModalOverlay as AriaModalOverlay,
 } from "react-aria-components";
 import { cx } from "@/utils/cx";
-import AppTitle from "@/components/custom/textTitles";
+import AppTitle from "@/components/custom/welcome/textTitles";
 
 export const MobileNavigationHeader = ({ children }: PropsWithChildren) => {
     return (

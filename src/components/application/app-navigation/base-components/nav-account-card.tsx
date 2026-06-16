@@ -8,7 +8,7 @@ import { useFocusManager } from "react-aria";
 import type { DialogProps as AriaDialogProps } from "react-aria-components";
 import { Button as AriaButton, Dialog as AriaDialog, DialogTrigger as AriaDialogTrigger, Popover as AriaPopover } from "react-aria-components";
 import { AvatarLabelGroup } from "@/components/base/avatar/avatar-label-group";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 
 import { useBreakpoint } from "@/hooks/use-breakpoint";

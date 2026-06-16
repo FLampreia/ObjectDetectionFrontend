@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import AppTitle from "@/components/custom/textTitles";
-import { useAuth } from "@/hooks/useAuth";
-import { Button } from "../base/buttons/button";
-import { NavAccountCard } from "../application/app-navigation/base-components/nav-account-card";
+import AppTitle from "@/components/custom/welcome/textTitles";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "../../base/buttons/button";
+import { NavAccountCard } from "../../application/app-navigation/base-components/nav-account-card";
 
 
 

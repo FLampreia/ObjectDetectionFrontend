@@ -3,12 +3,11 @@
 
 import { useState } from "react";
 import { Save, Trash2, User, Lock, BadgeInfo } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
 import { updateUsername, updateFullName, updatePassword, deletePassword } from "@/services/user";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/base/input/input";
 import { Button } from "@/components/base/buttons/button";
-import { Placeholder, Save01 } from "@untitledui/icons";
 
 export default function SettingsScreen() {
     const { user, refreshUser, logout } = useAuth();
@@ -96,7 +95,7 @@ export default function SettingsScreen() {
 
             <h1 className="text-3xl font-bold mb-8 pt-8">Settings</h1>
 
-            <div className="space-y-6">
+            <div className="space-y-8 pb-8">
 
                 {/* Profile */}
                 <section className="p-6 bg-primary pt-4 shadow-xs ring-secondary ring-inset lg:w-(--width) lg:rounded-xl lg:ring-1">

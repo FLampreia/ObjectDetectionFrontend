@@ -1,10 +1,10 @@
 
 "use client";
 
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Sidebar } from "@/components/custom/sideBar";
+import { Sidebar } from "@/components/custom/layout/navBar";
 
 
 export default function ProtectedLayout({
@@ -27,7 +27,7 @@ export default function ProtectedLayout({
     return (
         <div className="min-h-screen">
             <Sidebar user={user} />
-            <main className="lg:pl-70">
+            <main className="px-4 sm:px-6 lg:px-8 lg:ml-69">
                 {children}
             </main>
         </div>
