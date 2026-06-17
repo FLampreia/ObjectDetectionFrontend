@@ -3,7 +3,6 @@
 import { Modal, ModalOverlay, Dialog, DialogTrigger } from "@/components/application/modals/modal";
 import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
-import { addTeam } from "@/services/team";
 import { useState } from "react";
 import { Plus } from "@untitledui/icons";
 import { useTeams } from "@/hooks/use-team";
@@ -61,6 +60,10 @@ export function CreateTeamModal({ isOpen, onOpenChange }: Props) {
                             />
 
                             <div className="flex justify-end gap-2">
+                                <Button color="secondary" size="md" onClick={() => onOpenChange(false)}>
+                                    Cancel
+                                </Button>
+
                                 <Button type="submit" size="md">
                                     Create
                                 </Button>

@@ -16,7 +16,7 @@ export function MyTeamsSection() {
 
     const {
         teams,
-        paginatedTeams,
+        allTeams,
         totalPages,
         search,
         setSearch,
@@ -34,7 +34,7 @@ export function MyTeamsSection() {
         <TableCard.Root>
             <TableCard.Header
                 title="My Teams"
-                badge={teams.length}
+                badge={allTeams.length}
                 description="Manage all your teams"
                 contentTrailing={
                     <TeamsHeader
@@ -48,7 +48,7 @@ export function MyTeamsSection() {
             />
 
             <TeamsTable
-                teams={paginatedTeams}
+                teams={teams}
                 sortDescriptor={sortDescriptor}
                 onSortChange={setSortDescriptor}
             />

@@ -15,14 +15,22 @@ export default function ProtectedLayout({
     const { user, loading } = useAuth();
     const router = useRouter();
 
+
     useEffect(() => {
-        if (!loading && !user) {
-            router.push("/");
+        if (!loading && user === null) {
+            router.replace("/");
         }
     }, [user, loading, router]);
 
-    if (loading) return <div>Loading...</div>; //TODO fazer loading
-    if (!user) return null;
+    if (loading || user === undefined) {
+        
+        return <div>Loading...</div>;
+    }
+
+    if (user === null) {
+        return null;
+    }
+
 
     return (
         <div className="min-h-screen">

@@ -4,6 +4,7 @@ import { createContext, useEffect, useState } from "react";
 import { getCurrentUser, login as loginApi, logout as logoutApi } from "@/services/auth";
 import { User } from "@/types/user";
 import { AuthContextType } from "@/types";
+import { queryClient } from "./query-provider";
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -32,6 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   function logout() {
     logoutApi();
     setUser(null);
+    queryClient.clear();
   }
 
   useEffect(() => {

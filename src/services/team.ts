@@ -66,3 +66,20 @@ export async function toggleFavorite(teamId: string) {
     }
 
 }
+
+export async function deleteTeam(teamId: string) {
+    const token = getAccessToken();
+
+    const response = await fetch(`${API_URL}/team/${teamId}`, {
+        method: "DELETE",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to Delete Team");
+    }
+
+}

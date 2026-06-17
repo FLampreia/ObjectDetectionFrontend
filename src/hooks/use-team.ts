@@ -4,8 +4,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { SortDescriptor } from "react-aria-components";
 import { toggleFavorite as toggleFavoriteAPI } from "@/services/team";
-
-import { getLoggedTeams, addTeam } from "@/services/team";
+import { getLoggedTeams, addTeam, deleteTeam } from "@/services/team";
 import type { Team } from "@/types/team";
 
 export function useTeams() {
@@ -34,7 +33,7 @@ export function useTeams() {
         refetchOnMount: false,
     });
 
-    // ---------------- CREATE (MUTATION) ----------------
+    // ---------------- CREATE/DELETE (MUTATION) ----------------
     const createTeamMutation = useMutation({
         mutationFn: addTeam,
         onSuccess: () => {
@@ -42,9 +41,37 @@ export function useTeams() {
         },
     });
 
+    const deleteTeamMutation = useMutation({
+        mutationFn: deleteTeam,
+
+        onMutate: async (teamId: string) => {
+            await queryClient.cancelQueries({ queryKey: ["teams"] });
+
+            const previousTeams = queryClient.getQueryData<Team[]>(["teams"]);
+
+            queryClient.setQueryData(["teams"], (old: Team[] = []) =>
+                old.filter((t) => t.id !== teamId)
+            );
+
+            return { previousTeams };
+        },
+
+        onError: (_err, _teamId, context) => {
+            queryClient.setQueryData(["teams"], context?.previousTeams);
+        },
+
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["teams"] });
+        },
+    });
+
     const createTeam = async (name: string) => {
         await createTeamMutation.mutateAsync(name);
     };
+
+    const removeTeam = async (id: string) => {
+        await deleteTeamMutation.mutateAsync(id)
+    }
 
     // reset page on search
     const onSearchChange = (value: string) => {
@@ -134,10 +161,16 @@ export function useTeams() {
 
         toggleFavoriteMutation.mutate(teamId);
     };
+
+    const favoriteTeams = useMemo(() => {
+        return teams.filter((t) => t.is_favorite);
+    }, [teams]);
+
     return {
         // data
-        teams: filteredTeams,
-        paginatedTeams,
+        teams: paginatedTeams,
+        allTeams: sortedTeams,
+        favoriteTeams,
         totalPages,
 
         // state
@@ -153,5 +186,6 @@ export function useTeams() {
 
         // actions
         createTeam,
+        removeTeam,
     };
 }
