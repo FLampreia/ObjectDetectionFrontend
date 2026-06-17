@@ -42,7 +42,7 @@ export const SidebarNavigationSectionsSubheadings = ({ activeUrl = "/", items, u
                         </div>
                         <ul className="px-4 pb-5">
                             {group.items.map((item) => (
-                                <li key={item.label} className="py-0.25">
+                                <li key={item.label} className="py-px">
                                     <NavItemBase icon={item.icon} href={item.href} badge={item.badge} type="link" current={item.href === activeUrl}>
                                         {item.label}
                                     </NavItemBase>

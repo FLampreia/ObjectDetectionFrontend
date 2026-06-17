@@ -1,6 +1,6 @@
 "use client"
 
-import { useState} from "react";
+import { useState } from "react";
 import { PaginationPageMinimalCenter } from "@/components/application/pagination/pagination";
 import { TableCard } from "@/components/application/table/table";
 
@@ -9,6 +9,7 @@ import { TeamsHeader } from "@/components/custom/teams/teams-header";
 import { TeamsTable } from "@/components/custom/teams/teams-table";
 
 import { useTeams } from "@/hooks/use-team";
+import { NotFoundTable } from "./not-found-table";
 
 
 export function MyTeamsSection() {
@@ -24,7 +25,7 @@ export function MyTeamsSection() {
         setCurrentPage,
         sortDescriptor,
         setSortDescriptor,
-        
+
         error,
     } = useTeams();
 
@@ -46,12 +47,16 @@ export function MyTeamsSection() {
                     />
                 }
             />
+            {allTeams.length != 0 ? (
+                <TeamsTable
+                    teams={teams}
+                    sortDescriptor={sortDescriptor}
+                    onSortChange={setSortDescriptor}
+                />
+            ) : (
+                <NotFoundTable/>
+            )}
 
-            <TeamsTable
-                teams={teams}
-                sortDescriptor={sortDescriptor}
-                onSortChange={setSortDescriptor}
-            />
 
             <PaginationPageMinimalCenter
                 page={currentPage}

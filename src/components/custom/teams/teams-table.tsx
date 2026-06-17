@@ -110,7 +110,9 @@ export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
 
                             <Table.Cell>
                                 <div className="flex justify-end">
-                                    <ButtonUtility size="xs" color="tertiary" tooltip="List" icon={List} onClick={() => router.push(`/teams/${team.id}`)} />
+                                    
+                                    <ButtonUtility size="xs" color="tertiary" tooltip="List" icon={List} onClick={() => router.push(`/team/${team.id}`)} />
+                                    
                                     {!team.is_favorite && team.role !== "member" && (
                                         <>
                                             <ButtonUtility
