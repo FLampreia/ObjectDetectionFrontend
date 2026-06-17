@@ -81,7 +81,7 @@ export default function AuthScreen() {
         <div className="flex flex-col items-center min-h-screen pt-10 px-4 ">
             <AppTitle size="lg" />
 
-            <div className="w-full max-w-md bg-slate-900 border border-blue-800 rounded-2xl shadow-2xl p-8 mt-6 flex flex-col transition-all duration-300 ">
+            <div className="w-full max-w-md bg-primary/40 p-8 mt-6 flex flex-col transition-all duration-300 ring-secondary ring-inset  lg:rounded-xl lg:ring-1">
                 {/* Toggle */}
                 <div className="relative grid grid-cols-2 rounded-xl bg-slate-800 p-1 mb-6">
 

@@ -98,7 +98,7 @@ export default function SettingsScreen() {
             <div className="space-y-8 pb-8">
 
                 {/* Profile */}
-                <section className="p-6 bg-primary pt-4 shadow-xs ring-secondary ring-inset lg:w-(--width) lg:rounded-xl lg:ring-1">
+                <section className="p-6 bg-primary pt-4 shadow-xs ring-secondary ring-inset lg:rounded-xl lg:ring-1">
 
                     <div className="flex items-center gap-3 mb-6">
                         <User className="w-5 h-5 text-emerald-400" />
@@ -121,7 +121,7 @@ export default function SettingsScreen() {
                 </section>
 
                 {/* Password */}
-                <section className="p-6 bg-primary pt-4 shadow-xs ring-secondary ring-inset lg:w-(--width) lg:rounded-xl lg:ring-1">
+                <section className="p-6 bg-primary pt-4 shadow-xs ring-secondary ring-inset lg:rounded-xl lg:ring-1">
                     <div className="flex items-center gap-3 mb-6">
                         <Lock className="w-5 h-5 text-emerald-400" />
                         <h2 className="text-xl font-semibold">Privacy</h2>
