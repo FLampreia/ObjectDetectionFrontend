@@ -71,13 +71,13 @@ export const NavAccountMenu = ({
         >
             <div className="rounded-xl bg-primary ring-1 ring-secondary">
                 <div className="flex flex-col gap-0.5 py-1.5">
-                    <NavAccountCardMenuItem label="Account settings" icon={Settings01} shortcut="⌘S" onClick={() => { router.push("/settings"); }} />
+                    <NavAccountCardMenuItem label="Account settings" icon={Settings01} onClick={() => { router.push("/settings"); }} />
                 </div>
 
             </div>
 
             <div className="pt-1 pb-1.5">
-                <NavAccountCardMenuItem label="Sign out" icon={LogOut01} shortcut="⌥⇧Q" onClick={() => { logout() }} />
+                <NavAccountCardMenuItem label="Sign out" icon={LogOut01} onClick={() => { logout() }} />
             </div>
         </AriaDialog>
     );

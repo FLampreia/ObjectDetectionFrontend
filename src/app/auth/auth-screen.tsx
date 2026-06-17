@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
 import { Button } from "@/components/base/buttons/button";
 import { ArrowLeft } from "@untitledui/icons";
+import { Input } from "@/components/base/input/input";
 
 
 // TODO se houver uma conta logada, nao permite aceder À pagina de auth
@@ -34,8 +35,7 @@ export default function AuthScreen() {
         }
     }, [user, loading, router]);
 
-    const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
+    const handleUsernameChange = (value: string) => {
 
         const hasSpace = value.includes(" ");
 
@@ -121,27 +121,27 @@ export default function AuthScreen() {
                         <h1 className="text-2xl font-bold text-center ">
                             Welcome back
                         </h1>
-
+                         {/* TODO se possivel dividir este ficheiro em componentes */}
                         <form
                             onSubmit={handleAuth}
                             className="flex flex-col gap-4 py-5"
                         >
-                            <input
+                            <Input
+                                size="lg"
                                 type="email"
                                 placeholder="Example@gmail.com"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                required
+                                onChange={(value) => setEmail(value)}
+                                isRequired
                             />
 
-                            <input
+                            <Input
+                                size="lg"
                                 type="password"
                                 placeholder="Password"
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                required
+                                onChange={(value) => setPassword(value)}
+                                isRequired
                             />
 
                             <Button type="submit" size="md">
@@ -160,60 +160,47 @@ export default function AuthScreen() {
                             onSubmit={handleAuth}
                             className="flex flex-col gap-4 py-5"
                         >
-                            <input
+                            <Input
                                 type="text"
                                 placeholder="Username"
                                 value={username}
                                 onChange={handleUsernameChange}
-                                className={`bg-slate-800 border rounded-lg px-4 py-2 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition
-                                            ${usernameError ? "border-red-500 focus:ring-red-500" : "border-slate-700"}
-                                        `}
-                                required
+                                isRequired
+                                isInvalid={usernameError}
                             />
-                            {usernameError && (
-                                <p className="text-red-400 text-sm mt-1">
-                                    Username cannot contain spaces.
-                                </p>
-                            )}
 
                             {/* TODO fazer erro para formulário como fiz para este  e rever esta questão dos inputs  */}
 
-                            <input
+                            <Input
                                 type="email"
                                 placeholder="Example@gmail.com"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                required
+                                onChange={(value) => setEmail(value)}
+                                isRequired
                             />
 
-                            <input
+                            <Input
                                 type="text"
                                 placeholder="Full Name"
                                 value={fullName}
-                                onChange={(e) => setFullName(e.target.value)}
-                                className="bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                required
+                                onChange={(value) => setFullName(value)}
+                                isRequired
                             />
 
-                            <input
+                            <Input
                                 type="password"
                                 placeholder="Password"
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                required
+                                onChange={(value) => setPassword(value)}
+                                isRequired
                             />
 
-                            <input
+                            <Input
                                 type="password"
                                 placeholder="Confirm password"
                                 value={confirmPassword}
-                                onChange={(e) =>
-                                    setConfirmPassword(e.target.value)
-                                }
-                                className="bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                required
+                                onChange={(value) => setConfirmPassword(value)}
+                                isRequired
                             />
 
                             <Button type="submit" size="md">
