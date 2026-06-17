@@ -14,6 +14,8 @@ import { useState } from "react";
 import { DeleteTeamModal } from "./delete-team-modal";
 import { LogOut } from 'lucide-react';
 import { EditTeamModal } from "./edit-team-modal";
+import { RemoveUserTeamModal } from "./remove-user-team-modal";
+import { useAuth } from "@/hooks/use-auth";
 
 type Props = {
     teams: Team[];
@@ -24,6 +26,7 @@ type Props = {
 
 export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
     const router = useRouter();
+    const { user } = useAuth();
 
     const {
         toggleFavorite,
@@ -31,7 +34,9 @@ export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
 
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
+    const [isRemoveOpen, setIsRemoveOpen] = useState(false);
     const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+    const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
     const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
 
     return (
@@ -138,7 +143,20 @@ export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
                                     )}
                                     {team.role === "member" && (
                                         <>
-                                            <ButtonUtility size="xs" color="tertiary" tooltip="Leave" icon={LogOut} />
+                                            <ButtonUtility
+                                                size="xs"
+                                                color="tertiary"
+                                                tooltip="Leave"
+                                                icon={LogOut}
+                                                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                                                    console.log(team)
+
+                                                    e.stopPropagation();
+                                                    setSelectedTeamId(team.id);
+                                                    setSelectedEmail(user?.email)
+                                                    setIsRemoveOpen(true);
+                                                }}
+                                            />
                                         </>
                                     )}
                                 </div>
@@ -156,15 +174,23 @@ export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
                 />
             )}
 
+
+            {isRemoveOpen && selectedTeamId && selectedEmail && (
+                <RemoveUserTeamModal
+                    isOpen={isRemoveOpen}
+                    onOpenChange={setIsRemoveOpen}
+                    teamId={selectedTeamId}
+                    email={selectedEmail}
+                />
+            )}
+
             {isEditOpen && selectedTeam && (
                 <EditTeamModal
                     isOpen={isEditOpen}
                     onOpenChange={setIsEditOpen}
                     team={selectedTeam}
                 />
-            )
-
-            }
+            )}
 
 
         </>

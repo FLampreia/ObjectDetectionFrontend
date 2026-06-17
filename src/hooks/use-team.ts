@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { SortDescriptor } from "react-aria-components";
-import { toggleFavorite as toggleFavoriteAPI, updateTeam } from "@/services/team";
+import { exitTeam, toggleFavorite as toggleFavoriteAPI, updateTeam } from "@/services/team";
 import { getLoggedTeams, addTeam, deleteTeam } from "@/services/team";
 import type { Team } from "@/types/team";
 
@@ -94,6 +94,35 @@ export function useTeams() {
         },
     });
 
+    const removeUserTeamMutation = useMutation({
+        mutationFn: ({ teamid, email }: { teamid: string; email: string }) =>
+            exitTeam(teamid, email),
+
+        onMutate: async ({ teamid, email }) => {
+            await queryClient.cancelQueries({ queryKey: ["teams"] });
+
+            const previousTeams = queryClient.getQueryData<Team[]>(["teams"]);
+
+            queryClient.setQueryData(["teams"], (old: Team[] = []) =>
+                old.map((t) =>
+                    t.id === teamid
+                        ? { ...t, email }
+                        : t
+                )
+            );
+
+            return { previousTeams };
+        },
+
+        onError: (_err, _vars, context) => {
+            queryClient.setQueryData(["teams"], context?.previousTeams);
+        },
+
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["teams"] });
+        },
+    });
+
     const createTeam = async (name: string) => {
         await createTeamMutation.mutateAsync(name);
     };
@@ -104,6 +133,10 @@ export function useTeams() {
 
     const editTeam = async (teamid: string, name: string) => {
         await editTeamMutation.mutateAsync({teamid, name})
+    }
+
+    const removeUserTeam = async(teamid: string, email: string) => {
+        await removeUserTeamMutation.mutateAsync({teamid, email})
     }
 
     // reset page on search
@@ -221,5 +254,6 @@ export function useTeams() {
         createTeam,
         removeTeam,
         editTeam,
+        removeUserTeam,
     };
 }
