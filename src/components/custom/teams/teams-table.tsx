@@ -14,10 +14,8 @@ type Props = {
     teams: Team[];
     sortDescriptor: SortDescriptor;
     onSortChange: (value: SortDescriptor) => void;
-    
+
 };
-
-
 
 export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
 
@@ -51,27 +49,13 @@ export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
                                 icon={(props) => (
                                     <Star
                                         {...props}
-                                        className={`w-4 h-4 transition-colors ${team.is_favorite
-                                                ? "fill-yellow-400 text-yellow-400"
-                                                : "text-gray-400"
-                                            }`}
+                                        className="w-4 h-4 transition-colors"
+                                        stroke={team.is_favorite ? "#facc15" : "#9ca3af"}
+                                        fill={team.is_favorite ? "#facc15" : "none"}
                                     />
                                 )}
                                 onClick={() => toggleFavorite(team.id)}
                             />
-
-                            {/*                             
-                                <button
-                                    onClick={() => toggleFavorite(team.id)}
-                                    className="p-1"
-                                >
-                                    {favoriteIds.includes(team.id) ? (
-                                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                    ) : (
-                                        <Star className="w-4 h-4 text-gray-400" />
-                                    )}
-                                </button> */}
-
                         </Table.Cell>
                         <Table.Cell>
                             <div className="flex items-center gap-3">

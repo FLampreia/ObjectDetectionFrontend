@@ -10,6 +10,7 @@ import type { Team } from "@/types/team";
 
 export function useTeams() {
     const ITEMS_PER_PAGE = 5;
+    const NUMBER_OF_FAVORITES = 3
     const queryClient = useQueryClient();
 
     const [search, setSearch] = useState("");
@@ -60,6 +61,12 @@ export function useTeams() {
 
     const sortedTeams = useMemo(() => {
         return [...filteredTeams].sort((a, b) => {
+            // 1. Favorites first
+            if (a.is_favorite !== b.is_favorite) {
+                return a.is_favorite ? -1 : 1;
+            }
+
+            // 2. then, normal sorting
             const first = a[sortDescriptor.column as keyof Team];
             const second = b[sortDescriptor.column as keyof Team];
 
@@ -113,9 +120,20 @@ export function useTeams() {
     });
 
     const toggleFavorite = (teamId: string) => {
+        const teams = queryClient.getQueryData<Team[]>(["teams"]) ?? [];
+
+        const currentFavorites = teams.filter(t => t.is_favorite).length;
+        const target = teams.find(t => t.id === teamId);
+
+        if (!target) return;
+
+        // blocks if there is already 3 fav
+        if (!target.is_favorite && currentFavorites >= NUMBER_OF_FAVORITES) {
+            return;
+        }
+
         toggleFavoriteMutation.mutate(teamId);
     };
-
     return {
         // data
         teams: filteredTeams,
