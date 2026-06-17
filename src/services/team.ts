@@ -83,3 +83,24 @@ export async function deleteTeam(teamId: string) {
     }
 
 }
+
+export async function updateTeam(teamId: string, teamName: string) {
+    const token = getAccessToken();
+
+    const response = await fetch(`${API_URL}/team/${teamId}`, {
+        method: "PATCH",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(
+            {
+                "name": teamName
+            }
+        ),
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to Update Team");
+    }
+}

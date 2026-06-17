@@ -14,7 +14,7 @@ export default function TeamScreen() {
 
     return (
 
-        <main className="flex-1 max-w-4xl mx-auto w-full flex-col justify-between">
+        <main className="flex-1 max-w-6xl mx-auto w-full flex-col justify-between">
 
             <h1 className="text-3xl font-bold mb-8 pt-8">Teams</h1>
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-4 w-full pb-4">

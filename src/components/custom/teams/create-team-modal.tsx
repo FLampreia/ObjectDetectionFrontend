@@ -6,6 +6,7 @@ import { Input } from "@/components/base/input/input";
 import { useState } from "react";
 import { Plus } from "@untitledui/icons";
 import { useTeams } from "@/hooks/use-team";
+import { Heading } from "react-aria-components";
 
 type Props = {
     isOpen: boolean;
@@ -27,9 +28,9 @@ export function CreateTeamModal({ isOpen, onOpenChange }: Props) {
             <ModalOverlay>
                 <Modal>
                     <Dialog className="p-6 w-105 space-y-4">
-                        <h2 className="text-xl font-semibold">
-                            Create Team
-                        </h2>
+
+                        <Heading slot="title" className="text-xl font-semibold"> Create Team</Heading>
+
 
                         <form
                             className="space-y-4"
@@ -44,7 +45,7 @@ export function CreateTeamModal({ isOpen, onOpenChange }: Props) {
                                 try {
                                     await createTeam(name);
 
-                                    form.reset(); 
+                                    form.reset();
                                     onOpenChange(false);
                                 } catch (err: unknown) {
                                     setError(err instanceof Error ? err.message : "Unexpected Error");

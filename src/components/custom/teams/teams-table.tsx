@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { DeleteTeamModal } from "./delete-team-modal";
 import { LogOut } from 'lucide-react';
+import { EditTeamModal } from "./edit-team-modal";
 
 type Props = {
     teams: Team[];
@@ -29,7 +30,9 @@ export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
     } = useTeams()
 
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
     const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+    const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
 
     return (
         <>
@@ -103,7 +106,7 @@ export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
                             <Table.Cell>
                                 <div className="flex justify-end">
                                     <ButtonUtility size="xs" color="tertiary" tooltip="List" icon={List} onClick={() => router.push(`/teams/${team.id}`)} />
-                                    {!team.is_favorite && team.role !== "member"&&(
+                                    {!team.is_favorite && team.role !== "member" && (
                                         <>
                                             <ButtonUtility
                                                 size="xs"
@@ -120,7 +123,17 @@ export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
                                     )}
                                     {team.role === "owner" && (
                                         <>
-                                            <ButtonUtility size="xs" color="tertiary" tooltip="Edit" icon={Edit01} />
+                                            <ButtonUtility
+                                                size="xs"
+                                                color="tertiary"
+                                                tooltip="Edit"
+                                                icon={Edit01}
+                                                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                                                    e.stopPropagation();
+                                                    setSelectedTeam(team);
+                                                    setIsEditOpen(true);
+                                                }}
+                                            />
                                         </>
                                     )}
                                     {team.role === "member" && (
@@ -134,15 +147,26 @@ export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
                     )}
                 </Table.Body>
             </Table >
-            {/* FIXME reoslver o modal de delete */}
+
             {isDeleteOpen && selectedTeamId && (
                 <DeleteTeamModal
                     isOpen={isDeleteOpen}
                     onOpenChange={setIsDeleteOpen}
                     teamId={selectedTeamId}
                 />
+            )}
+
+            {isEditOpen && selectedTeam && (
+                <EditTeamModal
+                    isOpen={isEditOpen}
+                    onOpenChange={setIsEditOpen}
+                    team={selectedTeam}
+                />
             )
+
             }
+
+
         </>
     );
 }
