@@ -26,8 +26,6 @@ export function TeamMembersSection({ teamId }: Props) {
         error,
     } = useMembers(teamId);
     
-    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-
     const queryClient = useQueryClient();
 
     const teams = queryClient.getQueryData<Team[]>(["teams"]) ?? [];
