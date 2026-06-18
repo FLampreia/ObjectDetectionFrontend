@@ -45,3 +45,25 @@ export async function exitTeam(teamId: string, userId: string) {
         throw new Error("Failed to Remove user from Team");
     }
 }
+
+export async function addMemberTeam(teamId: string, email: string) {
+    const token = getAccessToken();
+
+    const response = await fetch(`${API_URL}/team/${teamId}/add`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(
+            {
+                "email": email
+            }
+        ),
+    });
+
+
+    if (!response.ok) {
+        throw new Error("Failed to Add user to Team");
+    }
+}

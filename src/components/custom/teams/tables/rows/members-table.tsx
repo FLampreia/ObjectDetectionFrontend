@@ -27,6 +27,8 @@ export function MembersTable({ teamId, members, sortDescriptor, onSortChange }: 
     const [isRemoveOpen, setIsRemoveOpen] = useState(false);
     const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+
     const { user } = useAuth()
     return (
         <>
@@ -43,48 +45,56 @@ export function MembersTable({ teamId, members, sortDescriptor, onSortChange }: 
                 </Table.Header>
 
                 <Table.Body items={members}>
-                    {(members) => (
-                        <Table.Row
-                            id={members.user_id}
-                        >
-                            <Table.Cell>
-                                {members.role === "owner" ? (
-                                    <BadgeWithIcon size="sm" color="blue" iconLeading={Crown} className="capitalize">
-                                        {members.role}
-                                    </BadgeWithIcon>
-                                ) : members.role === "member" ? (
-                                    <BadgeWithIcon size="sm" color="gray" iconLeading={User01} className="capitalize">
-                                        {members.role}
-                                    </BadgeWithIcon>
-                                ) : (
-                                    <BadgeWithIcon size="sm" color="error" iconLeading={X} className="capitalize">
-                                        {members.role}
-                                    </BadgeWithIcon>
-                                )}
-                            </Table.Cell>
+                    {(member) => {
+                        const isCurrentUser = user?.id === member.user_id;
+                        const currentUserMember = members.find(m => m.user_id === user?.id);
+                        const isOwner = currentUserMember?.role === "owner";
 
-                            <Table.Cell>
-                                <div className="flex items-center gap-3">
-                                    <Avatar
-                                        size="md"
-                                        initials={members.username[0].toUpperCase()}
-                                    />
-                                    <p className="text-sm font-medium text-primary">
-                                        {members.username}
-                                    </p>
-                                </div>
-                            </Table.Cell>
-                            <Table.Cell>
-                                <div className="flex items-center gap-3">
+                        const showLeave =
+                            (isOwner && !isCurrentUser) ||
+                            (!isOwner && isCurrentUser);
 
-                                    <p className="text-sm font-medium text-tertiary">
-                                        {members.email}
-                                    </p>
-                                </div>
-                            </Table.Cell>
-                            <Table.Cell>
-                                {members.role === "member" && (user?.id == members.user_id) && (
-                                    <>
+                        return (
+                            <Table.Row
+                                id={member.user_id}
+                            >
+                                <Table.Cell>
+                                    {member.role === "owner" ? (
+                                        <BadgeWithIcon size="sm" color="blue" iconLeading={Crown} className="capitalize">
+                                            {member.role}
+                                        </BadgeWithIcon>
+                                    ) : member.role === "member" ? (
+                                        <BadgeWithIcon size="sm" color="gray" iconLeading={User01} className="capitalize">
+                                            {member.role}
+                                        </BadgeWithIcon>
+                                    ) : (
+                                        <BadgeWithIcon size="sm" color="error" iconLeading={X} className="capitalize">
+                                            {member.role}
+                                        </BadgeWithIcon>
+                                    )}
+                                </Table.Cell>
+
+                                <Table.Cell>
+                                    <div className="flex items-center gap-3">
+                                        <Avatar
+                                            size="md"
+                                            initials={member.username[0].toUpperCase()}
+                                        />
+                                        <p className="text-sm font-medium text-primary">
+                                            {member.username}
+                                        </p>
+                                    </div>
+                                </Table.Cell>
+                                <Table.Cell>
+                                    <div className="flex items-center gap-3">
+
+                                        <p className="text-sm font-medium text-tertiary">
+                                            {member.email}
+                                        </p>
+                                    </div>
+                                </Table.Cell>
+                                <Table.Cell>
+                                    {showLeave && (
                                         <ButtonUtility
                                             size="xs"
                                             color="tertiary"
@@ -95,17 +105,15 @@ export function MembersTable({ teamId, members, sortDescriptor, onSortChange }: 
 
                                                 e.stopPropagation();
                                                 setSelectedTeamId(teamId);
-                                                setSelectedUserId(user?.id)
+                                                setSelectedUserId(member.user_id);
                                                 setIsRemoveOpen(true);
                                             }}
-                                        // FIXME nao está a haver refresh na pagina quando retiro um user
                                         />
-
-                                    </>
-                                )}
-                            </Table.Cell>
-                        </Table.Row>
-                    )}
+                                    )}
+                                </Table.Cell>
+                            </Table.Row>
+                        )
+                    }}
                 </Table.Body>
             </Table>
 

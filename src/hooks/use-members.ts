@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import type { SortDescriptor } from "react-aria-components";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMembersTeam } from "@/services/members";
+import { addMemberTeam, getMembersTeam } from "@/services/members";
 import { Member } from "@/types/team";
 
 export function useMembers(teamId: string) {
@@ -12,6 +12,7 @@ export function useMembers(teamId: string) {
 
     const [search, setSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
+    const queryClient = useQueryClient();
 
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
         column: "username",
@@ -23,7 +24,7 @@ export function useMembers(teamId: string) {
         setCurrentPage(1);
     };
 
-    
+
     // ---------------- FETCH (CACHED) ----------------
     const {
         data: members = [],
@@ -68,6 +69,18 @@ export function useMembers(teamId: string) {
         return sortedMembers.slice(start, start + ITEMS_PER_PAGE);
     }, [sortedMembers, currentPage]);
 
+    const addMemberMutation = useMutation({
+        mutationFn: (email: string) => addMemberTeam(teamId, email),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["members", teamId] });
+        },
+    });
+
+
+    const addMember = async (email: string) => {
+        await addMemberMutation.mutateAsync(email);
+    };
+
     return {
         members: paginatedMembers,
         allMembers: sortedMembers,
@@ -77,6 +90,8 @@ export function useMembers(teamId: string) {
         setCurrentPage,
         sortDescriptor,
         setSortDescriptor,
+
+        addMember,
 
 
         error: error ? "Failed to load members" : null,

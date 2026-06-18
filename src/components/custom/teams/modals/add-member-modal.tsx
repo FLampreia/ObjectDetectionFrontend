@@ -11,11 +11,12 @@ import { Heading } from "react-aria-components";
 type Props = {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
+    teamId: string | null;
 };
 
-export function AddMemberModal({ isOpen, onOpenChange }: Props) {
+export function AddMemberModal({ isOpen, onOpenChange, teamId }: Props) {
     const [error, setError] = useState<string | null>(null);
-    // const { addMember } = useMembers();
+    const { addMember } = useMembers(teamId);
     return (
         <DialogTrigger isOpen={isOpen} onOpenChange={onOpenChange}>
 
@@ -43,7 +44,7 @@ export function AddMemberModal({ isOpen, onOpenChange }: Props) {
                                 const email = formData.get("email") as string;
 
                                 try {
-                                    // await addMember(email);
+                                    await addMember(email);
 
                                     form.reset();
                                     onOpenChange(false);

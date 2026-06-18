@@ -45,6 +45,7 @@ export function MembersHeader({
                     <AddMemberModal
                         isOpen={isOpen}
                         onOpenChange={setIsOpen}
+                        teamId={team.id}
                     />
                     <Button
                         color="primary-destructive"
