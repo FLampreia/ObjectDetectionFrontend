@@ -28,8 +28,10 @@ export function MembersTable({ teamId, members, sortDescriptor, onSortChange }: 
     const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
-
     const { user } = useAuth()
+
+    const isNotOwner = user?.role !== "owner";
+
     return (
         <>
             <Table
@@ -124,6 +126,7 @@ export function MembersTable({ teamId, members, sortDescriptor, onSortChange }: 
                     teamId={selectedTeamId}
                     userId={selectedUserId}
                     getBack={true}
+                    isOwner={isNotOwner}
                 />
             )}
 

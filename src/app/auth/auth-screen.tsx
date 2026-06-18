@@ -169,8 +169,6 @@ export default function AuthScreen() {
                                 isInvalid={usernameError}
                             />
 
-                            {/* TODO fazer erro para formulário como fiz para este  e rever esta questão dos inputs  */}
-
                             <Input
                                 type="email"
                                 placeholder="Example@gmail.com"

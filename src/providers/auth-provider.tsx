@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useEffect, useState } from "react";
-import { getCurrentUser, login as loginApi, logout as logoutApi } from "@/services/auth";
+import { getCurrentUser, login as loginApi, logout   as logoutApi } from "@/services/auth";
 import { User } from "@/types/user";
 import { AuthContextType } from "@/types";
 import { queryClient } from "./query-provider";

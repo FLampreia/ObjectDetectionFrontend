@@ -170,14 +170,15 @@ export default function SettingsScreen() {
                     </div>
 
 
-                    <button
+                    <Button
                         onClick={handleDeleteAccount}
-                        disabled={confirmDelete !== user?.username}
+                        size="lg"
+                        isDisabled={confirmDelete !== user?.username}
                         className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-400 disabled:bg-zinc-700 disabled:text-zinc-400 transition px-5 py-3 rounded-xl font-medium cursor-pointer"
+                        iconLeading={Trash2}
                     >
-                        <Trash2 className="w-4 h-4" />
                         Delete Account
-                    </button>
+                    </Button>
                 </section>
             </div>
         </main>

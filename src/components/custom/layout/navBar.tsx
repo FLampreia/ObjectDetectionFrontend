@@ -21,7 +21,7 @@ export const Sidebar = ({ user }: { user: User }) => {
             .filter((team) => team.is_favorite)
             .map((team) => ({
                 label: team.name,
-                href: `/team/${team.id}`, // FIXME colocar a referencia certa
+                href: `/team/${team.id}`,
                 icon: () => (
                     <div className="flex items-center justify-center w-5 h-5 mr-2">
                         <Avatar

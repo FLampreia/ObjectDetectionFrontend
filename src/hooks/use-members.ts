@@ -5,6 +5,8 @@ import type { SortDescriptor } from "react-aria-components";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { addMemberTeam, getMembersTeam } from "@/services/members";
 import { Member } from "@/types/team";
+import { exitTeam } from "@/services/members";
+
 
 export function useMembers(teamId: string) {
     const ITEMS_PER_PAGE = 5;
@@ -81,6 +83,43 @@ export function useMembers(teamId: string) {
         await addMemberMutation.mutateAsync(email);
     };
 
+    const removeMemberMutation = useMutation({
+        mutationFn: ({ teamId, userId }: { teamId: string; userId: string }) =>
+            exitTeam(teamId, userId),
+
+        onMutate: async ({ teamId, userId }) => {
+            await queryClient.cancelQueries({ queryKey: ["members", teamId] });
+
+            const previous = queryClient.getQueryData<Member[]>([
+                "members",
+                teamId,
+            ]);
+
+            queryClient.setQueryData<Member[]>(["members", teamId], (old = []) =>
+                old.filter((m) => m.user_id !== userId)
+            );
+
+            return { previous };
+        },
+
+        onError: (_err, _vars, ctx) => {
+            queryClient.setQueryData(
+                ["members", _vars.teamId],
+                ctx?.previous
+            );
+        },
+
+        onSettled: (_data, _err, { teamId }) => {
+            queryClient.invalidateQueries({
+                queryKey: ["members", teamId],
+            });
+        },
+    });
+
+    const removeMember = (userId: string) =>
+        removeMemberMutation.mutateAsync({ teamId, userId });
+
+
     return {
         members: paginatedMembers,
         allMembers: sortedMembers,
@@ -92,6 +131,7 @@ export function useMembers(teamId: string) {
         setSortDescriptor,
 
         addMember,
+        removeMember,
 
 
         error: error ? "Failed to load members" : null,

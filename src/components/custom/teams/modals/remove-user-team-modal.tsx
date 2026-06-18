@@ -2,6 +2,7 @@
 
 import { Modal, ModalOverlay, Dialog } from "@/components/application/modals/modal";
 import { Button } from "@/components/base/buttons/button";
+import { useMembers } from "@/hooks/use-members";
 import { useTeams } from "@/hooks/use-team";
 import { useRouter } from "next/navigation";
 import { Heading } from "react-aria-components";
@@ -12,26 +13,27 @@ type Props = {
     teamId: string | null;
     userId: string
     getBack: boolean
+    isOwner: boolean
 };
 
-export function RemoveUserTeamModal({ isOpen, onOpenChange, teamId, userId, getBack }: Props) {
-    const { removeUserTeam } = useTeams();
+export function RemoveUserTeamModal({ isOpen, onOpenChange, teamId, userId, getBack, isOwner }: Props) {
+    const { removeMember } = useMembers(teamId!);
     const router = useRouter();
 
     const handleRemoveUser = async () => {
         if (!teamId) return;
 
-        await removeUserTeam(teamId, userId);
+        await removeMember(userId);
         onOpenChange(false);
-        
-        if (getBack) router.push("/team")
+
+        if (getBack && !isOwner) router.push("/team")
     };
 
     return (
         <ModalOverlay isOpen={isOpen} onOpenChange={onOpenChange}>
             <Modal>
                 <Dialog className="p-6 w-105 space-y-4">
-                    
+
                     <Heading slot="title" className="text-xl font-semibold"> Leave Team</Heading>
 
                     <p>Are you sure you want to leave this team?</p>

@@ -19,12 +19,7 @@ export function setTokens(access: string, refresh?: string) {
   }
 }
 
-export function logout() {
 
-  // TODO colocar o endpoint para logout
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
-}
 
 // TODO fazer refresh token
 
@@ -91,7 +86,7 @@ export async function signup(
   });
 
   const data = await response.json();
-  
+
   if (!response.ok) {
     throw new Error(data.message || "Signup failed");
   }
@@ -123,6 +118,25 @@ export async function getCurrentUser(): Promise<User | null> {
   } catch {
     return null;
   }
+}
+
+export async function logout() {
+  const token = getAccessToken();
+
+  const response = await fetch(`${API_URL}/logout`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Logout failed");
+  }
+
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
 }
 
 // TODO verifica se é possivel colocar as informações em cache para nao estar constantemente a fazer /me, tavez fazer um (React Query / TanStack Query)

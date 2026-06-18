@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { SortDescriptor } from "react-aria-components";
 import { toggleFavorite as toggleFavoriteAPI, updateTeam } from "@/services/team";
-import { exitTeam } from "@/services/members";
 import { getLoggedTeams, addTeam, deleteTeam } from "@/services/team";
 import type { Team } from "@/types/team";
 
@@ -33,6 +32,8 @@ export function useTeams() {
         refetchOnWindowFocus: false,
         refetchOnMount: false,
     });
+
+    // FIXME verificar a cache, porque está a chamar o endpoint cada vez q atuakiza a pagina
 
     // ---------------- CREATE/DELETE (MUTATION) ----------------
     const createTeamMutation = useMutation({
@@ -95,34 +96,34 @@ export function useTeams() {
         },
     });
 
-    const removeUserTeamMutation = useMutation({
-        mutationFn: ({ teamid, userId }: { teamid: string; userId: string }) =>
-            exitTeam(teamid, userId),
+    // const removeUserTeamMutation = useMutation({
+    //     mutationFn: ({ teamid, userId }: { teamid: string; userId: string }) =>
+    //         exitTeam(teamid, userId),
 
-        onMutate: async ({ teamid, userId }) => {
-            await queryClient.cancelQueries({ queryKey: ["teams"] });
+    //     onMutate: async ({ teamid, userId }) => {
+    //         await queryClient.cancelQueries({ queryKey: ["teams"] });
 
-            const previousTeams = queryClient.getQueryData<Team[]>(["teams"]);
+    //         const previousTeams = queryClient.getQueryData<Team[]>(["teams"]);
 
-            queryClient.setQueryData(["teams"], (old: Team[] = []) =>
-                old.map((t) =>
-                    t.id === teamid
-                        ? { ...t, userId }
-                        : t
-                )
-            );
+    //         queryClient.setQueryData(["teams"], (old: Team[] = []) =>
+    //             old.map((t) =>
+    //                 t.id === teamid
+    //                     ? { ...t, userId }
+    //                     : t
+    //             )
+    //         );
 
-            return { previousTeams };
-        },
+    //         return { previousTeams };
+    //     },
 
-        onError: (_err, _vars, context) => {
-            queryClient.setQueryData(["teams"], context?.previousTeams);
-        },
+    //     onError: (_err, _vars, context) => {
+    //         queryClient.setQueryData(["teams"], context?.previousTeams);
+    //     },
 
-        onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: ["teams"] });
-        },
-    });
+    //     onSettled: () => {
+    //         queryClient.invalidateQueries({ queryKey: ["teams"] });
+    //     },
+    // });
 
     const createTeam = async (name: string) => {
         await createTeamMutation.mutateAsync(name);
@@ -136,9 +137,9 @@ export function useTeams() {
         await editTeamMutation.mutateAsync({teamid, name})
     }
 
-    const removeUserTeam = async(teamid: string, userId: string) => {
-        await removeUserTeamMutation.mutateAsync({teamid, userId})
-    }
+    // const removeUserTeam = async(teamid: string, userId: string) => {
+    //     await removeUserTeamMutation.mutateAsync({teamid, userId})
+    // }
 
     // reset page on search
     const onSearchChange = (value: string) => {
@@ -255,6 +256,6 @@ export function useTeams() {
         createTeam,
         removeTeam,
         editTeam,
-        removeUserTeam,
+        // removeUserTeam,
     };
 }
