@@ -2,7 +2,12 @@
 import { Plus, } from "@untitledui/icons";
 import { EmptyState } from "@/components/application/empty-state/empty-state";
 import { Button } from "@/components/base/buttons/button";
-export function NotFoundTable() {
+
+interface Props {
+    type: string;
+}
+
+export function NotFoundTable({ type }: Props) {
     return (
         <div className="flex items-center justify-center overflow-hidden px-8 py-20">
             <EmptyState size="sm">
@@ -11,9 +16,9 @@ export function NotFoundTable() {
                 </EmptyState.Header>
 
                 <EmptyState.Content>
-                    <EmptyState.Title>No teams found</EmptyState.Title>
+                    <EmptyState.Title>No {type}s found</EmptyState.Title>
                     <EmptyState.Description>
-                        Your search did not match any team. Please try again or create a new team.
+                        Your search did not match any {type}. Please try again or create a new {type}.
                     </EmptyState.Description>
                 </EmptyState.Content>
 

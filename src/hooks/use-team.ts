@@ -3,13 +3,14 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { SortDescriptor } from "react-aria-components";
-import { exitTeam, toggleFavorite as toggleFavoriteAPI, updateTeam } from "@/services/team";
+import { toggleFavorite as toggleFavoriteAPI, updateTeam } from "@/services/team";
+import { exitTeam } from "@/services/members";
 import { getLoggedTeams, addTeam, deleteTeam } from "@/services/team";
 import type { Team } from "@/types/team";
 
 export function useTeams() {
-    const ITEMS_PER_PAGE = 5;
-    const NUMBER_OF_FAVORITES = 3
+    const ITEMS_PER_PAGE = 5;// TODO ver se é possivel colocar numerode equipas realtivo ao tamanho do ecra
+    const NUMBER_OF_FAVORITES = 3 
     const queryClient = useQueryClient();
 
     const [search, setSearch] = useState("");
@@ -95,10 +96,10 @@ export function useTeams() {
     });
 
     const removeUserTeamMutation = useMutation({
-        mutationFn: ({ teamid, email }: { teamid: string; email: string }) =>
-            exitTeam(teamid, email),
+        mutationFn: ({ teamid, userId }: { teamid: string; userId: string }) =>
+            exitTeam(teamid, userId),
 
-        onMutate: async ({ teamid, email }) => {
+        onMutate: async ({ teamid, userId }) => {
             await queryClient.cancelQueries({ queryKey: ["teams"] });
 
             const previousTeams = queryClient.getQueryData<Team[]>(["teams"]);
@@ -106,7 +107,7 @@ export function useTeams() {
             queryClient.setQueryData(["teams"], (old: Team[] = []) =>
                 old.map((t) =>
                     t.id === teamid
-                        ? { ...t, email }
+                        ? { ...t, userId }
                         : t
                 )
             );
@@ -135,8 +136,8 @@ export function useTeams() {
         await editTeamMutation.mutateAsync({teamid, name})
     }
 
-    const removeUserTeam = async(teamid: string, email: string) => {
-        await removeUserTeamMutation.mutateAsync({teamid, email})
+    const removeUserTeam = async(teamid: string, userId: string) => {
+        await removeUserTeamMutation.mutateAsync({teamid, userId})
     }
 
     // reset page on search

@@ -5,8 +5,8 @@ import { PaginationPageMinimalCenter } from "@/components/application/pagination
 import { TableCard } from "@/components/application/table/table";
 
 
-import { TeamsHeader } from "@/components/custom/teams/teams-header";
-import { TeamsTable } from "@/components/custom/teams/teams-table";
+import { TeamsHeader } from "@/components/custom/teams/tables/headers/teams-header";
+import { TeamsTable } from "@/components/custom/teams/tables/rows/teams-table";
 
 import { useTeams } from "@/hooks/use-team";
 import { NotFoundTable } from "./not-found-table";
@@ -54,7 +54,7 @@ export function MyTeamsSection() {
                     onSortChange={setSortDescriptor}
                 />
             ) : (
-                <NotFoundTable/>
+                <NotFoundTable type="team"/>
             )}
 
 

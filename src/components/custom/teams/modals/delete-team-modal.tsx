@@ -2,30 +2,34 @@
 
 import { Modal, ModalOverlay, Dialog } from "@/components/application/modals/modal";
 import { Button } from "@/components/base/buttons/button";
-import { useTeams } from "@/hooks/use-team";
 import { Heading } from "react-aria-components";
+import { useRouter } from "next/navigation";
 
 type Props = {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
     teamId: string | null;
+    onDelete: (teamId: string) => Promise<void>;
+    getBack: boolean
 };
 
-export function DeleteTeamModal({ isOpen, onOpenChange, teamId }: Props) {
-    const { removeTeam } = useTeams();
+export function DeleteTeamModal({ isOpen, onOpenChange, teamId, onDelete, getBack }: Props) {
+
+    const router = useRouter();
 
     const handleDelete = async () => {
         if (!teamId) return;
 
-        await removeTeam(teamId);
+        await onDelete(teamId);
         onOpenChange(false);
-    };
 
+        if (getBack) router.push("/team");
+    };
     return (
         <ModalOverlay isOpen={isOpen} onOpenChange={onOpenChange}>
             <Modal>
                 <Dialog className="p-6 w-105 space-y-4">
-                    
+
                     <Heading slot="title" className="text-xl font-semibold"> Delete Team</Heading>
 
 

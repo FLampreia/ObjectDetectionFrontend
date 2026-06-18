@@ -4,18 +4,17 @@ import { Table } from "@/components/application/table/table";
 import { Avatar } from "@/components/base/avatar/avatar";
 import { ButtonUtility } from "@/components/base/buttons/button-utility";
 import { Trash01, Edit01, X, User01, List } from "@untitledui/icons";
-import { Crown, Star } from "lucide-react";
+import { Crown, Star, LogOut } from "lucide-react";
 import type { SortDescriptor } from "react-aria-components";
 import type { Team } from "@/types/team";
-import { BadgeWithIcon } from "@/components/base/badges/badges";
 import { useTeams } from "@/hooks/use-team";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { DeleteTeamModal } from "./delete-team-modal";
-import { LogOut } from 'lucide-react';
-import { EditTeamModal } from "./edit-team-modal";
-import { RemoveUserTeamModal } from "./remove-user-team-modal";
+import { DeleteTeamModal } from "../../modals/delete-team-modal";
+import { EditTeamModal } from "../../modals/edit-team-modal";
+import { RemoveUserTeamModal } from "../../modals/remove-user-team-modal";
 import { useAuth } from "@/hooks/use-auth";
+import { RoleBadge } from "../../role-badge";
 
 type Props = {
     teams: Team[];
@@ -30,19 +29,20 @@ export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
 
     const {
         toggleFavorite,
+        removeTeam,
     } = useTeams()
 
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isRemoveOpen, setIsRemoveOpen] = useState(false);
     const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
-    const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
+    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
     const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
 
     return (
         <>
             <Table
-                aria-label="Team members"
+                aria-label="Teams"
                 sortDescriptor={sortDescriptor}
                 onSortChange={onSortChange}
             >
@@ -93,26 +93,14 @@ export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
                             </Table.Cell>
 
                             <Table.Cell>
-                                {team.role === "owner" ? (
-                                    <BadgeWithIcon size="sm" color="blue" iconLeading={Crown} className="capitalize">
-                                        {team.role}
-                                    </BadgeWithIcon>
-                                ) : team.role === "member" ? (
-                                    <BadgeWithIcon size="sm" color="gray" iconLeading={User01} className="capitalize">
-                                        {team.role}
-                                    </BadgeWithIcon>
-                                ) : (
-                                    <BadgeWithIcon size="sm" color="error" iconLeading={X} className="capitalize">
-                                        {team.role}
-                                    </BadgeWithIcon>
-                                )}
+                                <RoleBadge role={team.role} />
                             </Table.Cell>
 
                             <Table.Cell>
                                 <div className="flex justify-end">
-                                    
+
                                     <ButtonUtility size="xs" color="tertiary" tooltip="List" icon={List} onClick={() => router.push(`/team/${team.id}`)} />
-                                    
+
                                     {!team.is_favorite && team.role !== "member" && (
                                         <>
                                             <ButtonUtility
@@ -151,11 +139,11 @@ export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
                                                 tooltip="Leave"
                                                 icon={LogOut}
                                                 onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                                                    console.log(team)
+                                                    if (!user) return;
 
                                                     e.stopPropagation();
                                                     setSelectedTeamId(team.id);
-                                                    setSelectedEmail(user?.email)
+                                                    setSelectedUserId(user?.id)
                                                     setIsRemoveOpen(true);
                                                 }}
                                             />
@@ -173,16 +161,19 @@ export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
                     isOpen={isDeleteOpen}
                     onOpenChange={setIsDeleteOpen}
                     teamId={selectedTeamId}
+                    onDelete={removeTeam}
+                    getBack={false}
                 />
             )}
 
 
-            {isRemoveOpen && selectedTeamId && selectedEmail && (
+            {isRemoveOpen && selectedTeamId && selectedUserId && (
                 <RemoveUserTeamModal
                     isOpen={isRemoveOpen}
                     onOpenChange={setIsRemoveOpen}
                     teamId={selectedTeamId}
-                    email={selectedEmail}
+                    userId={selectedUserId}
+                    getBack={false}
                 />
             )}
 

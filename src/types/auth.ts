@@ -1,7 +1,7 @@
 import { User } from "./user";
 
 export type AuthContextType = {
-  user: User;
+  user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;

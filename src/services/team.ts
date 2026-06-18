@@ -41,7 +41,6 @@ export async function getLoggedTeams(): Promise<Team[]> {
     });
 
     const data = await response.json();
-    console.log(data)
 
     if (!response.ok) {
         throw new Error(data.message || "Failed to get Teams");
@@ -105,23 +104,3 @@ export async function updateTeam(teamId: string, teamName: string) {
     }
 }
 
-export async function exitTeam(teamId: string, email: string) {
-        const token = getAccessToken();
-
-    const response = await fetch(`${API_URL}/team/${teamId}/remove`, {
-        method: "DELETE",
-        headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(
-            {
-                "email": email
-            }
-        ),
-    });
-
-    if (!response.ok) {
-        throw new Error("Failed to Update Team");
-    }
-}
