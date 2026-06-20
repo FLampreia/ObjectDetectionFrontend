@@ -12,7 +12,7 @@ type Props = {
     error: string | null;
 };
 
-export function TeamsHeader({
+export function ExploreTeamsHeader({
     search,
     setSearch,
     isOpen,

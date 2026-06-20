@@ -43,7 +43,27 @@ export async function getLoggedTeams(): Promise<Team[]> {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.message || "Failed to get Teams");
+        throw new Error(data.message || "Failed to get logged user Teams");
+    }
+
+    return data;
+}
+
+export async function getAllTeams(): Promise<Team[]> {
+    const token = getAccessToken();
+
+    const response = await fetch(`${API_URL}/team`, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || "Failed to get All Teams");
     }
 
     return data;
@@ -103,4 +123,6 @@ export async function updateTeam(teamId: string, teamName: string) {
         throw new Error("Failed to Update Team");
     }
 }
+
+
 

@@ -12,7 +12,7 @@ import { useTeams } from "@/hooks/use-team";
 export const Sidebar = ({ user }: { user: User }) => {
     const pathname = usePathname();
 
-    const { allTeams } = useTeams();
+    const { allLoggedTeams: allTeams } = useTeams();
 
     const favoriteTeamsSection = {
 

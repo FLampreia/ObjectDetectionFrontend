@@ -22,9 +22,12 @@ export default function ProtectedLayout({
         }
     }, [user, loading, router]);
 
-    if (loading || user === undefined) {
-        
+    if (loading) {
         return <div>Loading...</div>;
+    }
+
+    if (!user) {
+        return null;
     }
 
     if (user === null) {

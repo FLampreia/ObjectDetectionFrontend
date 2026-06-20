@@ -27,9 +27,7 @@ export function TeamMembersSection({ teamId }: Props) {
     } = useMembers(teamId);
     
     const queryClient = useQueryClient();
-
-    const teams = queryClient.getQueryData<Team[]>(["teams"]) ?? [];
-
+    const teams = queryClient.getQueryData<Team[]>(["all-teams"]) ?? [];
     const team = teams.find(t => t.id === teamId);
 
     const [isOpen, setIsOpen] = useState(false);

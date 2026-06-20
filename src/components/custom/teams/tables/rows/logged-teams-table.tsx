@@ -23,7 +23,7 @@ type Props = {
 
 };
 
-export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
+export function LoggedTeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
     const router = useRouter();
     const { user } = useAuth();
 
@@ -93,7 +93,7 @@ export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
                             </Table.Cell>
 
                             <Table.Cell>
-                                <RoleBadge role={team.role} />
+                                <RoleBadge role={team.owner.role} />
                             </Table.Cell>
 
                             <Table.Cell>
@@ -101,7 +101,7 @@ export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
 
                                     <ButtonUtility size="xs" color="tertiary" tooltip="List" icon={List} onClick={() => router.push(`/team/${team.id}`)} />
 
-                                    {!team.is_favorite && team.role !== "member" && (
+                                    {!team.is_favorite && team.owner.role !== "member" && (
                                         <>
                                             <ButtonUtility
                                                 size="xs"
@@ -116,7 +116,7 @@ export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
                                             />
                                         </>
                                     )}
-                                    {team.role === "owner" && (
+                                    {team.owner.role === "owner" && (
                                         <>
                                             <ButtonUtility
                                                 size="xs"
@@ -131,7 +131,7 @@ export function TeamsTable({ teams, sortDescriptor, onSortChange }: Props) {
                                             />
                                         </>
                                     )}
-                                    {team.role === "member" && (
+                                    {team.owner.role === "member" && (
                                         <>
                                             <ButtonUtility
                                                 size="xs"

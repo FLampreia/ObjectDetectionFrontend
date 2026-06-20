@@ -5,8 +5,8 @@ import { PaginationPageMinimalCenter } from "@/components/application/pagination
 import { TableCard } from "@/components/application/table/table";
 
 
-import { TeamsHeader } from "@/components/custom/teams/tables/headers/teams-header";
-import { TeamsTable } from "@/components/custom/teams/tables/rows/teams-table";
+import { LoggedTeamsHeader } from "@/components/custom/teams/tables/headers/logged-teams-header";
+import { LoggedTeamsTable } from "@/components/custom/teams/tables/rows/logged-teams-table";
 
 import { useTeams } from "@/hooks/use-team";
 import { NotFoundTable } from "./not-found-table";
@@ -16,13 +16,13 @@ export function MyTeamsSection() {
 
 
     const {
-        teams,
-        allTeams,
-        totalPages,
+        loggedTeams: teams,
+        allLoggedTeams: allTeams,
+        totalPagesLogged,
         search,
-        setSearch,
-        currentPage,
-        setCurrentPage,
+        setSearchLogged: setSearch,
+        currentPageLogged,
+        setCurrentPageLogged,
         sortDescriptor,
         setSortDescriptor,
 
@@ -38,7 +38,7 @@ export function MyTeamsSection() {
                 badge={allTeams.length}
                 description="Manage all your teams"
                 contentTrailing={
-                    <TeamsHeader
+                    <LoggedTeamsHeader
                         search={search}
                         setSearch={setSearch}
                         isOpen={isOpen}
@@ -48,7 +48,7 @@ export function MyTeamsSection() {
                 }
             />
             {allTeams.length != 0 ? (
-                <TeamsTable
+                <LoggedTeamsTable
                     teams={teams}
                     sortDescriptor={sortDescriptor}
                     onSortChange={setSortDescriptor}
@@ -59,9 +59,9 @@ export function MyTeamsSection() {
 
 
             <PaginationPageMinimalCenter
-                page={currentPage}
-                total={totalPages}
-                onPageChange={setCurrentPage}
+                page={currentPageLogged}
+                total={totalPagesLogged}
+                onPageChange={setCurrentPageLogged}
                 className="px-4 py-3 md:px-6 md:pt-3 md:pb-4"
             />
         </TableCard.Root>
