@@ -1,7 +1,7 @@
 
 import API_URL from "@/config/api";
 import { getAccessToken } from "./auth";
-import { Member } from "@/types/team";
+import { Member } from "@/types/index";
 
 
 export async function getMembersTeam(teamId: string): Promise<Member[]> {

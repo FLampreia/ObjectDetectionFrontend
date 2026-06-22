@@ -44,7 +44,7 @@ export const Sidebar = ({ user }: { user: User }) => {
                 },
                 {
                     label: "Detections",
-                    href: "/detect",
+                    href: "/detection",
                     icon: Camera01,
                 },
                 {

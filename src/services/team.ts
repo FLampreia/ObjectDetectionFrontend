@@ -1,6 +1,6 @@
 import API_URL from "@/config/api";
 import { getAccessToken } from "./auth";
-import { Team } from "@/types/team";
+import { Team } from "@/types/index";
 
 export async function addTeam(teamname: string) {
     const token = getAccessToken();
@@ -19,7 +19,6 @@ export async function addTeam(teamname: string) {
     });
 
     const data = await response.json();
-    console.log(data)
 
     if (!response.ok) {
         throw new Error(data.error || "Failed to create team");
