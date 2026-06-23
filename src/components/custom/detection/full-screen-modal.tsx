@@ -32,11 +32,11 @@ export function FullScreenModal({ isOpen, onClose, children }: FullScreenModalPr
     return createPortal(
         <div
             className="fixed inset-0 z-50 bg-primary/80 flex items-center justify-center"
-            onClick={onClose}
+        // onClick={onClose}
         >
             <div
                 className="relative w-full h-full flex items-center justify-center"
-                onClick={(e) => e.stopPropagation()}
+                // onClick={(e) => e.stopPropagation()}
             >
                 {children}
 

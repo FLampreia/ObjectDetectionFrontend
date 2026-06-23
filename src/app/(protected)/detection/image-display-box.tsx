@@ -78,7 +78,7 @@ export function ImageDisplayBox({ imageUrl, detections }: ImageDisplayBoxProps) 
 
     return (
         <>
-            <div className="w-full  h-96 rounded-lg overflow-hidden flex items-center justify-center bg-secondary ring-secondary ring-inset lg:rounded-xl lg:ring-1">
+            <div className="w-full h-64 lg:h-112 rounded-lg overflow-hidden flex items-center justify-center bg-secondary ring-secondary ring-inset lg:rounded-xl lg:ring-1">
                 {imageUrl ? (
                     <div className="relative w-full h-full flex items-center justify-center">
                         <canvas

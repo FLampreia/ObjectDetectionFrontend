@@ -35,17 +35,12 @@ export function usePhotoDetection() {
             const formData = new FormData()
             formData.append("image", file)
 
-            // converter selection para array
-            const classes =
-                selectedClasses === "all"
-                    ? []
-                    : Array.from(selectedClasses as Set<string | number>)
-
-            formData.append("classes", JSON.stringify(classes))
+            Array.from(selectedClasses as Set<number>).forEach((id) => {
+                formData.append("chosen_class_id", String(id))
+            })
 
             const data = await detectImage(formData)
 
-            setDetections(data?.detections ?? [])
             setDetections(data?.detections ?? [])
         } finally {
             setLoading(false)
