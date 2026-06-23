@@ -11,33 +11,14 @@ interface FullScreenModalProps {
 }
 
 export function FullScreenModal({ isOpen, onClose, children }: FullScreenModalProps) {
-    useEffect(() => {
-        if (!isOpen) return
-
-        const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === "Escape") {
-                onClose()
-            }
-        }
-
-        window.addEventListener("keydown", handleEscape)
-
-        return () => {
-            window.removeEventListener("keydown", handleEscape)
-        }
-    }, [isOpen, onClose])
-
     if (!isOpen) return null
 
     return createPortal(
         <div
             className="fixed inset-0 z-50 bg-primary/80 flex items-center justify-center"
-        // onClick={onClose}
         >
-            <div
-                className="relative w-full h-full flex items-center justify-center"
-                // onClick={(e) => e.stopPropagation()}
-            >
+            <div className="relative w-full h-full flex items-center justify-center">
+                
                 {children}
 
                 <button

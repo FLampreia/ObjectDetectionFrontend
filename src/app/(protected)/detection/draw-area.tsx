@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { PenLine, Check, Trash, Save } from "lucide-react"
 import { Button } from "@/components/base/buttons/button"
+import { Area } from "@/types"
 
 interface Props {
     imageUrl: string | null
@@ -13,36 +14,13 @@ export function DrawArea({ imageUrl, onSave }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const imageRef = useRef<HTMLImageElement>(null)
 
-    const [drawing, setDrawing] = useState(false)
+    const [drawing, setDrawing] = useState(true)
     const [startPoint, setStartPoint] = useState<{ x: number; y: number } | null>(null)
     const [currentPoint, setCurrentPoint] = useState<{ x: number; y: number } | null>(null)
     const [isDragging, setIsDragging] = useState(false)
 
-    const [finalRect, setFinalRect] = useState<{
-        x1: number
-        y1: number
-        x2: number
-        y2: number
-    } | null>(null)
+    const [finalRect, setFinalRect] = useState<Area | null>(null)
 
-    function drawCanvasBounds() {
-        const canvas = canvasRef.current
-        if (!canvas) return
-
-        const ctx = canvas.getContext("2d")
-        if (!ctx) return
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-        ctx.strokeStyle = "blue"
-        ctx.lineWidth = 3
-        ctx.strokeRect(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        )
-    }
 
     useEffect(() => {
         if (!imageUrl) return
@@ -55,8 +33,6 @@ export function DrawArea({ imageUrl, onSave }: Props) {
         img.onload = () => {
             canvas.width = img.clientWidth
             canvas.height = img.clientHeight
-
-            drawCanvasBounds()
         }
     }, [imageUrl])
 
@@ -92,29 +68,26 @@ export function DrawArea({ imageUrl, onSave }: Props) {
         setCurrentPoint(point)
         drawRect(startPoint, point)
     }
+
     function handlePointerUp(e: React.MouseEvent<HTMLCanvasElement>) {
         e.preventDefault()
         e.stopPropagation()
-
-        const canvas = canvasRef.current
-        if (canvas) {
-            canvas.releasePointerCapture(e.pointerId)
-        }
 
         setIsDragging(false)
 
         if (!startPoint || !currentPoint) return
 
-
+        const canvas = canvasRef.current
+        if (!canvas) return
+        
         const rect = {
-            x1: startPoint.x,
-            y1: startPoint.y,
-            x2: currentPoint.x,
-            y2: currentPoint.y,
+            x1: startPoint.x / canvas.width,
+            y1: startPoint.y / canvas.height,
+            x2: currentPoint.x / canvas.width,
+            y2: currentPoint.y / canvas.height,
         }
 
         setFinalRect(rect)
-        onSave(rect)
     }
 
     function drawRect(p1: { x: number; y: number }, p2: { x: number; y: number }) {
@@ -129,27 +102,16 @@ export function DrawArea({ imageUrl, onSave }: Props) {
         const w = Math.abs(p2.x - p1.x)
         const h = Math.abs(p2.y - p1.y)
 
-        ctx.strokeStyle = "red"
+        ctx.strokeStyle = "blue"
         ctx.lineWidth = 2
         ctx.strokeRect(x, y, w, h)
     }
 
-    // function reset() {
-    //     setPoints([])
-    //     const ctx = canvasRef.current?.getContext("2d")
-    //     ctx?.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height)
-    // }
+    function save() {
+        if (!finalRect) return
 
-    // function save() {
-    //     if (points.length !== 2) return
-
-    //     onSave({
-    //         x1: points[0].x,
-    //         y1: points[0].y,
-    //         x2: points[1].x,
-    //         y2: points[1].y,
-    //     })
-    // }
+        onSave(finalRect)
+    }
 
     return (
         <div
@@ -177,22 +139,10 @@ export function DrawArea({ imageUrl, onSave }: Props) {
 
             <div className="absolute bottom-4 flex gap-3">
                 <Button
-                    onClick={() => setDrawing(!drawing)}
-                    color="secondary"
-                    iconLeading={PenLine}
-                />
-
-                <Button
-                    // onClick={reset}
-                    color="secondary"
-                    iconLeading={Trash}
-                />
-
-                <Button
-                    // onClick={save}
+                    onClick={save}
                     iconLeading={Save}
                 >
-                    Guardar
+                    Save Area
                 </Button>
             </div>
         </div>

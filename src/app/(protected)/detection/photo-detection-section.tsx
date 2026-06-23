@@ -73,7 +73,7 @@ export function PhotoDetectionSection() {
             </div>
 
             <section className="mt-4 grid grid-cols-1 lg:grid-cols-[13fr_7fr] gap-4 w-full items-start">
-                <ImageDisplayBox imageUrl={imageUrl} detections={detections} />
+                <ImageDisplayBox imageUrl={imageUrl} detections={detections} area={area} />
 
                 <TextResultDisplay detections={detections} />
 

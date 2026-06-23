@@ -4,7 +4,7 @@ import { FullScreenModal } from "@/components/custom/detection/full-screen-modal
 import { Maximize02 } from "@untitledui/icons"
 import { useEffect, useRef, useState } from "react"
 import { EmptyFile } from "./empty-file"
-import { Detection } from "@/types"
+import { Area, Detection } from "@/types"
 import { Download } from "lucide-react"
 import { drawNotations } from "@/utils/draw-notations"
 
@@ -12,17 +12,16 @@ import { drawNotations } from "@/utils/draw-notations"
 interface ImageDisplayBoxProps {
     imageUrl: string | null
     detections: Detection[]
+    area: Area | null
 }
 
-export function ImageDisplayBox({ imageUrl, detections }: ImageDisplayBoxProps) {
+export function ImageDisplayBox({ imageUrl, detections, area }: ImageDisplayBoxProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const imgRef = useRef<HTMLImageElement | null>(null)
 
     const hasDetections = detections && detections.length > 0
 
     const [isOpen, setIsOpen] = useState(false)
-
-
 
     const draw = () => {
         const canvas = canvasRef.current
@@ -34,6 +33,7 @@ export function ImageDisplayBox({ imageUrl, detections }: ImageDisplayBoxProps) 
             canvas,
             image: img,
             detections,
+            area,
         })
     }
 
@@ -64,7 +64,7 @@ export function ImageDisplayBox({ imageUrl, detections }: ImageDisplayBoxProps) 
     // Redraw when detections change
     useEffect(() => {
         draw()
-    }, [detections])
+    }, [detections, area])
 
     const downloadImage = () => {
         const canvas = canvasRef.current
@@ -127,6 +127,7 @@ export function ImageDisplayBox({ imageUrl, detections }: ImageDisplayBoxProps) 
                                 canvas: node,
                                 image: img,
                                 detections,
+                                area,
                                 lineWidth: 2,
                             })
                         }}
