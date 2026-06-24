@@ -20,14 +20,23 @@ export function PhotoDetectionSection() {
         setFile,
         imageUrl,
         detections,
+        setDetections,
         detect,
         loading,
         selectedClasses,
         setSelectedClasses,
+
+        area,
+        setArea,
     } = usePhotoDetection()
 
     const [isAreaOpen, setIsAreaOpen] = useState(false)
-    const [area, setArea] = useState<Area | null>(null)
+    const [imageSize, setImageSize] = useState({
+        width: 0,
+        height: 0,
+    })
+
+
 
     return (
         <>
@@ -38,6 +47,8 @@ export function PhotoDetectionSection() {
                         type="photo"
                         onFileSelect={(file) => {
                             setFile(file)
+                            setArea(null)
+                            setDetections([])
                         }}
                     />
                 </div>
@@ -73,9 +84,24 @@ export function PhotoDetectionSection() {
             </div>
 
             <section className="mt-4 grid grid-cols-1 lg:grid-cols-[13fr_7fr] gap-4 w-full items-start">
-                <ImageDisplayBox imageUrl={imageUrl} detections={detections} area={area} />
+                <ImageDisplayBox
+                    imageUrl={imageUrl}
+                    detections={detections}
+                    area={area}
+                    onImageLoad={(width, height) =>
+                        setImageSize({
+                            width,
+                            height,
+                        })
+                    }
+                />
 
-                <TextResultDisplay detections={detections} />
+                <TextResultDisplay
+                    detections={detections}
+                    area={area}
+                    imageWidth={imageSize.width}
+                    imageHeight={imageSize.height}
+                />
 
             </section>
 
@@ -88,6 +114,7 @@ export function PhotoDetectionSection() {
                     onSave={(area) => {
                         setArea(area)
                         setIsAreaOpen(false)
+                        setDetections([])
                     }}
                 />
             </FullScreenModal>

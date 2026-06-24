@@ -14,7 +14,6 @@ export function DrawArea({ imageUrl, onSave }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const imageRef = useRef<HTMLImageElement>(null)
 
-    const [drawing, setDrawing] = useState(true)
     const [startPoint, setStartPoint] = useState<{ x: number; y: number } | null>(null)
     const [currentPoint, setCurrentPoint] = useState<{ x: number; y: number } | null>(null)
     const [isDragging, setIsDragging] = useState(false)

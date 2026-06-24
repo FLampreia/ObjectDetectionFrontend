@@ -13,9 +13,10 @@ interface ImageDisplayBoxProps {
     imageUrl: string | null
     detections: Detection[]
     area: Area | null
+    onImageLoad: (width: number, height: number) => void
 }
 
-export function ImageDisplayBox({ imageUrl, detections, area }: ImageDisplayBoxProps) {
+export function ImageDisplayBox({ imageUrl, detections, area, onImageLoad }: ImageDisplayBoxProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const imgRef = useRef<HTMLImageElement | null>(null)
 
@@ -55,6 +56,12 @@ export function ImageDisplayBox({ imageUrl, detections, area }: ImageDisplayBoxP
 
         img.onload = () => {
             imgRef.current = img
+
+            onImageLoad(
+                img.naturalWidth,
+                img.naturalHeight
+            )
+
             draw()
         }
 
