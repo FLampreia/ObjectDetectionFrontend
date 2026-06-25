@@ -1,18 +1,15 @@
 import { detectImage } from "@/services/detect"
-import { Detection } from "@/types"
+import { Detection, Area, AlgorithmObj } from "@/types"
 import { useEffect, useState } from "react"
 import type { Selection } from "react-aria-components"
-import { Area } from "@/types"
+import { useAlgorithms } from "./use-algorithms"
 
 function cropImage(file: File, area: Area): Promise<File> {
     return new Promise((resolve, reject) => {
-        console.log("cropImage called")
-
 
         const img = new Image()
 
         img.onload = () => {
-            console.log("image loaded for crop")
 
             const canvas = document.createElement("canvas")
             const ctx = canvas.getContext("2d")
@@ -50,6 +47,8 @@ function cropImage(file: File, area: Area): Promise<File> {
     })
 }
 
+
+
 export function usePhotoDetection() {
     const [file, setFile] = useState<File | null>(null)
     const [imageUrl, setImageUrl] = useState<string | null>(null)
@@ -57,8 +56,12 @@ export function usePhotoDetection() {
     const [detections, setDetections] = useState<Detection[]>([])
     const [loading, setLoading] = useState(false)
 
+    const [minConfidence, setMinConfidence] = useState<number>(80)
+
     const [selectedClasses, setSelectedClasses] = useState<Selection>(new Set())
 
+
+    const [selectedAlgorithm, setSelectedAlgorithm] = useState<string | null>(null)
 
     useEffect(() => {
         if (!file) return
@@ -83,9 +86,7 @@ export function usePhotoDetection() {
             let fileToSend = file
 
             if (area) {
-                console.log("Area recortada1")
                 fileToSend = await cropImage(file, area)
-                console.log("Area recortada2")
             }
 
             const formData = new FormData()
@@ -95,6 +96,14 @@ export function usePhotoDetection() {
                 formData.append("chosen_class_id", String(id))
             })
 
+            // if (selectedAlgorithm) {
+            //     formData.append("algorithm", selectedAlgorithm)
+            // }
+
+            // if (minConfidence !== null) {
+            //     formData.append("conf_threshold", String(minConfidence))
+            // }
+
             const data = await detectImage(formData)
 
             setDetections(data?.detections ?? [])
@@ -102,6 +111,7 @@ export function usePhotoDetection() {
             setLoading(false)
         }
     }
+
 
     return {
         file,
@@ -117,5 +127,13 @@ export function usePhotoDetection() {
 
         area,
         setArea,
+
+        // installedAlgorithms,
+        selectedAlgorithm,
+        setSelectedAlgorithm,
+        // setAlgorithm,
+
+        minConfidence,
+        setMinConfidence,
     }
 }

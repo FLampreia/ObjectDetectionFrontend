@@ -19,7 +19,7 @@ export function TextResultDisplay({
 
     return (
         <div className="w-full h-64 lg:h-112 overflow-y-auto rounded-lg flex flex-col bg-secondary ring-secondary ring-inset lg:rounded-xl lg:ring-1 p-3">
-            {imageHeight && imageWidth && (
+            {imageHeight != 0 && imageWidth != 0 && (
                 <>
                     <p>
                         Image size:

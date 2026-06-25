@@ -13,3 +13,8 @@ export type Area = {
     x2: number
     y2: number
 }
+
+export type AlgorithmObj = {
+    name: string
+    installed: boolean
+}

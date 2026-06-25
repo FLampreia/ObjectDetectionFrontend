@@ -13,6 +13,9 @@ import { TextResultDisplay } from "./text-results-display"
 import { FullScreenModal } from "@/components/custom/detection/full-screen-modal"
 import { DrawArea } from "./draw-area"
 import { Area } from "@/types"
+import { AlgorithmSelect } from "@/components/custom/algorithm-select"
+import { MinConfidenceInput } from "@/components/custom/min-confidence-input"
+import { useAlgorithms } from "@/hooks/use-algorithms"
 
 export function PhotoDetectionSection() {
     const {
@@ -28,7 +31,21 @@ export function PhotoDetectionSection() {
 
         area,
         setArea,
+
+        selectedAlgorithm,
+        setSelectedAlgorithm,
+        // allowedAlgorithms,
+        // installedAlgorithms,
+        // setAlgorithm,
+
+
+        minConfidence,
+        setMinConfidence,
     } = usePhotoDetection()
+
+    const {
+        data: algorithms = [],
+    } = useAlgorithms()
 
     const [isAreaOpen, setIsAreaOpen] = useState(false)
     const [imageSize, setImageSize] = useState({
@@ -40,9 +57,10 @@ export function PhotoDetectionSection() {
 
     return (
         <>
-            <div className="flex flex-col lg:flex-row gap-4 lg:items-center justify-center">
+            <div className="flex flex-col gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
 
-                <div className="flex-1">
+
                     <FileUploadInput
                         type="photo"
                         onFileSelect={(file) => {
@@ -51,20 +69,29 @@ export function PhotoDetectionSection() {
                             setDetections([])
                         }}
                     />
-                </div>
 
-                <div className="flex-1">
                     <MultiSelectClassesBox
                         selectedKeys={selectedClasses}
                         onSelectionChange={setSelectedClasses}
                     />
-                </div>
 
-                <div className="flex-1">
                     <SelectTeamBox />
+
+                    <AlgorithmSelect
+                        algorithms={algorithms}
+                        selectedAlgorithm={selectedAlgorithm}
+                        onAlgorithmChange={setSelectedAlgorithm}
+                    />
+
+                    <MinConfidenceInput
+                        value={minConfidence}
+                        onChange={(confValue) => {
+                            setMinConfidence(confValue)
+                        }}
+                    />
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex flex-wrap gap-4 justify-end">
                     <Button
                         iconLeading={<PenLine />}
                         color="secondary"
@@ -80,6 +107,7 @@ export function PhotoDetectionSection() {
                     >
                         {loading ? "Detecting..." : "Detect"}
                     </Button>
+
                 </div>
             </div>
 
