@@ -21,21 +21,3 @@ export async function detectImage(formData: FormData) {
     return data;
 }
 
-export async function getAlgorithms() {
-    const token = getAccessToken();
-
-    const response = await fetch(`${API_URL}/detect/models`, {
-        method: "GET",
-        headers: {
-            Authorization: `Bearer ${token}`,
-        }
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(data.error || "Failed to get models list");
-    }
-
-    return data;
-}

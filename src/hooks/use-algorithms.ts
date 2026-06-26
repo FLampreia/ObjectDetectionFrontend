@@ -1,17 +1,35 @@
-import { useQuery } from "@tanstack/react-query"
-import { getAlgorithms } from "@/services/detect"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { getAlgorithms, downloadAlgorithm } from "@/services/algorithms"
 import { AlgorithmObj } from "@/types"
 
 
 export function useAlgorithms() {
-    return useQuery<AlgorithmObj[]>({
+    const queryClient = useQueryClient()
+
+    const algorithmsQuery = useQuery<AlgorithmObj[]>({
         queryKey: ["algorithms"],
         queryFn: getAlgorithms,
 
-        // 10 min for the next request
         staleTime: 1000 * 60 * 10,
-
-        // stores cache for 30 min
         gcTime: 1000 * 60 * 30,
     })
+
+    const downloadMutation = useMutation({
+        mutationFn: downloadAlgorithm,
+
+        onSuccess: () => {
+            // Updates list after download
+            queryClient.invalidateQueries({
+                queryKey: ["algorithms"],
+            })
+        },
+    })
+
+    return {
+        ...algorithmsQuery,
+
+        downloadAlgorithm: downloadMutation.mutateAsync,
+        downloadingAlgorithm: downloadMutation.variables ?? null,
+        isDownloading: downloadMutation.isPending,
+    }
 }

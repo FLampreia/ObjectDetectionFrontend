@@ -2,7 +2,6 @@ import { detectImage } from "@/services/detect"
 import { Detection, Area, AlgorithmObj } from "@/types"
 import { useEffect, useState } from "react"
 import type { Selection } from "react-aria-components"
-import { useAlgorithms } from "./use-algorithms"
 
 function cropImage(file: File, area: Area): Promise<File> {
     return new Promise((resolve, reject) => {
