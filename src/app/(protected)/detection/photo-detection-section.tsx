@@ -34,10 +34,9 @@ export function PhotoDetectionSection() {
 
         selectedAlgorithm,
         setSelectedAlgorithm,
-        // allowedAlgorithms,
-        // installedAlgorithms,
-        // setAlgorithm,
 
+        selectedTeamId,
+        setSelectedTeamId,
 
         minConfidence,
         setMinConfidence,
@@ -81,7 +80,10 @@ export function PhotoDetectionSection() {
                         onSelectionChange={setSelectedClasses}
                     />
 
-                    <SelectTeamBox />
+                    <SelectTeamBox
+                        selectedTeamId={selectedTeamId}
+                        onTeamChange={setSelectedTeamId}
+                    />
 
 
                     <MinConfidenceInput

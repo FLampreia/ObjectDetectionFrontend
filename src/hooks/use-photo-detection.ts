@@ -59,8 +59,9 @@ export function usePhotoDetection() {
 
     const [selectedClasses, setSelectedClasses] = useState<Selection>(new Set())
 
-
     const [selectedAlgorithm, setSelectedAlgorithm] = useState<string | null>(null)
+
+    const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null)
 
     useEffect(() => {
         if (!file) return
@@ -99,6 +100,10 @@ export function usePhotoDetection() {
                 formData.append("algorithm", selectedAlgorithm)
             }
 
+            if (selectedTeamId) {
+                formData.append("chosen_team_id", selectedTeamId)
+            }
+
             if (minConfidence !== null) {
                 formData.append("conf_threshold", String(minConfidence / 100))
             }
@@ -127,10 +132,11 @@ export function usePhotoDetection() {
         area,
         setArea,
 
-        // installedAlgorithms,
         selectedAlgorithm,
         setSelectedAlgorithm,
-        // setAlgorithm,
+
+        selectedTeamId,
+        setSelectedTeamId,
 
         minConfidence,
         setMinConfidence,

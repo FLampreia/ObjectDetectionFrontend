@@ -2,7 +2,13 @@
 import { Select } from "../base/select/select";
 import { useTeams } from "@/hooks/use-team";
 
-export const SelectTeamBox = () => {
+export function SelectTeamBox({
+    selectedTeamId,
+    onTeamChange,
+}: {
+    selectedTeamId: string | null
+    onTeamChange: (value: string | null) => void
+}) {
 
     const {
         allLoggedTeams,
@@ -26,7 +32,9 @@ export const SelectTeamBox = () => {
             tooltip="Select a team to associate your detection results"
             placeholder="Select a team"
             items={teamItems}
-
+            onChange={(value) => {
+                onTeamChange(value === "none" ? null : String(value))
+            }}
         >
             {(team) => (
                 <Select.Item id={team.id} >
