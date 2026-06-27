@@ -69,6 +69,12 @@ export function PhotoDetectionSection() {
                             setDetections([])
                         }}
                     />
+                    
+                    <AlgorithmSelect
+                        algorithms={algorithms}
+                        selectedAlgorithm={selectedAlgorithm}
+                        onAlgorithmChange={setSelectedAlgorithm}
+                    />
 
                     <MultiSelectClassesBox
                         selectedKeys={selectedClasses}
@@ -77,11 +83,6 @@ export function PhotoDetectionSection() {
 
                     <SelectTeamBox />
 
-                    <AlgorithmSelect
-                        algorithms={algorithms}
-                        selectedAlgorithm={selectedAlgorithm}
-                        onAlgorithmChange={setSelectedAlgorithm}
-                    />
 
                     <MinConfidenceInput
                         value={minConfidence}
@@ -103,7 +104,7 @@ export function PhotoDetectionSection() {
                     <Button
                         iconLeading={<Camera01 />}
                         onClick={detect}
-                        isDisabled={!file || loading}
+                        isDisabled={!file || loading || !selectedAlgorithm}
                     >
                         {loading ? "Detecting..." : "Detect"}
                     </Button>

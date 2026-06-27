@@ -38,6 +38,7 @@ export function AlgorithmSelect({
 
     return (
         <Select
+            isRequired
             size="md"
             label="5. Select the Algorithm"
             tooltip="Select the algorithm to process your upload"

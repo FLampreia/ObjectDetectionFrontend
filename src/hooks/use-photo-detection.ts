@@ -95,13 +95,13 @@ export function usePhotoDetection() {
                 formData.append("chosen_class_id", String(id))
             })
 
-            // if (selectedAlgorithm) {
-            //     formData.append("algorithm", selectedAlgorithm)
-            // }
+            if (selectedAlgorithm) {
+                formData.append("algorithm", selectedAlgorithm)
+            }
 
-            // if (minConfidence !== null) {
-            //     formData.append("conf_threshold", String(minConfidence))
-            // }
+            if (minConfidence !== null) {
+                formData.append("conf_threshold", String(minConfidence / 100))
+            }
 
             const data = await detectImage(formData)
 
