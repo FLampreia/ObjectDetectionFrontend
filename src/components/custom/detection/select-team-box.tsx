@@ -1,5 +1,5 @@
 
-import { Select } from "../base/select/select";
+import { Select } from "@/components/base/select/select";
 import { useTeams } from "@/hooks/use-team";
 
 export function SelectTeamBox({

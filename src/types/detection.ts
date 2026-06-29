@@ -18,3 +18,14 @@ export type AlgorithmObj = {
     name: string
     installed: boolean
 }
+
+export type ListDetection = {
+    id: string;
+    username: string;
+    created_at: string;
+    model: string;
+    conf_threshold: number;
+    processing_time_ms: number;
+    count: number;
+    type: "image" | "video" | "stream";
+}

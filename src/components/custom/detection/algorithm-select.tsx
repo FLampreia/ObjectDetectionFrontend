@@ -1,5 +1,5 @@
 import { CheckCircle2, Download, Loader2 } from "lucide-react"
-import { Select } from "../base/select/select"
+import { Select } from "../../base/select/select"
 import { AlgorithmObj } from "@/types"
 import { useAlgorithms } from "@/hooks/use-algorithms"
 

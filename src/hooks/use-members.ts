@@ -11,7 +11,6 @@ import { exitTeam } from "@/services/members";
 export function useMembers(teamId: string) {
     const ITEMS_PER_PAGE = 5;
 
-
     const [search, setSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const queryClient = useQueryClient();

@@ -1,5 +1,5 @@
-import { Input } from "../base/input/input"
-import { InputNumber } from "../base/input/input-number"
+import { Input } from "../../base/input/input"
+import { InputNumber } from "../../base/input/input-number"
 
 interface MinConfidenceInputProps {
     value: number

@@ -1,21 +1,20 @@
 "use client"
 
-import { FileUploadInput } from "@/components/custom/file-upload-input"
-import { MultiSelectClassesBox } from "@/components/custom/multi-select-class-box"
-import { useEffect, useState } from "react"
+import { FileUploadInput } from "@/components/custom/detection/file-upload-input"
+import { MultiSelectClassesBox } from "@/components/custom/detection/multi-select-class-box"
+import { useState } from "react"
 import { ImageDisplayBox } from "./image-display-box"
 import { Button } from "@/components/base/buttons/button"
 import { PenLine } from "lucide-react"
-import { SelectTeamBox } from "@/components/custom/select-team-box"
 import { Camera01 } from "@untitledui/icons"
 import { usePhotoDetection } from "@/hooks/use-photo-detection"
 import { TextResultDisplay } from "./text-results-display"
 import { FullScreenModal } from "@/components/custom/detection/full-screen-modal"
 import { DrawArea } from "./draw-area"
-import { Area } from "@/types"
-import { AlgorithmSelect } from "@/components/custom/algorithm-select"
-import { MinConfidenceInput } from "@/components/custom/min-confidence-input"
+import { AlgorithmSelect } from "@/components/custom/detection/algorithm-select"
+import { MinConfidenceInput } from "@/components/custom/detection/min-confidence-input"
 import { useAlgorithms } from "@/hooks/use-algorithms"
+import { SelectTeamBox } from "@/components/custom/detection/select-team-box"
 
 export function PhotoDetectionSection() {
     const {

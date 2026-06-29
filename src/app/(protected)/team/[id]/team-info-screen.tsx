@@ -52,7 +52,7 @@ export default function TeamInfoScreen({ params }: PageProps) {
                 {selectedTeamTab === "team-members" ? (
                     <TeamMembersSection teamId={id} />
                 ) : (
-                    <TeamDetectionsSection />
+                    <TeamDetectionsSection teamId={id} />
                 )}
                 
             </section>
