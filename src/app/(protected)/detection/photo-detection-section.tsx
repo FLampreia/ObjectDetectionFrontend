@@ -51,8 +51,6 @@ export function PhotoDetectionSection() {
         height: 0,
     })
 
-
-
     return (
         <>
             <div className="flex flex-col gap-4">
@@ -67,7 +65,7 @@ export function PhotoDetectionSection() {
                             setDetections([])
                         }}
                     />
-                    
+
                     <AlgorithmSelect
                         algorithms={algorithms}
                         selectedAlgorithm={selectedAlgorithm}
@@ -105,7 +103,15 @@ export function PhotoDetectionSection() {
                     <Button
                         iconLeading={<Camera01 />}
                         onClick={detect}
-                        isDisabled={!file || loading || !selectedAlgorithm}
+                        isDisabled={
+                            !file ||
+                            loading ||
+                            !selectedAlgorithm ||
+                            (
+                                selectedClasses !== "all" &&
+                                ((selectedClasses as Set<string | number> | undefined)?.size ?? 0) === 0
+                            )
+                        }
                     >
                         {loading ? "Detecting..." : "Detect"}
                     </Button>
