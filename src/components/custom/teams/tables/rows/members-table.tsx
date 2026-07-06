@@ -13,6 +13,7 @@ import { exitTeam } from "@/services/members";
 import { useTeams } from "@/hooks/use-team";
 import { useAuth } from "@/hooks/use-auth";
 import { RemoveUserTeamModal } from "../../modals/remove-user-team-modal";
+import { useRouter } from "next/navigation";
 
 
 
@@ -30,7 +31,8 @@ export function MembersTable({ teamId, members, sortDescriptor, onSortChange }: 
 
     const { user } = useAuth()
 
-    const isNotOwner = user?.role !== "owner";
+    const currentUserMember = members.find(m => m.user_id === user?.id);
+    const isOwner = currentUserMember?.role === "owner";
 
     return (
         <>
@@ -126,7 +128,7 @@ export function MembersTable({ teamId, members, sortDescriptor, onSortChange }: 
                     teamId={selectedTeamId}
                     userId={selectedUserId}
                     getBack={true}
-                    isOwner={isNotOwner}
+                    isCurrentUserOwner={!!isOwner}
                 />
             )}
 

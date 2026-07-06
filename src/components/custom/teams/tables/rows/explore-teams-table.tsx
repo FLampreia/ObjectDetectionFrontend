@@ -114,7 +114,7 @@ export function ExploreTeamsTable({ teams, sortDescriptor, onSortChange }: Props
                     teamId={selectedTeamId}
                     userId={selectedUserId}
                     getBack={false}
-                    isOwner={false}
+                    isCurrentUserOwner={false}
                 />
             )}
 

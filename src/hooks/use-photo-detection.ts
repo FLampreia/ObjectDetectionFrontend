@@ -1,5 +1,6 @@
 import { detectImage } from "@/services/detect"
 import { Detection, Area, AlgorithmObj } from "@/types"
+import { cocoClassesItems } from "@/utils/coco-classes"
 import { useEffect, useState } from "react"
 import type { Selection } from "react-aria-components"
 
@@ -57,7 +58,7 @@ export function usePhotoDetection() {
 
     const [minConfidence, setMinConfidence] = useState<number>(80)
 
-    const [selectedClasses, setSelectedClasses] = useState<Selection>(new Set())
+    const [selectedClasses, setSelectedClasses] = useState<Selection>("all")
 
     const [selectedAlgorithm, setSelectedAlgorithm] = useState<string | null>(null)
 

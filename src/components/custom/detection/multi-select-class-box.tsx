@@ -19,6 +19,8 @@ export const MultiSelectClassesBox = ({
     onSelectionChange: (keys: Selection) => void
 }) => {
 
+    console.log(selectedKeys)
+
     return (
         <MultiSelect
             size="md"
@@ -29,6 +31,7 @@ export const MultiSelectClassesBox = ({
             selectedKeys={selectedKeys}
             onSelectionChange={onSelectionChange}
             supportingText={`${getSelectedClasses(selectedKeys)} classes`}
+            defaultSelectedKeys={"all"}
             onReset={() => onSelectionChange(new Set())}
             onSelectAll={() =>
                 onSelectionChange(new Set(cocoClassesItems.map((t) => t.id)))

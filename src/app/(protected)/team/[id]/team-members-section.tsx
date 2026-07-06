@@ -9,6 +9,7 @@ import { useState } from "react";
 import { NotFoundTable } from "../not-found-table";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Team } from "@/types/team";
+import { PaginationPageMinimalCenter } from "@/components/application/pagination/pagination";
 
 interface Props {
     teamId: string;
@@ -23,15 +24,19 @@ export function TeamMembersSection({ teamId }: Props) {
         setSearch,
         sortDescriptor,
         setSortDescriptor,
+        currentPage,
+        setCurrentPage,
+        totalMembers,
         error,
     } = useMembers(teamId);
-    
+
     const queryClient = useQueryClient();
-    const teams = queryClient.getQueryData<Team[]>(["all-teams"]) ?? [];
+    const teams = queryClient.getQueryData<Team[]>(["logged-teams"]) ?? [];
     const team = teams.find(t => t.id === teamId);
 
     const [isOpen, setIsOpen] = useState(false);
 
+    console.log(team)
 
     return (
         <TableCard.Root>
@@ -62,7 +67,12 @@ export function TeamMembersSection({ teamId }: Props) {
             ) : (
                 <NotFoundTable type="member" />
             )}
-
+            <PaginationPageMinimalCenter
+                page={currentPage}
+                total={totalMembers}
+                onPageChange={setCurrentPage}
+                className="px-4 py-3 md:px-6 md:pt-3 md:pb-4"
+            />
         </TableCard.Root>);
 
 }

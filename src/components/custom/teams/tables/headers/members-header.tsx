@@ -28,6 +28,7 @@ export function MembersHeader({
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const { removeTeam } = useTeams();
 
+    console.log(team)
 
     return (
         <div className="flex shrink-0 items-center gap-3 max-md:w-full">
@@ -40,7 +41,7 @@ export function MembersHeader({
                 value={search}
                 onChange={setSearch}
             />
-            {team?.role === "owner" && (
+            {team?.current_user_role === "owner" && (
                 <>
                     <AddMemberModal
                         isOpen={isOpen}
@@ -61,7 +62,7 @@ export function MembersHeader({
                 </>
             )}
 
-            {!team?.is_favorite && team?.role === "owner" &&(
+            {!team?.is_favorite && team?.current_user_role === "owner" &&(
                 <DeleteTeamModal
                     isOpen={isDeleteOpen}
                     onOpenChange={setIsDeleteOpen}

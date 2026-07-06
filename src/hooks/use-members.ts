@@ -112,6 +112,14 @@ export function useMembers(teamId: string) {
             queryClient.invalidateQueries({
                 queryKey: ["members", teamId],
             });
+
+            queryClient.invalidateQueries({
+                queryKey: ["logged-teams"],
+            });
+
+            queryClient.invalidateQueries({
+                queryKey: ["all-teams"],
+            });
         },
     });
 
@@ -128,6 +136,7 @@ export function useMembers(teamId: string) {
         setCurrentPage,
         sortDescriptor,
         setSortDescriptor,
+        currentPage,
 
         addMember,
         removeMember,

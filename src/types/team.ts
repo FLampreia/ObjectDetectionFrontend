@@ -12,4 +12,5 @@ export type Team = {
     created_at: string
     is_favorite: boolean;
     owner: Member
+    current_user_role: string
 }

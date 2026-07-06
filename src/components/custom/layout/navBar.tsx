@@ -2,7 +2,6 @@ import { BarChartSquare02, Camera01, Calendar, CheckDone01, ChevronRight, File05
 import type { NavItemType } from "@/components/application/app-navigation/config";
 import { SidebarNavigationSectionsSubheadings } from "../../application/app-navigation/sidebar-navegation/sidebar-sections-subheadings";
 import { Avatar } from "@/components/base/avatar/avatar";
-import { Badge } from "@/components/base/badges/badges";
 import { usePathname } from "next/navigation";
 import { User } from "@/types";
 import { useTeams } from "@/hooks/use-team";
@@ -49,7 +48,7 @@ export const Sidebar = ({ user }: { user: User }) => {
                 },
                 {
                     label: "History",
-                    href: "/documents",
+                    href: "/history",
                     icon: File05,
                 },
                 {

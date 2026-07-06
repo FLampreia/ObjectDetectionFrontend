@@ -44,7 +44,7 @@ export default function DetectionScreen() {
 
             </ButtonGroup>
 
-            <section className="p-6 bg-primary pt-4 shadow-xs ring-secondary ring-inset lg:rounded-xl lg:ring-1">
+            <section className="p-6 bg-primary pt-4 shadow-xs ring-secondary ring-inset lg:rounded-xl lg:ring-1 ">
                 {
                     selectedDetectionTab === "photo" ? (
                         <PhotoDetectionSection />

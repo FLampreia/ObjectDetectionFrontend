@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react";
-import type { SortDescriptor } from "react-aria-components";
+import type { DateValue, SortDescriptor } from "react-aria-components";
 import { useQuery } from "@tanstack/react-query";
 
 import { ListDetection } from "@/types";
@@ -10,9 +10,9 @@ import { getDetectionsTeam } from "@/services/detect";
 
 export function useDetections(teamId: string) {
 
-    const ITEMS_PER_PAGE = 10;
+    const ITEMS_PER_PAGE = 5;
 
-    const [searchDate, setSearchDate] = useState("");
+    const [searchDate, setSearchDate] = useState<DateValue | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
 
 
@@ -22,11 +22,10 @@ export function useDetections(teamId: string) {
     });
 
 
-    const onSearchDateChange = (value: string) => {
+    const onSearchDateChange = (value: DateValue | null) => {
         setSearchDate(value);
         setCurrentPage(1);
     };
-
 
     const {
         data: detections = [],
@@ -48,9 +47,7 @@ export function useDetections(teamId: string) {
         }
 
         return detections.filter((detection: ListDetection) =>
-            detection.created_at
-                .toLowerCase()
-                .includes(searchDate.toLowerCase())
+            detection.created_at.includes(String(searchDate))
         );
 
     }, [detections, searchDate]);

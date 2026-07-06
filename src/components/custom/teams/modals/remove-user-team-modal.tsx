@@ -13,10 +13,10 @@ type Props = {
     teamId: string | null;
     userId: string
     getBack: boolean
-    isOwner: boolean
+    isCurrentUserOwner: boolean
 };
 
-export function RemoveUserTeamModal({ isOpen, onOpenChange, teamId, userId, getBack, isOwner }: Props) {
+export function RemoveUserTeamModal({ isOpen, onOpenChange, teamId, userId, getBack, isCurrentUserOwner: isOwner }: Props) {
     const { removeMember } = useMembers(teamId!);
     const router = useRouter();
 

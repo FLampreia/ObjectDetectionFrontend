@@ -93,7 +93,7 @@ export function LoggedTeamsTable({ teams, sortDescriptor, onSortChange }: Props)
                             </Table.Cell>
 
                             <Table.Cell>
-                                <RoleBadge role={team.owner.role} />
+                                <RoleBadge role={team.current_user_role} />
                             </Table.Cell>
 
                             <Table.Cell>
@@ -101,7 +101,7 @@ export function LoggedTeamsTable({ teams, sortDescriptor, onSortChange }: Props)
 
                                     <ButtonUtility size="xs" color="tertiary" tooltip="List" icon={List} onClick={() => router.push(`/team/${team.id}`)} />
 
-                                    {!team.is_favorite && team.owner.role !== "member" && (
+                                    {!team.is_favorite && team.current_user_role !== "member" && (
                                         <>
                                             <ButtonUtility
                                                 size="xs"
@@ -116,7 +116,7 @@ export function LoggedTeamsTable({ teams, sortDescriptor, onSortChange }: Props)
                                             />
                                         </>
                                     )}
-                                    {team.owner.role === "owner" && (
+                                    {team.current_user_role === "owner" && (
                                         <>
                                             <ButtonUtility
                                                 size="xs"
@@ -131,7 +131,7 @@ export function LoggedTeamsTable({ teams, sortDescriptor, onSortChange }: Props)
                                             />
                                         </>
                                     )}
-                                    {team.owner.role === "member" && (
+                                    {team.current_user_role === "member" && (
                                         <>
                                             <ButtonUtility
                                                 size="xs"
@@ -174,7 +174,7 @@ export function LoggedTeamsTable({ teams, sortDescriptor, onSortChange }: Props)
                     teamId={selectedTeamId}
                     userId={selectedUserId}
                     getBack={false}
-                    isOwner={false}
+                    isCurrentUserOwner={false}
                 />
             )}
 
