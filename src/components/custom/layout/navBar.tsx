@@ -42,7 +42,7 @@ export const Sidebar = ({ user }: { user: User }) => {
                     icon: BarChartSquare02,
                 },
                 {
-                    label: "Detections",
+                    label: "Detection",
                     href: "/detection",
                     icon: Camera01,
                 },

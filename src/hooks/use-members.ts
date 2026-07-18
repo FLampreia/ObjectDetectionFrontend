@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { addMemberTeam, getMembersTeam } from "@/services/members";
 import { Member } from "@/types/team";
 import { exitTeam } from "@/services/members";
+import { useAuth } from "./use-auth";
 
 
 export function useMembers(teamId: string) {
@@ -14,6 +15,8 @@ export function useMembers(teamId: string) {
     const [search, setSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const queryClient = useQueryClient();
+
+    const { user } = useAuth();
 
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
         column: "username",
@@ -126,6 +129,9 @@ export function useMembers(teamId: string) {
     const removeMember = (userId: string) =>
         removeMemberMutation.mutateAsync({ teamId, userId });
 
+    const isMember = sortedMembers.some(
+        member => member.user_id === user?.id
+    );
 
     return {
         members: paginatedMembers,
@@ -140,6 +146,8 @@ export function useMembers(teamId: string) {
 
         addMember,
         removeMember,
+
+        isMember,
 
 
         error: error ? "Failed to load members" : null,

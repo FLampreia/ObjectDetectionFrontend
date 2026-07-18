@@ -5,8 +5,8 @@ import { ButtonGroup, ButtonGroupItem } from "@/components/base/button-group/but
 import { TeamMembersSection } from "./team-members-section";
 import { use, useState } from "react";
 import { Camera, Users } from "lucide-react";
-import NotFound from "@/app/not-found";
 import { TeamDetectionsSection } from "./team-detections-section";
+import { useMembers } from "@/hooks/use-members";
 
 
 interface PageProps {
@@ -18,6 +18,9 @@ interface PageProps {
 export default function TeamInfoScreen({ params }: PageProps) {
     const { id } = use(params);
     const [selectedTeamTab, setSelectedTeamTab] = useState("team-members");
+
+    const { isMember } = useMembers(id);
+
 
     return (
         <main className="flex-1 max-w-6xl mx-auto w-full flex-col justify-between">
@@ -37,12 +40,16 @@ export default function TeamInfoScreen({ params }: PageProps) {
                     Team Members
                 </ButtonGroupItem>
 
-                <ButtonGroupItem
-                    id="team-detections"
-                    iconLeading={<Camera />}
-                >
-                    Team Detections
-                </ButtonGroupItem>
+                {isMember && (
+                    <ButtonGroupItem
+                        id="team-detections"
+                        iconLeading={<Camera />}
+                    >
+                        Team Detections
+                    </ButtonGroupItem>
+                )}
+
+
 
             </ButtonGroup>
 
@@ -51,10 +58,10 @@ export default function TeamInfoScreen({ params }: PageProps) {
 
                 {selectedTeamTab === "team-members" ? (
                     <TeamMembersSection teamId={id} />
-                ) : (
+                ) : isMember ? (
                     <TeamDetectionsSection teamId={id} />
-                )}
-                
+                ) : null}
+
             </section>
         </main>
     );

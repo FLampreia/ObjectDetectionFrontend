@@ -1,7 +1,10 @@
 "use client"
 
 import { Table } from "@/components/application/table/table";
+import { ButtonUtility } from "@/components/base/buttons/button-utility";
 import { ListDetection } from "@/types";
+import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { SortDescriptor } from "react-aria-components";
 
 type Props = {
@@ -11,6 +14,9 @@ type Props = {
 };
 
 export function DetectionsTable({ detections, sortDescriptor, onSortChange }: Props) {
+    const router = useRouter();
+
+
     return (
         <>
             <Table
@@ -26,6 +32,7 @@ export function DetectionsTable({ detections, sortDescriptor, onSortChange }: Pr
                     <Table.Head id="conf_threshold" label="Confidence" allowsSorting />
                     <Table.Head id="processing_time_ms" label="Processing Time (ms)" allowsSorting />
                     <Table.Head id="count" label="Nº Objects" allowsSorting />
+                    <Table.Head id="actions" />
                 </Table.Header>
 
                 <Table.Body items={detections}>
@@ -57,6 +64,14 @@ export function DetectionsTable({ detections, sortDescriptor, onSortChange }: Pr
 
                             <Table.Cell>
                                 {detection.count}
+                            </Table.Cell>
+
+                            <Table.Cell>
+                                <div className="flex justify-end">
+
+                                    <ButtonUtility size="xs" color="tertiary" tooltip="Details" icon={Plus} onClick={() => router.push(`/history/${detection.id}`)} />
+
+                                </div>
                             </Table.Cell>
                         </Table.Row>
                     )}
