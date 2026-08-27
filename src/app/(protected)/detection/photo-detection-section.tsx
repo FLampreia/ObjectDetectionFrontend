@@ -7,7 +7,7 @@ import { ImageDisplayBox } from "./image-display-box"
 import { Button } from "@/components/base/buttons/button"
 import { PenLine } from "lucide-react"
 import { Camera01 } from "@untitledui/icons"
-import { usePhotoDetection } from "@/hooks/use-photo-detection"
+import { useFileDetection } from "@/hooks/use-file-detection"
 import { TextResultDisplay } from "./text-results-display"
 import { FullScreenModal } from "@/components/custom/detection/full-screen-modal"
 import { DrawArea } from "./draw-area"
@@ -23,7 +23,8 @@ export function PhotoDetectionSection() {
         imageUrl,
         detections,
         setDetections,
-        detect,
+        setTrackedDetections,
+        detectImage,
         loading,
         selectedClasses,
         setSelectedClasses,
@@ -39,7 +40,7 @@ export function PhotoDetectionSection() {
 
         minConfidence,
         setMinConfidence,
-    } = usePhotoDetection()
+    } = useFileDetection()
 
     const {
         data: algorithms = [],
@@ -59,10 +60,12 @@ export function PhotoDetectionSection() {
 
                     <FileUploadInput
                         type="photo"
+                        accepted="SVG, PNG, JPG"
                         onFileSelect={(file) => {
                             setFile(file)
                             setArea(null)
                             setDetections([])
+                            setTrackedDetections(new Map())
                         }}
                     />
 
@@ -102,7 +105,7 @@ export function PhotoDetectionSection() {
                     </Button>
                     <Button
                         iconLeading={<Camera01 />}
-                        onClick={detect}
+                        onClick={detectImage}
                         isDisabled={
                             !file ||
                             loading ||
@@ -133,6 +136,7 @@ export function PhotoDetectionSection() {
                 />
 
                 <TextResultDisplay
+                    type="Image"
                     detections={detections}
                     area={area}
                     imageWidth={imageSize.width}
@@ -151,6 +155,7 @@ export function PhotoDetectionSection() {
                         setArea(area)
                         setIsAreaOpen(false)
                         setDetections([])
+                        setTrackedDetections(new Map())
                     }}
                 />
             </FullScreenModal>

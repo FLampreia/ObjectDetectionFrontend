@@ -2,12 +2,13 @@ import { Area, Detection } from "@/types"
 
 interface DrawOptions {
     canvas: HTMLCanvasElement
-    image: HTMLImageElement
+    source: HTMLImageElement | HTMLVideoElement
     detections: Detection[]
     area: Area | null
     boxColor?: string
     lineWidth?: number
     font?: string
+    drawSource?: boolean;
 }
 
 /**
@@ -17,24 +18,37 @@ interface DrawOptions {
  */
 export function drawNotations({
     canvas,
-    image,
+    source,
     detections,
     area,
     boxColor = "red",
     lineWidth = 8,
     font = "32px sans-serif",
+    drawSource = false
 }: DrawOptions) {
-
+    
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
     // Resize canvas to match the image dimensions
-    canvas.width = image.width
-    canvas.height = image.height
+    const width =
+        source instanceof HTMLImageElement
+            ? source.naturalWidth
+            : source.videoWidth
+
+    const height =
+        source instanceof HTMLImageElement
+            ? source.naturalHeight
+            : source.videoHeight
+
+    canvas.width = width
+    canvas.height = height
 
     // Clear previous content and draw the base image
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.drawImage(image, 0, 0)
+    if (drawSource) {
+        ctx.drawImage(source, 0, 0, canvas.width, canvas.height)
+    }
 
     // Draw detection bounding boxes and labels
     detections.forEach((d) => {
@@ -54,8 +68,8 @@ export function drawNotations({
         if (area) {
 
             // Convert normalized area origin to absolute image coordinates
-            const ax = area.x1 * image.width
-            const ay = area.y1 * image.height
+            const ax = area.x1 * width
+            const ay = area.y1 * height
 
             // Offset detection coordinates by selected area position
             x1 += ax

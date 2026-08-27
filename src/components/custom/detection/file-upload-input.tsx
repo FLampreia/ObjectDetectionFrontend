@@ -5,11 +5,12 @@ import { InputFile } from "@/components/base/input/input-file";
 interface Props {
     size?: "sm" | "md" | "lg";
     type: string;
+    accepted: string;
     onFileSelect?: (file: File) => Promise<void> | void;
 
 }
 
-export const FileUploadInput = ({ size = "sm", type, onFileSelect }: Props) => {
+export const FileUploadInput = ({ size = "sm", type, accepted, onFileSelect }: Props) => {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = async (files: FileList | null) => {
@@ -30,7 +31,7 @@ export const FileUploadInput = ({ size = "sm", type, onFileSelect }: Props) => {
             isRequired
             size={size}
             label={`1. Upload ${type}`}
-            hint="SVG, PNG, JPG"
+            hint={accepted}
             onChange={handleChange}
             isLoading={isLoading}
         />

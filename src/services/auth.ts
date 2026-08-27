@@ -1,6 +1,6 @@
 import { jwtDecode } from "jwt-decode";
 import type { User, TokenPayload } from "@/types/index"
-import API_URL from "@/config/api";
+import config from "@/config/api";
 
 /* =========================
    TOKEN HANDLING
@@ -47,7 +47,7 @@ export function isTokenExpired(): boolean {
 ========================= */
 
 export async function login(email: string, password: string) {
-  const response = await fetch(`${API_URL}/login`, {
+  const response = await fetch(`${config.API_URL}/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -72,7 +72,7 @@ export async function signup(
   password: string,
   full_name: string
 ) {
-  const response = await fetch(`${API_URL}/signin`, {
+  const response = await fetch(`${config.API_URL}/signin`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -104,7 +104,7 @@ export async function getCurrentUser(): Promise<User | null> {
   if (!token) return null;
 
   try {
-    const response = await fetch(`${API_URL}/me`, {
+    const response = await fetch(`${config.API_URL}/me`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -123,7 +123,7 @@ export async function getCurrentUser(): Promise<User | null> {
 export async function logout() {
   const token = getAccessToken();
 
-  const response = await fetch(`${API_URL}/logout`, {
+  const response = await fetch(`${config.API_URL}/logout`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,

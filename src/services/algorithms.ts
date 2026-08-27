@@ -1,10 +1,10 @@
-import API_URL from "@/config/api";
+import config from "@/config/api";
 import { getAccessToken } from "./auth";
 
 export async function getAlgorithms() {
     const token = getAccessToken();
 
-    const response = await fetch(`${API_URL}/detect/models`, {
+    const response = await fetch(`${config.API_URL}/models`, {
         method: "GET",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -32,7 +32,7 @@ export async function downloadAlgorithm(algorithmName: string) {
     //     message: `Algorithm ${algorithmName} downloaded successfully`,
     // };
 
-    const response = await fetch(`${API_URL}/detect/models/download`, {
+    const response = await fetch(`${config.API_URL}/models/download`, {
         method: "POST",
         headers: {
             Authorization: `Bearer ${token}`,

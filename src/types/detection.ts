@@ -1,10 +1,14 @@
-
 export type Detection = {
+    track_id?: number
     class_id: number
     class_name: string
     confidence: number
     bbox: [number, number, number, number]
+}
 
+export type VideoProcessingResponse = {
+    processing_time: number
+    detections_per_frame: Detection[]
 }
 
 export type Area = {

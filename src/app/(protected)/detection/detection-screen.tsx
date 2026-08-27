@@ -4,6 +4,7 @@ import { ButtonGroup, ButtonGroupItem } from "@/components/base/button-group/but
 import { Film, ImagePlus, Tv } from "lucide-react";
 import { useState } from "react";
 import { PhotoDetectionSection } from "./photo-detection-section";
+import { VideoDetectionSection } from "./video-detection-section";
 
 export default function DetectionScreen() {
     const [selectedDetectionTab, setSelectedDetectionTab] = useState("photo");
@@ -49,7 +50,7 @@ export default function DetectionScreen() {
                     selectedDetectionTab === "photo" ? (
                         <PhotoDetectionSection />
                     ) : selectedDetectionTab === "video" ? (
-                        <></>
+                        <VideoDetectionSection />
                     ): (
                         <></>
                     )}

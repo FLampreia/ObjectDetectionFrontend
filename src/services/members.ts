@@ -1,5 +1,5 @@
 
-import API_URL from "@/config/api";
+import config from "@/config/api";
 import { getAccessToken } from "./auth";
 import { Member } from "@/types/index";
 
@@ -7,7 +7,7 @@ import { Member } from "@/types/index";
 export async function getMembersTeam(teamId: string): Promise<Member[]> {
     const token = getAccessToken();
 
-    const response = await fetch(`${API_URL}/team/${teamId}/members`, {
+    const response = await fetch(`${config.API_URL}/team/${teamId}/members`, {
         method: "GET",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -27,7 +27,7 @@ export async function getMembersTeam(teamId: string): Promise<Member[]> {
 export async function exitTeam(teamId: string, userId: string) {
     const token = getAccessToken();
 
-    const response = await fetch(`${API_URL}/team/${teamId}/remove`, {
+    const response = await fetch(`${config.API_URL}/team/${teamId}/remove`, {
         method: "POST",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -49,7 +49,7 @@ export async function exitTeam(teamId: string, userId: string) {
 export async function addMemberTeam(teamId: string, email: string) {
     const token = getAccessToken();
 
-    const response = await fetch(`${API_URL}/team/${teamId}/add`, {
+    const response = await fetch(`${config.API_URL}/team/${teamId}/add`, {
         method: "POST",
         headers: {
             Authorization: `Bearer ${token}`,

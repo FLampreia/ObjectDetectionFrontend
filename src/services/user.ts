@@ -1,4 +1,4 @@
-import API_URL from "@/config/api";
+import config from "@/config/api";
 import { getAccessToken } from "./auth";
 
 
@@ -7,7 +7,7 @@ import { getAccessToken } from "./auth";
 export async function updateUsername(userId: string, username: string) {
     const token = getAccessToken();
 
-    const response = await fetch(`${API_URL}/users/${userId}`, {
+    const response = await fetch(`${config.API_URL}/users/${userId}`, {
         method: "PATCH",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -28,7 +28,7 @@ export async function updateUsername(userId: string, username: string) {
 export async function updateFullName(userId: string, full_name: string) {
     const token = getAccessToken();
 
-    const response = await fetch(`${API_URL}/users/${userId}`, {
+    const response = await fetch(`${config.API_URL}/users/${userId}`, {
         method: "PATCH",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -49,7 +49,7 @@ export async function updateFullName(userId: string, full_name: string) {
 export async function updatePassword(userId:string, password: string, currentPassword: string) {
     const token = getAccessToken();
 
-    const response = await fetch(`${API_URL}/users/${userId}`, {
+    const response = await fetch(`${config.API_URL}/users/${userId}`, {
         method: "PATCH",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -73,7 +73,7 @@ export async function updatePassword(userId:string, password: string, currentPas
 export async function deletePassword(userId:string) {
     const token = getAccessToken();
 
-    const response = await fetch(`${API_URL}/users/${userId}`, {
+    const response = await fetch(`${config.API_URL}/users/${userId}`, {
         method: "DELETE",
         headers: {
             Authorization: `Bearer ${token}`,

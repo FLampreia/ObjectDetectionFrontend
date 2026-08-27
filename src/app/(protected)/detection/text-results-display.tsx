@@ -1,33 +1,53 @@
 "use client"
 
-import { usePhotoDetection } from "@/hooks/use-photo-detection"
 import { Area, Detection } from "@/types"
 
 interface TextDisplayBoxProps {
+    type: string
     detections: Detection[]
+    trackedDetections?: Detection[]
     area: Area | null
     imageWidth: number
     imageHeight: number
+    videoDuration?: number
+    videoCurrentTime?: number
 }
 
 export function TextResultDisplay({
+    type,
     detections,
+    trackedDetections,
     area,
     imageWidth,
-    imageHeight
+    imageHeight,
+    videoDuration,
+    videoCurrentTime,
 }: TextDisplayBoxProps) {
+
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60)
+        const secs = Math.floor(seconds % 60)
+
+        return `${mins}:${secs.toString().padStart(2, "0")}`
+    }
 
     return (
         <div className="w-full h-64 lg:h-112 overflow-y-auto rounded-lg flex flex-col bg-secondary ring-secondary ring-inset lg:rounded-xl lg:ring-1 p-3">
             {imageHeight != 0 && imageWidth != 0 && (
                 <>
                     <p>
-                        Image size:
+                        {type} details:
                     </p>
                     <p className="pl-3">
                         Hight: {imageHeight}px <br />
                         Width: {imageWidth}px <br />
-                        
+
+                        {videoDuration !== undefined && (
+                            <>
+                                Duration: {formatTime(videoDuration)} / {formatTime(videoCurrentTime ?? 0)} <br />
+                            </>
+                        )}
+
                     </p>
                     <hr className="my-3 border-secondary" />
 
@@ -68,6 +88,21 @@ export function TextResultDisplay({
 
                 </>
 
+            )}
+            {trackedDetections && trackedDetections.length > 0 && (
+                <>
+                    <hr className="my-3 border-secondary" />
+
+                    <p>Tracked objects:</p>
+
+                    {trackedDetections.map((d) => (
+                        <p
+                            className="pl-3"
+                            key={d.track_id}>
+                            {d.class_name} #{d.track_id}
+                        </p>
+                    ))}
+                </>
             )}
         </div>
     )

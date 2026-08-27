@@ -7,6 +7,7 @@ import { EmptyFile } from "./empty-file"
 import { Area, Detection } from "@/types"
 import { Download } from "lucide-react"
 import { drawNotations } from "@/utils/draw-notations"
+import Image from "next/image"
 
 
 interface ImageDisplayBoxProps {
@@ -17,8 +18,12 @@ interface ImageDisplayBoxProps {
 }
 
 export function ImageDisplayBox({ imageUrl, detections, area, onImageLoad }: ImageDisplayBoxProps) {
+
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const imgRef = useRef<HTMLImageElement | null>(null)
+    const imgRef = useRef<HTMLImageElement>(null)
+
+    const fullImgRef = useRef<HTMLImageElement>(null)
+    const fullCanvasRef = useRef<HTMLCanvasElement>(null)
 
     const hasDetections = detections && detections.length > 0
 
@@ -30,9 +35,14 @@ export function ImageDisplayBox({ imageUrl, detections, area, onImageLoad }: Ima
 
         if (!canvas || !img) return
 
+        const rect = img.getBoundingClientRect()
+
+        canvas.style.width = `${rect.width}px`
+        canvas.style.height = `${rect.height}px`
+
         drawNotations({
             canvas,
-            image: img,
+            source: img,
             detections,
             area,
         })
@@ -51,21 +61,6 @@ export function ImageDisplayBox({ imageUrl, detections, area, onImageLoad }: Ima
 
             return
         }
-
-        const img = new Image()
-
-        img.onload = () => {
-            imgRef.current = img
-
-            onImageLoad(
-                img.naturalWidth,
-                img.naturalHeight
-            )
-
-            draw()
-        }
-
-        img.src = imageUrl
     }, [imageUrl])
 
     // Redraw when detections change
@@ -73,28 +68,76 @@ export function ImageDisplayBox({ imageUrl, detections, area, onImageLoad }: Ima
         draw()
     }, [detections, area])
 
+    useEffect(() => {
+        if (!isOpen) return
+
+        const img = fullImgRef.current
+        const canvas = fullCanvasRef.current
+
+        if (!img || !canvas) return
+
+        const rect = img.getBoundingClientRect()
+
+        canvas.style.width = `${rect.width}px`
+        canvas.style.height = `${rect.height}px`
+
+        drawNotations({
+            canvas,
+            source: img,
+            detections,
+            area,
+            lineWidth: 2,
+        })
+    }, [isOpen, detections, area])
+
     const downloadImage = () => {
-        const canvas = canvasRef.current
-        if (!canvas) return
+        if (!imgRef.current) return
+
+        const exportCanvas = document.createElement("canvas")
+
+        drawNotations({
+            canvas: exportCanvas,
+            source: imgRef.current,
+            detections,
+            area,
+            drawSource: true,
+        })
 
         const link = document.createElement("a")
         link.download = "detections.png"
-        link.href = canvas.toDataURL("image/png")
+        link.href = exportCanvas.toDataURL("image/png")
         link.click()
     }
 
     return (
         <>
-            <div className="w-full h-64 lg:h-112 rounded-lg overflow-hidden flex items-center justify-center bg-secondary ring-secondary ring-inset lg:rounded-xl lg:ring-1">
+            <div className="w-full h-64 lg:h-112 rounded-lg overflow-hidden bg-secondary ring-secondary ring-inset lg:rounded-xl lg:ring-1">
                 {imageUrl ? (
                     <div className="relative w-full h-full flex items-center justify-center">
-                        <canvas
-                            ref={canvasRef}
-                            className="object-contain"
-                            style={{ width: "100%", height: "100%" }}
-                        />
+                        <div className="relative flex items-center justify-center w-full h-full">
+                            <img
+                                ref={imgRef}
+                                src={imageUrl}
+                                alt=""
+                                className="block max-w-full max-h-full object-contain"
+                                onLoad={(e) => {
+                                    const img = e.currentTarget
 
+                                    onImageLoad(
+                                        img.naturalWidth,
+                                        img.naturalHeight
+                                    )
 
+                                    draw()
+                                }}
+                            />
+
+                            <canvas
+                                ref={canvasRef}
+                                className="absolute pointer-events-none"
+                            />
+
+                        </div>
 
                         <div className="absolute flex gap-2 top-2 right-2">
                             {hasDetections && (
@@ -118,28 +161,45 @@ export function ImageDisplayBox({ imageUrl, detections, area, onImageLoad }: Ima
                         </div>
                     </div>
                 ) : (
-                    <EmptyFile />
+                    <div className="relative w-full h-full flex items-center justify-center">
+                        <EmptyFile />
+                    </div>
                 )}
             </div>
             {isOpen && imageUrl && (
                 <FullScreenModal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-                    <canvas
-                        ref={(node) => {
-                            if (!node) return
+                    <div className="relative inline-block">
+                        <img
+                            ref={fullImgRef}
+                            src={imageUrl}
+                            alt=""
+                            className="max-w-full max-h-full object-contain block"
+                            onLoad={() => {
+                                const img = fullImgRef.current
+                                const canvas = fullCanvasRef.current
 
-                            const img = imgRef.current
-                            if (!img) return
+                                if (!img || !canvas) return
 
-                            drawNotations({
-                                canvas: node,
-                                image: img,
-                                detections,
-                                area,
-                                lineWidth: 2,
-                            })
-                        }}
-                        className="max-w-full max-h-full"
-                    />
+                                const rect = img.getBoundingClientRect()
+
+                                canvas.style.width = `${rect.width}px`
+                                canvas.style.height = `${rect.height}px`
+
+                                drawNotations({
+                                    canvas,
+                                    source: img,
+                                    detections,
+                                    area,
+                                    lineWidth: 2,
+                                })
+                            }}
+                        />
+
+                        <canvas
+                            ref={fullCanvasRef}
+                            className="absolute inset-0 pointer-events-none"
+                        />
+                    </div>
                 </FullScreenModal>
             )}
         </>

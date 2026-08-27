@@ -19,8 +19,6 @@ export const MultiSelectClassesBox = ({
     onSelectionChange: (keys: Selection) => void
 }) => {
 
-    console.log(selectedKeys)
-
     return (
         <MultiSelect
             size="md"
