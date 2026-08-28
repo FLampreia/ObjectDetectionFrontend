@@ -28,7 +28,7 @@ export function SelectTeamBox({
     return (
         <Select
             size="md"
-            label="3. Associate a team"
+            label="4. Associate a team"
             tooltip="Select a team to associate your detection results"
             placeholder="Select a team"
             items={teamItems}

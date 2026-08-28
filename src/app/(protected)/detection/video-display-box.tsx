@@ -30,10 +30,6 @@ export function VideoDisplayBox({
 }: VideoDisplayBoxProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
 
-    const fullVideoRef = useRef<HTMLVideoElement>(null)
-    const fullCanvasRef = useRef<HTMLCanvasElement>(null)
-
-    const [isOpen, setIsOpen] = useState(false)
 
     const draw = (
         video: HTMLVideoElement | null,
@@ -56,15 +52,6 @@ export function VideoDisplayBox({
             area,
         })
     }
-
-    // const handleLoadedMetadata = () => {
-    //     const video = videoRef.current
-    //     if (!video) return
-
-    //     onImageLoad(video.videoWidth, video.videoHeight)
-
-    //     draw()
-    // }
 
     useEffect(() => {
         draw(videoRef.current, canvasRef.current)

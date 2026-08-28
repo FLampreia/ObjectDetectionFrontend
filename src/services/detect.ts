@@ -50,12 +50,14 @@ export async function storeDetections(
     algorithm: string,
     confThreshold: number,
     chosenTeamId?: string | null,
+    type: string,
 ) {
     const token = getAccessToken();
 
     const params = new URLSearchParams({
         algorithm,
         conf_threshold: confThreshold.toString(),
+        detection_type: type
     });
 
     if (chosenTeamId) {

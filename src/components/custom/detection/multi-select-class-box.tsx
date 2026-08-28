@@ -22,7 +22,7 @@ export const MultiSelectClassesBox = ({
     return (
         <MultiSelect
             size="md"
-            label="2. Choose Classes"
+            label="3. Choose Classes"
             tooltip="Check the box of the classes you want to detect on the uploaded file"
             placeholder="Select classes"
             items={cocoClassesItems}

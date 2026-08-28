@@ -40,7 +40,7 @@ export function AlgorithmSelect({
         <Select
             isRequired
             size="md"
-            label="5. Select the Algorithm"
+            label="2. Select the Algorithm"
             tooltip="Select the algorithm to process your upload"
             placeholder="Select an algorithm"
             items={algorithmItems}

@@ -18,7 +18,7 @@ export function MinConfidenceInput({
         <InputNumber
             isRequired
             orientation="horizontal"
-            label="4. Minimum Confidence (%)"
+            label="5. Minimum Confidence (%)"
             hint="0-100%"
             value={value}
             minValue={0}
