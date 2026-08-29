@@ -10,7 +10,7 @@ import { Camera01 } from "@untitledui/icons"
 import { useFileDetection } from "@/hooks/use-file-detection"
 import { TextResultDisplay } from "./text-results-display"
 import { FullScreenModal } from "@/components/custom/detection/full-screen-modal"
-import { DrawArea } from "./draw-area"
+import { DrawAreaModal } from "./draw-area-modal"
 import { AlgorithmSelect } from "@/components/custom/detection/algorithm-select"
 import { MinConfidenceInput } from "@/components/custom/detection/min-confidence-input"
 import { useAlgorithms } from "@/hooks/use-algorithms"
@@ -149,10 +149,11 @@ export function PhotoDetectionSection() {
                 isOpen={isAreaOpen}
                 onClose={() => setIsAreaOpen(false)}
             >
-                <DrawArea
+                <DrawAreaModal
                     imageUrl={imageUrl}
-                    onSave={(area) => {
-                        setArea(area)
+                    area={area}
+                    onSave={(newArea) => {
+                        setArea(newArea)
                         setIsAreaOpen(false)
                         setDetections([])
                         setTrackedDetections(new Map())

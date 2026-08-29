@@ -5,7 +5,8 @@ import { EmptyFile } from "./empty-file"
 import { Maximize02 } from "@untitledui/icons"
 import { RefObject, useEffect, useRef, useState } from "react"
 import { Area, Detection } from "@/types"
-import { drawNotations, drawArea } from "@/utils/draw-notations"
+import { drawNotations } from "@/utils/draw-notations"
+import { drawArea } from "@/utils/draw-area"
 
 interface VideoDisplayBoxProps {
     videoUrl: string | null,

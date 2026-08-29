@@ -6,8 +6,8 @@ import { useEffect, useRef, useState } from "react"
 import { EmptyFile } from "./empty-file"
 import { Area, Detection } from "@/types"
 import { Download } from "lucide-react"
-import { drawNotations, drawArea } from "@/utils/draw-notations"
-import Image from "next/image"
+import { drawNotations } from "@/utils/draw-notations"
+import { drawArea } from "@/utils/draw-area"
 
 
 interface ImageDisplayBoxProps {

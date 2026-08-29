@@ -6,8 +6,8 @@ import { RefObject, useEffect, useRef } from "react"
 
 import { Area, Detection } from "@/types"
 
-import { drawArea, drawNotations } from "@/utils/draw-notations"
-// import { drawArea } from "./draw-area"
+import { drawNotations } from "@/utils/draw-notations"
+import { drawArea } from "@/utils/draw-area"
 
 interface StreamDisplayBoxProps {
     videoStream: MediaStream | null

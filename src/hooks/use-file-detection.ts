@@ -411,6 +411,8 @@ export function useFileDetection() {
 
             let lastUiUpdate = 0
 
+            const start = performance.now();
+
             // Stream loop
             while (
                 !stopStreamRef.current &&
@@ -493,11 +495,12 @@ export function useFileDetection() {
                 }
             }
 
+            const end = performance.now();
             console.log("Stream detection finished")
 
             // Prepare result for database
             const result: VideoProcessingResponse = {
-                processing_time: 0,
+                processing_time: (end - start),
                 detections_per_frame:
                     Array.from(
                         trackedDetectionsRef.current.values()

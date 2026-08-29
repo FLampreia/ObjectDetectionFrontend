@@ -11,7 +11,7 @@ import { useAlgorithms } from "@/hooks/use-algorithms"
 import { useFileDetection } from "@/hooks/use-file-detection"
 import { TextResultDisplay } from "./text-results-display"
 import { FullScreenModal } from "@/components/custom/detection/full-screen-modal"
-import { DrawArea } from "./draw-area"
+import { DrawAreaModal } from "./draw-area-modal"
 import { VideoDisplayBox } from "./video-display-box"
 
 export function VideoDetectionSection() {
@@ -228,10 +228,11 @@ export function VideoDetectionSection() {
                 isOpen={isAreaOpen}
                 onClose={() => setIsAreaOpen(false)}
             >
-                <DrawArea
+                <DrawAreaModal
                     imageUrl={imageUrl}
-                    onSave={(area) => {
-                        setArea(area)
+                    area={area}
+                    onSave={(newArea) => {
+                        setArea(newArea)
                         setIsAreaOpen(false)
                         setDetections([])
                         setTrackedDetections(new Map())

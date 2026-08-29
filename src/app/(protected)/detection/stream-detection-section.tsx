@@ -10,7 +10,7 @@ import { useAlgorithms } from "@/hooks/use-algorithms"
 import { useFileDetection } from "@/hooks/use-file-detection"
 import { TextResultDisplay } from "./text-results-display"
 import { FullScreenModal } from "@/components/custom/detection/full-screen-modal"
-import { DrawArea } from "./draw-area"
+import { DrawAreaModal } from "./draw-area-modal"
 import { Select } from "@/components/base/select/select"
 import { Input } from "@/components/base/input/input"
 import { StreamDisplayBox } from "./stream-display-box"
@@ -236,7 +236,7 @@ export function StreamDetectionSection() {
                     <Select
                         isRequired
                         size="md"
-                        label="1. Select the Input"
+                        label="1. Select the Input Type"
                         placeholder="Select an input"
                         value={inputType}
                         onChange={handleInputTypeChange}
@@ -424,10 +424,11 @@ export function StreamDetectionSection() {
                     setAreaImageUrl(null)
                 }}
             >
-                <DrawArea
+                <DrawAreaModal
                     imageUrl={areaImageUrl}
-                    onSave={area => {
-                        setArea(area)
+                    area={area}
+                    onSave={newArea => {
+                        setArea(newArea)
                         setIsAreaOpen(false)
                         setAreaImageUrl(null)
                         setDetections([])
