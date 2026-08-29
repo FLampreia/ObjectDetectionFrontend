@@ -53,6 +53,7 @@ export function StreamDetectionSection() {
     const [streamUrl, setStreamUrl] = useState("")
     const [connectedUrl, setConnectedUrl] = useState("")
     const [isConnecting, setIsConnecting] = useState(false)
+    const [videoReady, setVideoReady] = useState(false)
 
     const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -67,24 +68,13 @@ export function StreamDetectionSection() {
         height: 0,
     })
 
-    const [videoDuration, setVideoDuration] = useState(0)
-    const [videoCurrentTime, setVideoCurrentTime] = useState(0)
-
     // Get available cameras
     useEffect(() => {
         if (inputType !== "camera") return
 
         async function getCameras() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: true,
-                    audio: false,
-                })
-
-                stream.getTracks().forEach(track => track.stop())
-
-                const devices =
-                    await navigator.mediaDevices.enumerateDevices()
+                const devices = await navigator.mediaDevices.enumerateDevices()
 
                 const videoDevices = devices.filter(
                     device => device.kind === "videoinput"
@@ -92,19 +82,11 @@ export function StreamDetectionSection() {
 
                 setCameras(videoDevices)
 
-                if (
-                    videoDevices.length > 0 &&
-                    !cameraId
-                ) {
+                if (videoDevices.length > 0 && !cameraId) {
                     setCameraId(videoDevices[0].deviceId)
                 }
-
             } catch (error) {
-                console.error(
-                    "Failed to access cameras:",
-                    error
-                )
-
+                console.error("Failed to enumerate cameras:", error)
                 setCameras([])
                 setCameraId(null)
             }
@@ -173,19 +155,24 @@ export function StreamDetectionSection() {
     const handleDetect = async () => {
         if (!selectedAlgorithm) return
 
-        if (inputType === "camera" && !cameraId) {
-            return
-        }
-
-        if (inputType === "url" && !connectedUrl.trim()) {
-            return
-        }
+        if (inputType === "camera" && !cameraId) return
+        if (inputType === "url" && !connectedUrl.trim()) return
 
         const video = videoRef.current
 
         if (!video) {
+            console.error("Video element is not available")
             return
         }
+
+        console.log("Starting detection:", {
+            inputType,
+            src: video.src,
+            currentSrc: video.currentSrc,
+            videoWidth: video.videoWidth,
+            videoHeight: video.videoHeight,
+            readyState: video.readyState,
+        })
 
         await detectStream(video)
     }
@@ -195,13 +182,27 @@ export function StreamDetectionSection() {
             return
         }
 
-        if (key === "url" && cameraStream) {
-            cameraStream
-                .getTracks()
-                .forEach(track => track.stop())
+        // URL -> Camera
+        if (key === "camera") {
+            if (connectedUrl) {
+                setConnectedUrl("")
+            }
 
-            setCameraStream(null)
+            setVideoReady(false)
+        }
+
+        // Camera -> URL
+        if (key === "url") {
+            if (cameraStream) {
+                cameraStream
+                    .getTracks()
+                    .forEach(track => track.stop())
+
+                setCameraStream(null)
+            }
+
             setCameraId(null)
+            setVideoReady(false)
         }
 
         setInputType(key)
@@ -209,6 +210,7 @@ export function StreamDetectionSection() {
 
     const canDetect =
         !loading &&
+        videoReady &&
         !!selectedAlgorithm &&
         (
             inputType === "camera"
@@ -295,18 +297,32 @@ export function StreamDetectionSection() {
                                 onChange={setStreamUrl}
                                 placeholder="rtsp://..."
                                 className="flex-1"
+                                isDisabled={!!connectedUrl}
                             />
 
-                            <Button
-                                size="md"
-                                color="secondary"
-                                isDisabled={!streamUrl.trim() || isConnecting}
-                                onClick={() => {
-                                    setConnectedUrl(streamUrl.trim())
-                                }}
-                            >
-                                {isConnecting ? "Connecting..." : "Connect"}
-                            </Button>
+                            {connectedUrl ? (
+                                <Button
+                                    size="md"
+                                    color="secondary"
+                                    onClick={() => {
+                                        setConnectedUrl("")
+                                        setVideoReady(false)
+                                    }}
+                                >
+                                    Disconnect
+                                </Button>
+                            ) : (
+                                <Button
+                                    size="md"
+                                    color="secondary"
+                                    isDisabled={!streamUrl.trim() || isConnecting}
+                                    onClick={() => {
+                                        setConnectedUrl(streamUrl.trim())
+                                    }}
+                                >
+                                    {isConnecting ? "Connecting..." : "Connect"}
+                                </Button>
+                            )}
                         </div>
                     )}
 
@@ -349,7 +365,7 @@ export function StreamDetectionSection() {
                             setAreaImageUrl(frame)
                             setIsAreaOpen(true)
                         }}
-                        isDisabled={loading || !cameraStream}
+                        isDisabled={loading || !videoReady}
                     >
                         Define Area
                     </Button>
@@ -382,6 +398,7 @@ export function StreamDetectionSection() {
                     area={area}
                     detections={detections}
                     loading={loading}
+                    onVideoReady={setVideoReady}
                     onImageLoad={(width, height) =>
                         setVideoInfo({
                             width,
@@ -397,7 +414,6 @@ export function StreamDetectionSection() {
                     area={area}
                     imageWidth={videoInfo.width}
                     imageHeight={videoInfo.height}
-                    videoCurrentTime={videoCurrentTime}
                 />
             </section>
 

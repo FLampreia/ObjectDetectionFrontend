@@ -1,13 +1,19 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { PenLine, Check, Trash, Save } from "lucide-react"
+import { PenLine, Check, Trash, Save, Eraser } from "lucide-react"
 import { Button } from "@/components/base/buttons/button"
 import { Area } from "@/types"
+import { Delete } from "@untitledui/icons"
 
 interface Props {
     imageUrl: string | null
-    onSave: (area: { x1: number; y1: number; x2: number; y2: number }) => void
+    onSave: (area: {
+        x1: number
+        y1: number
+        x2: number
+        y2: number
+    }) => void
 }
 
 export function DrawArea({ imageUrl, onSave }: Props) {
@@ -78,7 +84,7 @@ export function DrawArea({ imageUrl, onSave }: Props) {
 
         const canvas = canvasRef.current
         if (!canvas) return
-        
+
         const rect = {
             x1: startPoint.x / canvas.width,
             y1: startPoint.y / canvas.height,
@@ -112,6 +118,20 @@ export function DrawArea({ imageUrl, onSave }: Props) {
         onSave(finalRect)
     }
 
+    function clear() {
+        setFinalRect(null)
+        setStartPoint(null)
+        setCurrentPoint(null)
+        setIsDragging(false)
+
+        const canvas = canvasRef.current
+        const ctx = canvas?.getContext("2d")
+
+        if (!canvas || !ctx) return
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+    }
+
     return (
         <div
             className="relative w-full h-full flex items-center justify-center"
@@ -142,6 +162,14 @@ export function DrawArea({ imageUrl, onSave }: Props) {
                     iconLeading={Save}
                 >
                     Save Area
+                </Button>
+
+                <Button
+                    color="secondary-destructive"
+                    onClick={clear}
+                    iconLeading={Eraser}
+                >
+                    Clear Area
                 </Button>
             </div>
         </div>

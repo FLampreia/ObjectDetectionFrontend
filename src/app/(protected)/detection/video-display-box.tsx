@@ -5,7 +5,7 @@ import { EmptyFile } from "./empty-file"
 import { Maximize02 } from "@untitledui/icons"
 import { RefObject, useEffect, useRef, useState } from "react"
 import { Area, Detection } from "@/types"
-import { drawNotations } from "@/utils/draw-notations"
+import { drawNotations, drawArea } from "@/utils/draw-notations"
 
 interface VideoDisplayBoxProps {
     videoUrl: string | null,
@@ -36,21 +36,37 @@ export function VideoDisplayBox({
         canvas: HTMLCanvasElement | null
     ) => {
         if (!canvas || !video) return
-
         if (!video.videoWidth || !video.videoHeight) return
+
+        canvas.width = video.videoWidth
+        canvas.height = video.videoHeight
 
         canvas.style.left = `${video.offsetLeft}px`
         canvas.style.top = `${video.offsetTop}px`
         canvas.style.width = `${video.clientWidth}px`
         canvas.style.height = `${video.clientHeight}px`
 
+        const ctx = canvas.getContext("2d")
+        if (!ctx) return
 
-        drawNotations({
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        // A área é sempre desenhada
+        drawArea({
             canvas,
             source: video,
-            detections: detections,
             area,
         })
+
+        // As deteções só são desenhadas durante a deteção
+        if (loading) {
+            drawNotations({
+                canvas,
+                source: video,
+                detections,
+                area,
+            })
+        }
     }
 
     useEffect(() => {

@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react"
 import { EmptyFile } from "./empty-file"
 import { Area, Detection } from "@/types"
 import { Download } from "lucide-react"
-import { drawNotations } from "@/utils/draw-notations"
+import { drawNotations, drawArea } from "@/utils/draw-notations"
 import Image from "next/image"
 
 
@@ -17,7 +17,12 @@ interface ImageDisplayBoxProps {
     onImageLoad: (width: number, height: number) => void
 }
 
-export function ImageDisplayBox({ imageUrl, detections, area, onImageLoad }: ImageDisplayBoxProps) {
+export function ImageDisplayBox({
+    imageUrl,
+    detections,
+    area,
+    onImageLoad
+}: ImageDisplayBoxProps) {
 
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const imgRef = useRef<HTMLImageElement>(null)
@@ -34,18 +39,32 @@ export function ImageDisplayBox({ imageUrl, detections, area, onImageLoad }: Ima
         const img = imgRef.current
 
         if (!canvas || !img) return
+        if (!img.naturalWidth || !img.naturalHeight) return
 
         const rect = img.getBoundingClientRect()
 
+        // Dimensões internas = dimensões reais da imagem
+        canvas.width = img.naturalWidth
+        canvas.height = img.naturalHeight
+
+        // Dimensões visuais = dimensões apresentadas da imagem
         canvas.style.width = `${rect.width}px`
         canvas.style.height = `${rect.height}px`
 
-        drawNotations({
+        drawArea({
             canvas,
             source: img,
-            detections,
             area,
         })
+
+        if (detections.length > 0) {
+            drawNotations({
+                canvas,
+                source: img,
+                detections,
+                area,
+            })
+        }
     }
 
     // Load Image
