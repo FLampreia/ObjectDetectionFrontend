@@ -22,7 +22,26 @@ export async function processImage(formData: FormData) {
     return data;
 }
 
+export async function getDetections(): Promise<ListDetection[]> {
+    const token = getAccessToken();
 
+    const response = await fetch(`${config.API_URL}/detections/all`, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error || "Failed to get all detections from logged user");
+    }
+
+    return data;
+
+}
 
 export async function getDetectionsTeam(teamId: string): Promise<ListDetection[]> {
     const token = getAccessToken();

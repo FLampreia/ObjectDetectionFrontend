@@ -4,7 +4,7 @@ import { TableCard } from "@/components/application/table/table";
 import { NotFoundTable } from "../../../../components/custom/not-found-table";
 import { useQueryClient } from "@tanstack/react-query";
 import { Team } from "@/types";
-import { useDetections } from "@/hooks/use-detections";
+import { useTeamDetections } from "@/hooks/use-team-detections";
 import { DetectionsTable } from "@/components/custom/detection/tables/detections-table";
 import { Calendar, SearchLg } from "@untitledui/icons";
 import { InputDate } from "@/components/base/input/input-date";
@@ -35,7 +35,7 @@ export function TeamDetectionsSection({ teamId }: Props) {
         totalDetections,
 
         error,
-    } = useDetections(teamId);
+    } = useTeamDetections(teamId);
 
     return (
         <TableCard.Root>

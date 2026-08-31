@@ -23,7 +23,7 @@ export default function TeamInfoScreen({ params }: PageProps) {
 
 
     return (
-        <main className="flex-1 max-w-6xl mx-auto w-full flex-col justify-between">
+        <main className="flex-1 max-w-7xl mx-auto w-full flex-col justify-between">
             <h1 className="text-3xl font-bold mb-8 pt-8">Teams</h1>
 
             <ButtonGroup

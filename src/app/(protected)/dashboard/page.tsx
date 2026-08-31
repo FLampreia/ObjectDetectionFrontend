@@ -1,9 +1,3 @@
-"use client";
+import DetectionScreen from "./dashboard-screen";
 
-import { useAuth } from "@/hooks/use-auth";
-
-
-export default function HomePage() {
-    
-
-}
+export default DetectionScreen;

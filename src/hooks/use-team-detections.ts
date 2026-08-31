@@ -8,7 +8,7 @@ import { ListDetection } from "@/types";
 import { getDetectionsTeam } from "@/services/detect";
 
 
-export function useDetections(teamId: string) {
+export function useTeamDetections(teamId: string) {
 
     const ITEMS_PER_PAGE = 5;
 
