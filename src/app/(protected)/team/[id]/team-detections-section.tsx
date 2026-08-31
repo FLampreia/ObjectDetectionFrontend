@@ -1,11 +1,11 @@
 "use client"
 
 import { TableCard } from "@/components/application/table/table";
-import { NotFoundTable } from "../not-found-table";
+import { NotFoundTable } from "../../../../components/custom/not-found-table";
 import { useQueryClient } from "@tanstack/react-query";
 import { Team } from "@/types";
 import { useDetections } from "@/hooks/use-detections";
-import { DetectionsTable } from "@/components/custom/detection/table/detections-table";
+import { DetectionsTable } from "@/components/custom/detection/tables/detections-table";
 import { Calendar, SearchLg } from "@untitledui/icons";
 import { InputDate } from "@/components/base/input/input-date";
 import { PaginationPageMinimalCenter } from "@/components/application/pagination/pagination";

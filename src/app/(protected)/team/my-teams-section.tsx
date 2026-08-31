@@ -9,7 +9,7 @@ import { LoggedTeamsHeader } from "@/components/custom/teams/tables/headers/logg
 import { LoggedTeamsTable } from "@/components/custom/teams/tables/rows/logged-teams-table";
 
 import { useTeams } from "@/hooks/use-team";
-import { NotFoundTable } from "./not-found-table";
+import { NotFoundTable } from "../../../components/custom/not-found-table";
 
 
 export function MyTeamsSection() {

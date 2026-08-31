@@ -6,7 +6,7 @@ import { MembersHeader } from "@/components/custom/teams/tables/headers/members-
 import { MembersTable } from "@/components/custom/teams/tables/rows/members-table";
 import { useMembers } from "@/hooks/use-members";
 import { useState } from "react";
-import { NotFoundTable } from "../not-found-table";
+import { NotFoundTable } from "../../../../components/custom/not-found-table";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Team } from "@/types/team";
 import { PaginationPageMinimalCenter } from "@/components/application/pagination/pagination";

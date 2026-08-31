@@ -33,3 +33,10 @@ export type ListDetection = {
     count: number;
     type: "image" | "video" | "stream";
 }
+
+export type ListObjects = {
+    id: string;
+    obj_name: string;
+    obj_class_id: number;
+    confidence: number
+}

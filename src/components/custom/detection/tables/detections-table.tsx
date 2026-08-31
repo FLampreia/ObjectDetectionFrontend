@@ -3,9 +3,11 @@
 import { Table } from "@/components/application/table/table";
 import { ButtonUtility } from "@/components/base/buttons/button-utility";
 import { ListDetection } from "@/types";
-import { Plus } from "lucide-react";
+import { Menu, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { SortDescriptor } from "react-aria-components";
+import { DetectionObjectsModal } from "../../teams/modals/detections-objects-modal";
 
 type Props = {
     detections: ListDetection[];
@@ -14,8 +16,8 @@ type Props = {
 };
 
 export function DetectionsTable({ detections, sortDescriptor, onSortChange }: Props) {
-    const router = useRouter();
-
+    const [selectedDetection, setSelectedDetection] = useState<ListDetection | null>(null)
+    const [isDetectionObjOpen, setIsDetectionObjOpen] = useState(false);
 
     return (
         <>
@@ -29,7 +31,7 @@ export function DetectionsTable({ detections, sortDescriptor, onSortChange }: Pr
                     <Table.Head id="username" label="User" allowsSorting />
                     <Table.Head id="model" label="Model" allowsSorting />
                     <Table.Head id="type" label="Type" allowsSorting />
-                    <Table.Head id="conf_threshold" label="Confidence" allowsSorting />
+                    <Table.Head id="conf_threshold" label="Confidence (%)" allowsSorting />
                     <Table.Head id="processing_time_ms" label="Processing Time (ms)" allowsSorting />
                     <Table.Head id="count" label="Nº Objects" allowsSorting />
                     <Table.Head id="actions" />
@@ -55,11 +57,11 @@ export function DetectionsTable({ detections, sortDescriptor, onSortChange }: Pr
                             </Table.Cell>
 
                             <Table.Cell>
-                                {detection.conf_threshold}
+                                {detection.conf_threshold * 100} %
                             </Table.Cell>
 
                             <Table.Cell>
-                                {detection.processing_time_ms.toFixed(2)}
+                                {detection.processing_time_ms.toFixed(2)} ms
                             </Table.Cell>
 
                             <Table.Cell>
@@ -68,9 +70,16 @@ export function DetectionsTable({ detections, sortDescriptor, onSortChange }: Pr
 
                             <Table.Cell>
                                 <div className="flex justify-end">
-
-                                    <ButtonUtility size="xs" color="tertiary" tooltip="Details" icon={Plus} onClick={() => router.push(`/history/${detection.id}`)} />
-
+                                    <ButtonUtility
+                                        size="xs"
+                                        color="tertiary"
+                                        tooltip="Details"
+                                        icon={Menu}
+                                        onClick={() => {
+                                            setSelectedDetection(detection)
+                                            setIsDetectionObjOpen(true)
+                                        }}
+                                    />
                                 </div>
                             </Table.Cell>
                         </Table.Row>
@@ -78,6 +87,14 @@ export function DetectionsTable({ detections, sortDescriptor, onSortChange }: Pr
                 </Table.Body>
             </Table>
 
+            {isDetectionObjOpen && selectedDetection && (
+                <DetectionObjectsModal
+                    isOpen={isDetectionObjOpen}
+                    onOpenChange={setIsDetectionObjOpen}
+                    detection={selectedDetection}
+                // onClose={() => setSelectedDetection(null)}
+                />
+            )}
         </>
     )
 }
