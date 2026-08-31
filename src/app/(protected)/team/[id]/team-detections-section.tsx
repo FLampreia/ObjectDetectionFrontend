@@ -9,6 +9,9 @@ import { DetectionsTable } from "@/components/custom/detection/tables/detections
 import { Calendar, SearchLg } from "@untitledui/icons";
 import { InputDate } from "@/components/base/input/input-date";
 import { PaginationPageMinimalCenter } from "@/components/application/pagination/pagination";
+import { DatePicker } from "@/components/application/date-picker/date-picker";
+import { Button } from "@/components/base/buttons/button";
+import { Eraser } from "lucide-react";
 
 interface Props {
     teamId: string;
@@ -23,6 +26,7 @@ export function TeamDetectionsSection({ teamId }: Props) {
     const {
         detections,
         allDetections,
+        searchDate,
         setSearchDate,
         sortDescriptor,
         setSortDescriptor,
@@ -42,13 +46,19 @@ export function TeamDetectionsSection({ teamId }: Props) {
                     `All detections associated to ${team?.name ?? "team"}`
                 }
                 contentTrailing={
-                    <InputDate
-                        className="min-w-0 max-md:flex-1 md:w-70"
-                        aria-label="date"
-                        size="md"
-                        icon={Calendar}
-                        onChange={setSearchDate}
-                    />
+                    <div className="flex items-center gap-2">
+                        {searchDate && (
+                            <Button
+                                size="md"
+                                color="secondary"
+                                onClick={() => setSearchDate(null)}
+                                aria-label="Clear date"
+                            >
+                                <Eraser size={16} />
+                            </Button>
+                        )}
+                        <DatePicker size="md" aria-label="Date picker" value={searchDate} onChange={setSearchDate} />
+                    </div>
                 }
             />
 

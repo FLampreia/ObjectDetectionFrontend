@@ -1,0 +1,40 @@
+{
+    "folder-color.pathColors": [
+        {
+            "folderPath": "frontend\\src\\app\\",
+            "color": "foldercolorizer.color_00d7ff"
+        },
+        {
+            "folderPath": "frontend\\src\\components\\",
+            "color": "foldercolorizer.color_afaf00"
+        },
+        {
+            "folderPath": "frontend\\src\\hooks\\",
+            "color": "foldercolorizer.color_008080"
+        },
+        {
+            "folderPath": "frontend\\src\\providers\\",
+            "color": "foldercolorizer.color_5fff00"
+        },
+        {
+            "folderPath": "frontend\\src\\services\\",
+            "color": "foldercolorizer.color_d70087"
+        },
+        {
+            "folderPath": "frontend\\src\\styles\\",
+            "color": "foldercolorizer.color_afd7ff"
+        },
+        {
+            "folderPath": "frontend\\src\\types\\",
+            "color": "foldercolorizer.color_af5f5f"
+        },
+        {
+            "folderPath": "frontend\\src\\utils\\",
+            "color": "foldercolorizer.color_d7ff00"
+        },
+        {
+            "folderPath": "frontend\\src\\components\\custom\\",
+            "color": "foldercolorizer.color_d7875f"
+        }
+    ]
+}
