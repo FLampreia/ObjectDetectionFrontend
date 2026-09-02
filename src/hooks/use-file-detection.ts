@@ -2,6 +2,7 @@ import { processImage, storeDetections } from "@/services/detect"
 import { askSocketSessionId, connectWebSocket } from "@/services/socket"
 import { Detection, Area, AlgorithmObj, VideoProcessingResponse } from "@/types"
 import { cocoClassesItems } from "@/utils/coco-classes"
+import { useQueryClient } from "@tanstack/react-query"
 import { useEffect, useRef, useState } from "react"
 import type { Selection } from "react-aria-components"
 
@@ -169,6 +170,8 @@ export function useFileDetection() {
 
     const stopStreamRef = useRef(false)
 
+    const queryClient = useQueryClient();
+
     useEffect(() => {
         if (!file) return
 
@@ -224,6 +227,14 @@ export function useFileDetection() {
             const data = await processImage(formData)
 
             setDetections(data?.detections_per_frame ?? [])
+
+            await queryClient.invalidateQueries({
+                queryKey: ["dashboard-stats"],
+            });
+
+            await queryClient.invalidateQueries({
+                queryKey: ["detections"]
+            });
         } finally {
             setLoading(false)
         }
@@ -338,6 +349,14 @@ export function useFileDetection() {
 
             ws.close()
             console.log("Connections Finished")
+
+            await queryClient.invalidateQueries({
+                queryKey: ["dashboard-stats"],
+            });
+
+            await queryClient.invalidateQueries({
+                queryKey: ["detections"]
+            });
 
         } finally {
             setTrackedDetections(new Map(trackedDetectionsRef.current));
@@ -520,6 +539,14 @@ export function useFileDetection() {
                 selectedTeamId,
                 "stream"
             )
+
+            await queryClient.invalidateQueries({
+                queryKey: ["dashboard-stats"],
+            });
+
+            await queryClient.invalidateQueries({
+                queryKey: ["detections"]
+            });
 
         } catch (error) {
             console.error(

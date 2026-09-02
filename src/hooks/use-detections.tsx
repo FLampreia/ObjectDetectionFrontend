@@ -38,7 +38,7 @@ export function useDetections() {
         queryFn: () => getDetections(),
         staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
-        refetchOnMount: false,
+        refetchOnMount: true,
     });
 
 

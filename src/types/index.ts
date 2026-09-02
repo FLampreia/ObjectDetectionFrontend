@@ -3,3 +3,4 @@ export * from "./token";
 export * from "./auth";
 export * from "./team";
 export * from "./detection";
+export * from "./stats";

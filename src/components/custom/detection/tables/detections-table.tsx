@@ -11,8 +11,8 @@ import { DetectionObjectsModal } from "../../teams/modals/detections-objects-mod
 
 type Props = {
     detections: ListDetection[];
-    sortDescriptor: SortDescriptor;
-    onSortChange: (value: SortDescriptor) => void;
+    sortDescriptor?: SortDescriptor;
+    onSortChange?: (value: SortDescriptor) => void;
 };
 
 export function DetectionsTable({ detections, sortDescriptor, onSortChange }: Props) {

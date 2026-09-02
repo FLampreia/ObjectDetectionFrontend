@@ -36,7 +36,7 @@ export function useTeamDetections(teamId: string) {
         queryFn: () => getDetectionsTeam(teamId),
         staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
-        refetchOnMount: false,
+        refetchOnMount: true,
     });
 
 
