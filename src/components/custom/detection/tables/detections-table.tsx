@@ -92,7 +92,6 @@ export function DetectionsTable({ detections, sortDescriptor, onSortChange }: Pr
                     isOpen={isDetectionObjOpen}
                     onOpenChange={setIsDetectionObjOpen}
                     detection={selectedDetection}
-                // onClose={() => setSelectedDetection(null)}
                 />
             )}
         </>

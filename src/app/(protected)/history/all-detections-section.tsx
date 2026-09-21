@@ -17,6 +17,7 @@ import { getLocalTimeZone, today } from "@internationalized/date";
 import { useState } from "react";
 import { DateValue } from "react-aria-components";
 import { useDetections } from "@/hooks/use-detections";
+import { getDetectionReportInterval } from "@/services/reports";
 
 export function AllDetectionsSection() {
 
@@ -34,6 +35,31 @@ export function AllDetectionsSection() {
 
         error,
     } = useDetections();
+
+    async function handleGenerateReport() {
+        if (!dateRange) return;
+
+        try {
+            const blob = await getDetectionReportInterval(
+                dateRange.start.toString(),
+                dateRange.end.toString(),
+            );
+
+            const url = window.URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `detections-report-${dateRange.start}-${dateRange.end}.pdf`;
+
+            document.body.appendChild(link);
+            link.click();
+
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Failed to generate detection report:", error);
+        }
+    }
 
     return (
         <TableCard.Root size="sm">
@@ -65,7 +91,11 @@ export function AllDetectionsSection() {
                             onChange={setDateRange}
                         />
 
-                        <Button size="md">
+                        <Button
+                            size="md"
+                            isDisabled={!dateRange}
+                            onClick={() => handleGenerateReport()}
+                        >
                             Extract Report
                         </Button>
 

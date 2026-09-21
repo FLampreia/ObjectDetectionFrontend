@@ -1,4 +1,3 @@
-"use client"
 
 import { useMemo, useState } from "react";
 import type { DateValue, SortDescriptor } from "react-aria-components";
@@ -19,9 +18,9 @@ export function useDetections() {
     const ITEMS_PER_PAGE = 10;
 
     const [dateRange, setDateRange] = useState<{
-    start: DateValue;
-    end: DateValue;
-} | null>(null);
+        start: DateValue;
+        end: DateValue;
+    } | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
 
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({

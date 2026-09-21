@@ -11,6 +11,7 @@ import { ListDetection } from "@/types"
 import { X } from "lucide-react"
 import { NotFoundTable } from "../../not-found-table"
 import { MultiSelect } from "@/components/base/select/multi-select"
+import { getSingleDetectionReport } from "@/services/reports"
 
 type DetectionObjectsModalProps = {
     isOpen: boolean;
@@ -98,6 +99,30 @@ export function DetectionObjectsModal({
             ? detectedClasses.length
             : selectedClasses.size
 
+
+    async function handleGenerateReport() {
+
+        try {
+            const blob = await getSingleDetectionReport(
+                detection.id
+            );
+
+            const url = window.URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `detection-report-${detection.id}.pdf`;
+
+            document.body.appendChild(link);
+            link.click();
+
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Failed to generate detection report:", error);
+        }
+    }
+
     return (
 
         <ModalOverlay
@@ -136,14 +161,23 @@ export function DetectionObjectsModal({
                             </span>
                         </div>
 
-                        <Button
-                            color="secondary"
-                            size="sm"
-                            onClick={() => onOpenChange(false)}
-                            aria-label="Close"
-                        >
-                            <X size={18} />
-                        </Button>
+                        <div className="flex items-center gap-3">
+                            <Button
+                                size="md"
+                                onClick={handleGenerateReport}
+                            >
+                                Extract Report
+                            </Button>
+
+                            <Button
+                                color="secondary"
+                                size="sm"
+                                onClick={() => onOpenChange(false)}
+                                aria-label="Close"
+                            >
+                                <X size={18} />
+                            </Button>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.5fr] lg:flex-1 lg:min-h-0">

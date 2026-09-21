@@ -26,7 +26,7 @@ export default function DetectionScreen() {
                 <h1 className="text-3xl font-bold mb-8 pt-8">
                     Dashboard
                 </h1>
-                <p>A carregar...</p>
+                <p>Loading...</p>
             </main>
         );
     }
@@ -37,7 +37,7 @@ export default function DetectionScreen() {
                 <h1 className="text-3xl font-bold mb-8 pt-8">
                     Dashboard
                 </h1>
-                <p>Ocorreu um erro ao carregar os dados.</p>
+                <p>An error occurred while loading data.</p>
             </main>
         );
     }
