@@ -43,8 +43,8 @@ export function drawNotations({
         let y2 = by2
 
         if (area) {
-            const ax = area.x1 * width
-            const ay = area.y1 * height
+            const ax = area.x1 
+            const ay = area.y1 
 
             x1 += ax
             y1 += ay

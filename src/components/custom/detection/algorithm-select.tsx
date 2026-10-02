@@ -26,7 +26,7 @@ export function AlgorithmSelect({
         selectedAlgorithm &&
             algorithmById[selectedAlgorithm]?.installed
             ? selectedAlgorithm
-            : undefined
+            : null
 
     const {
         downloadAlgorithm,

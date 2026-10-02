@@ -56,10 +56,7 @@ export function DrawAreaModal({
 
         if (!canvas || !ctx) return
 
-        const x1 = rect.x1 * canvas.width
-        const y1 = rect.y1 * canvas.height
-        const x2 = rect.x2 * canvas.width
-        const y2 = rect.y2 * canvas.height
+        const { x1, y1, x2, y2 } = rect
 
         const x = Math.min(x1, x2)
         const y = Math.min(y1, y2)
@@ -96,10 +93,13 @@ export function DrawAreaModal({
         setCurrentPoint(null)
 
         const rect = canvas.getBoundingClientRect()
+        const img = imageRef.current
+
+        if (!img) return
 
         const point = {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
+            x: (e.clientX - rect.left) * img.naturalWidth / rect.width,
+            y: (e.clientY - rect.top) * img.naturalHeight / rect.height,
         }
 
         setStartPoint(point)
@@ -120,10 +120,13 @@ export function DrawAreaModal({
         if (!canvas) return
 
         const rect = canvas.getBoundingClientRect()
+        const img = imageRef.current
+
+        if (!img) return
 
         const point = {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
+            x: (e.clientX - rect.left) * img.naturalWidth / rect.width,
+            y: (e.clientY - rect.top) * img.naturalHeight / rect.height,
         }
 
         setCurrentPoint(point)
@@ -146,10 +149,10 @@ export function DrawAreaModal({
         if (!canvas) return
 
         const finalRect: Area = {
-            x1: startPoint.x / canvas.width,
-            y1: startPoint.y / canvas.height,
-            x2: currentPoint.x / canvas.width,
-            y2: currentPoint.y / canvas.height,
+            x1: Math.round(Math.min(startPoint.x, currentPoint.x)),
+            y1: Math.round(Math.min(startPoint.y, currentPoint.y)),
+            x2: Math.round(Math.max(startPoint.x, currentPoint.x)),
+            y2: Math.round(Math.max(startPoint.y, currentPoint.y)),
         }
 
         setFinalRect(finalRect)
@@ -190,6 +193,7 @@ export function DrawAreaModal({
 
     function save() {
         onSave(finalRect)
+        console.log(finalRect)
     }
 
     function clear() {
@@ -211,8 +215,10 @@ export function DrawAreaModal({
         if (!img || !canvas) return
 
         const handleLoad = () => {
-            canvas.width = img.clientWidth
-            canvas.height = img.clientHeight
+            canvas.width = img.naturalWidth
+            canvas.height = img.naturalHeight
+            canvas.style.width = `${img.clientWidth}px`
+            canvas.style.height = `${img.clientHeight}px`
 
             if (area) {
                 setFinalRect(area)

@@ -26,6 +26,7 @@ export function PhotoDetectionSection() {
         setTrackedDetections,
         detectImage,
         loading,
+        detectionError,
         selectedClasses,
         setSelectedClasses,
 
@@ -121,6 +122,12 @@ export function PhotoDetectionSection() {
 
                 </div>
             </div>
+
+            {detectionError && (
+                <p role="alert" className="mt-4 text-sm text-error-primary">
+                    {detectionError}
+                </p>
+            )}
 
             <section className="mt-4 grid grid-cols-1 lg:grid-cols-[13fr_7fr] gap-4 w-full items-start">
                 <ImageDisplayBox

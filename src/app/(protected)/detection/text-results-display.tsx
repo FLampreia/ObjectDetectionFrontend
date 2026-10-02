@@ -30,6 +30,7 @@ export function TextResultDisplay({
 
         return `${mins}:${secs.toString().padStart(2, "0")}`
     }
+    // TODO colocar mais informações aqui colcoar as deteções por class, e nao só a lista total de deteções
 
     return (
         <div className="w-full h-64 lg:h-112 overflow-y-auto rounded-lg flex flex-col bg-secondary ring-secondary ring-inset lg:rounded-xl lg:ring-1 p-3">
@@ -60,10 +61,10 @@ export function TextResultDisplay({
                     </p>
 
                     <p className="pl-3">
-                        x1: {Math.round(area.x1 * imageWidth)}px <br />
-                        y1: {Math.round(area.y1 * imageHeight)}px <br />
-                        x2: {Math.round(area.x2 * imageWidth)}px <br />
-                        y2: {Math.round(area.y2 * imageHeight)}px
+                        x1: {Math.round(area.x1)}px <br />
+                        y1: {Math.round(area.y1)}px <br />
+                        x2: {Math.round(area.x2)}px <br />
+                        y2: {Math.round(area.y2)}px
                     </p>
 
                     <hr className="my-3 border-secondary" />

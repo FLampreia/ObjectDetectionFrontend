@@ -13,10 +13,20 @@ export async function processImage(formData: FormData) {
         body: formData,
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => null);
 
     if (!response.ok) {
-        throw new Error(data.error || "Failed to detect image");
+        const detail = data?.detail;
+        const message = typeof detail === "string"
+            ? detail
+            : Array.isArray(detail)
+                ? detail.map((item) => `${item.loc?.join(".") ?? "request"}: ${item.msg}`).join("; ")
+                : data?.error || "Failed to detect image";
+        throw new Error(`${message} (HTTP ${response.status})`);
+    }
+
+    if (data === null) {
+        throw new Error("The detection API returned an invalid response.");
     }
 
     return data;

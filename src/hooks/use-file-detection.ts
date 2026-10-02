@@ -8,51 +8,6 @@ import type { Selection } from "react-aria-components"
 
 const frames_processed_per_second = 10
 
-function cropImage(file: File, area: Area): Promise<File> {
-    return new Promise((resolve, reject) => {
-
-        const img = new Image()
-
-        img.onload = () => {
-
-            const canvas = document.createElement("canvas")
-            const ctx = canvas.getContext("2d")
-            if (!ctx) return reject("No context")
-
-            const { naturalWidth, naturalHeight } = img
-
-            const x = Math.min(area.x1, area.x2) * naturalWidth
-            const y = Math.min(area.y1, area.y2) * naturalHeight
-            const w = Math.abs(area.x2 - area.x1) * naturalWidth
-            const h = Math.abs(area.y2 - area.y1) * naturalHeight
-
-            canvas.width = w
-            canvas.height = h
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            ctx.drawImage(
-                img,
-                x, y, w, h,
-                0, 0, w, h
-            )
-
-            canvas.toBlob((blob) => {
-                if (!blob) return reject("No blob")
-
-                const croppedFile = new File([blob], file.name, {
-                    type: "image/jpeg",
-                })
-
-                resolve(croppedFile)
-            }, "image/jpeg")
-        }
-
-        img.onerror = reject
-        img.src = URL.createObjectURL(file)
-    })
-}
-
 async function captureFrame(
     video: HTMLVideoElement,
     canvas: HTMLCanvasElement,
@@ -61,10 +16,10 @@ async function captureFrame(
 ): Promise<Blob> {
 
     if (area) {
-        const x = Math.min(area.x1, area.x2) * video.videoWidth
-        const y = Math.min(area.y1, area.y2) * video.videoHeight
-        const w = Math.abs(area.x2 - area.x1) * video.videoWidth
-        const h = Math.abs(area.y2 - area.y1) * video.videoHeight
+        const x = Math.min(area.x1, area.x2) 
+        const y = Math.min(area.y1, area.y2) 
+        const w = Math.abs(area.x2 - area.x1) 
+        const h = Math.abs(area.y2 - area.y1) 
 
         canvas.width = w
         canvas.height = h
@@ -153,6 +108,7 @@ export function useFileDetection() {
         new Map()
     )
     const [loading, setLoading] = useState(false)
+    const [detectionError, setDetectionError] = useState<string | null>(null)
 
     const [minConfidence, setMinConfidence] = useState<number>(80)
     const [selectedClasses, setSelectedClasses] = useState<Selection>("all")
@@ -191,16 +147,16 @@ export function useFileDetection() {
         if (!file) return
 
         setLoading(true)
+        setDetectionError(null)
 
         try {
-            let fileToSend = file
-
-            if (area) {
-                fileToSend = await cropImage(file, area)
-            }
-
             const formData = new FormData()
-            formData.append("image", fileToSend)
+
+            formData.append("image", file)
+            
+            if (area) {
+                formData.append("area", JSON.stringify(area))
+            }
 
             if (selectedClasses === "all") {
                 cocoClassesItems.forEach((item) => {
@@ -235,6 +191,8 @@ export function useFileDetection() {
             await queryClient.invalidateQueries({
                 queryKey: ["detections"]
             });
+        } catch (error) {
+            setDetectionError(error instanceof Error ? error.message : "Failed to detect image")
         } finally {
             setLoading(false)
         }
@@ -587,6 +545,7 @@ export function useFileDetection() {
         detectStream,
         stopStreamDetection,
         loading,
+        detectionError,
 
         selectedClasses,
         setSelectedClasses,
