@@ -11,6 +11,7 @@ import { Camera01 } from "@untitledui/icons";
 import { DetectionsTable } from "@/components/custom/detection/tables/detections-table";
 import { TableCard } from "@/components/application/table/table";
 import { NotFoundTable } from "@/components/custom/not-found-table";
+import { Loading } from "@/components/custom/layout/loading";
 
 export default function DetectionScreen() {
     const router = useRouter();
@@ -26,7 +27,11 @@ export default function DetectionScreen() {
                 <h1 className="text-3xl font-bold mb-8 pt-8">
                     Dashboard
                 </h1>
-                <p>Loading...</p>
+
+                <Loading
+                    details="load the dashboard"
+                />
+                
             </main>
         );
     }
