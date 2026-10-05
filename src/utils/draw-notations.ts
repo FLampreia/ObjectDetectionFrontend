@@ -56,7 +56,7 @@ export function drawNotations({
         const h = y2 - y1
 
         ctx.strokeStyle = boxColor
-        ctx.lineWidth = lineWidth
+        ctx.lineWidth = Math.max(2, Math.min(width, height) * 0.003);
 
         ctx.strokeRect(x1, y1, w, h)
 

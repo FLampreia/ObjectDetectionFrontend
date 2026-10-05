@@ -11,6 +11,20 @@ interface FullScreenModalProps {
 }
 
 export function FullScreenModal({ isOpen, onClose, children }: FullScreenModalProps) {
+    useEffect(() => {
+        if (!isOpen) return
+        const previousOverflow = document.body.style.overflow
+        document.body.style.overflow = "hidden"
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") onClose()
+        }
+        document.addEventListener("keydown", handleKeyDown)
+        return () => {
+            document.body.style.overflow = previousOverflow
+            document.removeEventListener("keydown", handleKeyDown)
+        }
+    }, [isOpen, onClose])
+
     if (!isOpen) return null
 
     return createPortal(
@@ -22,6 +36,8 @@ export function FullScreenModal({ isOpen, onClose, children }: FullScreenModalPr
                 {children}
 
                 <button
+                    type="button"
+                    aria-label="Close maximized image"
                     className="absolute top-2 right-2 p-2 rounded-md bg-primary hover:bg-brand-primary transition cursor-pointer"
                     onClick={onClose}
                 >
