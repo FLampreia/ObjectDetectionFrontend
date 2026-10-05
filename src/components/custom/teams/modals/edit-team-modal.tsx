@@ -19,14 +19,6 @@ export function EditTeamModal({ isOpen, onOpenChange, team }: Props) {
     const { editTeam } = useTeams();
     const [error, setError] = useState<string | null>(null);
     const [teamName, setTeamName] = useState(() => team.name)
-    
-
-    // const handleDelete = async () => {
-    //     if (!teamId) return;
-
-    //     await removeTeam(teamId);
-    //     onOpenChange(false);
-    // };
 
     return (
         <ModalOverlay isOpen={isOpen} onOpenChange={onOpenChange}>

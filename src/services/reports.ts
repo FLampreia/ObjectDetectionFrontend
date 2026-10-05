@@ -1,5 +1,6 @@
 import config from "@/config/api";
 import { getAccessToken } from "./auth";
+import type { ReportConfig } from "@/types";
 
 export async function getDetectionReportInterval(
     startDate: string,
@@ -24,18 +25,27 @@ export async function getDetectionReportInterval(
     return await response.blob();
 }
 
+
+
 export async function getSingleDetectionReport(
     detectionId: string,
+    drawingConfig: ReportConfig,
 ) {
     const token = getAccessToken();
 
+    const params = new URLSearchParams(
+        Object.entries(drawingConfig).map(([key, value]) => [
+            key,
+            String(value),
+        ]),
+    );
+
     const response = await fetch(
-        `${config.API_URL}/report/detection/${detectionId}`,
+        `${config.API_URL}/report/detection/${detectionId}?${params.toString()}`,
         {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
             },
         }
     );

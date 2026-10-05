@@ -4,3 +4,4 @@ export * from "./auth";
 export * from "./team";
 export * from "./detection";
 export * from "./stats";
+export * from "./report"

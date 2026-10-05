@@ -32,7 +32,7 @@ export function DetectionsTable({ detections, sortDescriptor, onSortChange }: Pr
                     <Table.Head id="model" label="Model" allowsSorting />
                     <Table.Head id="type" label="Type" allowsSorting />
                     <Table.Head id="conf_threshold" label="Confidence (%)" allowsSorting />
-                    <Table.Head id="processing_time_ms" label="Processing Time (ms)" allowsSorting />
+                    <Table.Head id="processing_time_ms" label="Processing Time" allowsSorting />
                     <Table.Head id="count" label="Nº Objects" allowsSorting />
                     <Table.Head id="actions" />
                 </Table.Header>
@@ -61,7 +61,12 @@ export function DetectionsTable({ detections, sortDescriptor, onSortChange }: Pr
                             </Table.Cell>
 
                             <Table.Cell>
-                                {detection.processing_time_ms.toFixed(2)} ms
+                                {detection.processing_time_ms < 1000
+                                    ? `${detection.processing_time_ms.toFixed(2)} ms`
+                                    : detection.processing_time_ms < 60000
+                                        ? `${(detection.processing_time_ms / 1000).toFixed(2)} s`
+                                        : `${(detection.processing_time_ms / 60000).toFixed(2)} min`
+                                }
                             </Table.Cell>
 
                             <Table.Cell>
