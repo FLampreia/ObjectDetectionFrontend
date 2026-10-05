@@ -1,17 +1,23 @@
 "use client";
 
-import { ButtonUtility } from "@/components/base/buttons/button-utility";
+import type { ReactNode } from "react";
 import { MobileNavigationHeader } from "../base-components/mobile-header";
 import { NavAccountCard } from "../base-components/nav-account-card";
 import { NavItemBase } from "../base-components/nav-item";
 import type { NavItemType } from "../config";
-import { User } from "@/types";
+import type { User } from "@/types";
+
+export type NavSectionType = {
+    label: string;
+    items: NavItemType[];
+    emptyState?: ReactNode;
+};
 
 interface SidebarNavigationSectionsSubheadingsProps {
     /** URL of the currently active item. */
     activeUrl?: string;
     /** List of items to display. */
-    items: Array<{ label: string; items: NavItemType[] }>;
+    items: NavSectionType[];
     /** Object User to display on user card */
     user: User;
 }
@@ -41,6 +47,9 @@ export const SidebarNavigationSectionsSubheadings = ({ activeUrl = "/", items, u
                             <p className="text-xs font-bold text-quaternary uppercase">{group.label}</p>
                         </div>
                         <ul className="px-4 pb-5">
+                            {group.items.length === 0 && group.emptyState && (
+                                <li className="px-1 py-2">{group.emptyState}</li>
+                            )}
                             {group.items.map((item) => (
                                 <li key={item.label} className="py-px">
                                     <NavItemBase icon={item.icon} href={item.href} badge={item.badge} type="link" current={item.href === activeUrl}>

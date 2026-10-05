@@ -1,9 +1,10 @@
-import { BarChartSquare02, Camera01, Calendar, CheckDone01, ChevronRight, File05, PieChart03, Rows01, Users01 } from "@untitledui/icons";
-import type { NavItemType } from "@/components/application/app-navigation/config";
-import { SidebarNavigationSectionsSubheadings } from "../../application/app-navigation/sidebar-navegation/sidebar-sections-subheadings";
+import { BarChartSquare02, Camera01, File05, Users01 } from "@untitledui/icons";
+import { SidebarNavigationSectionsSubheadings, type NavSectionType } from "../../application/app-navigation/sidebar-navegation/sidebar-sections-subheadings";
 import { Avatar } from "@/components/base/avatar/avatar";
+import { Button } from "@/components/base/buttons/button";
+import { Star } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { User } from "@/types";
+import type { User } from "@/types";
 import { useTeams } from "@/hooks/use-team";
 
 
@@ -11,11 +12,25 @@ import { useTeams } from "@/hooks/use-team";
 export const Sidebar = ({ user }: { user: User }) => {
     const pathname = usePathname();
 
-    const { allLoggedTeams: allTeams } = useTeams();
+    const { allLoggedTeams: allTeams, loading, error } = useTeams();
 
-    const favoriteTeamsSection = {
+    const favoriteTeamsSection: NavSectionType = {
 
         label: "Favorite teams",
+        emptyState: loading ? (
+            <p role="status" className="text-sm text-tertiary">Loading teams…</p>
+        ) : error ? (
+            <p className="text-sm text-tertiary">Unable to load favorite teams.</p>
+        ) : (
+            <div className="flex items-start gap-2.5">
+                <Star size={16} aria-hidden="true" className="mt-0.5 shrink-0 text-quaternary" />
+                <div className="min-w-0">
+                    <p className="text-sm font-medium text-secondary">No favorite teams yet</p>
+                    <p className="mt-1 text-xs text-tertiary">Star a team to keep it here for quick access.</p>
+                    <Button href="/team" color="link-color" size="sm" className="mt-2">Manage teams</Button>
+                </div>
+            </div>
+        ),
         items: allTeams
             .filter((team) => team.is_favorite)
             .map((team) => ({
@@ -32,7 +47,7 @@ export const Sidebar = ({ user }: { user: User }) => {
             })),
     };
 
-    const navItemsWithSectionsSubheadings: Array<{ label: string; items: NavItemType[] }> = [
+    const navItemsWithSectionsSubheadings: NavSectionType[] = [
         {
             label: "General",
             items: [
