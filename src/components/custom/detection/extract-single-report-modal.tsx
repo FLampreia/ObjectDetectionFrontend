@@ -3,6 +3,7 @@
 import { Dialog, Modal, ModalOverlay } from "@/components/application/modals/modal";
 import { Button } from "@/components/base/buttons/button";
 import { Toggle } from "@/components/base/toggle/toggle";
+import { DEFAULT_DRAWING_CONFIG } from "@/config/drawing";
 import { getSingleDetectionReport } from "@/services/reports";
 import type { ReportConfig } from "@/types";
 import { useId, useRef, useState } from "react";
@@ -12,19 +13,6 @@ type Props = {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
     detection_id: string;
-};
-
-// Initial UI values matching the current backend drawing defaults.
-const DEFAULT_DRAWING_CONFIG: ReportConfig = {
-    bbox_enable: true,
-    bbox_label_enable: true,
-    dot_enable: false,
-    dot_label_enable: false,
-    area_color: "#0000FF",
-    bbox_color: "#FF0000",
-    dot_color: "#FFFF00",
-    text_color: "#FFFF00",
-    text_background_color: "#000000",
 };
 
 type ColorKey = "area_color" | "bbox_color" | "dot_color" | "text_color" | "text_background_color";

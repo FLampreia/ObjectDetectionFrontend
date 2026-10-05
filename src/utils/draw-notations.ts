@@ -1,4 +1,4 @@
-import { Area, Detection } from "@/types"
+import type { Area, Detection, ReportConfig } from "@/types"
 
 interface DrawNotationsOptions {
     canvas: HTMLCanvasElement
@@ -6,8 +6,10 @@ interface DrawNotationsOptions {
     detections: Detection[]
     area: Area | null
     boxColor?: string
+    labelColor?: string
     lineWidth?: number
     font?: string
+    drawingConfig?: ReportConfig
 }
 
 export function drawNotations({
@@ -16,8 +18,10 @@ export function drawNotations({
     detections,
     area,
     boxColor = "red",
-    lineWidth = 8,
-    font = "32px sans-serif",
+    labelColor = boxColor,
+    lineWidth,
+    font,
+    drawingConfig,
 }: DrawNotationsOptions) {
 
     const ctx = canvas.getContext("2d")
@@ -33,7 +37,20 @@ export function drawNotations({
             ? source.naturalHeight
             : source.videoHeight
 
-    detections.forEach((d) => {
+    if (!width || !height) return
+
+    const fontSize = Math.max(12, Math.round(Math.min(width, height) * 0.025))
+    const labelGap = Math.max(2, Math.round(fontSize * 0.2))
+    const pointRadius = Math.max(3, Math.round(Math.min(width, height) * 0.005))
+    const boxesEnabled = drawingConfig?.bbox_enable ?? true
+    const pointsEnabled = drawingConfig?.dot_enable ?? false
+    const boxLabelsEnabled = drawingConfig?.bbox_label_enable ?? true
+    const pointLabelsEnabled = drawingConfig?.dot_label_enable ?? false
+    ctx.font = font ?? `${fontSize}px sans-serif`
+    ctx.textAlign = "left"
+    ctx.textBaseline = "bottom"
+
+    detections.forEach((d, index) => {
 
         const [bx1, by1, bx2, by2] = d.bbox
 
@@ -55,18 +72,36 @@ export function drawNotations({
         const w = x2 - x1
         const h = y2 - y1
 
-        ctx.strokeStyle = boxColor
-        ctx.lineWidth = Math.max(2, Math.min(width, height) * 0.003);
+        ctx.strokeStyle = drawingConfig?.bbox_color ?? boxColor
+        ctx.lineWidth = lineWidth ?? Math.max(2, Math.min(width, height) * 0.003)
 
-        ctx.strokeRect(x1, y1, w, h)
+        if (boxesEnabled) ctx.strokeRect(x1, y1, w, h)
 
-        ctx.fillStyle = boxColor
-        ctx.font = font
+        const centerX = (x1 + x2) / 2
+        const centerY = (y1 + y2) / 2
+        if (pointsEnabled) {
+            ctx.fillStyle = drawingConfig?.dot_color ?? "yellow"
+            ctx.beginPath()
+            ctx.arc(centerX, centerY, pointRadius, 0, Math.PI * 2)
+            ctx.fill()
+        }
 
-        ctx.fillText(
-            `${d.class_name} ${(d.confidence * 100).toFixed(1)}%`,
-            x1,
-            Math.max(10, y1 - 5)
-        )
+        const label = `${index + 1} - ${(d.confidence * 100).toFixed(0)}%`
+        const drawLabel = (x: number, y: number, centered: boolean) => {
+            const textWidth = ctx.measureText(label).width
+            const padding = Math.max(2, Math.round(fontSize * 0.15))
+            const left = Math.max(padding, Math.min(centered ? x - textWidth / 2 : x, width - textWidth - padding))
+            const bottom = Math.max(fontSize + padding, Math.min(y, height - padding))
+            ctx.textAlign = "left"
+            if (drawingConfig) {
+                ctx.fillStyle = drawingConfig.text_background_color
+                ctx.fillRect(left - padding, bottom - fontSize - padding, textWidth + padding * 2, fontSize + padding * 2)
+            }
+            ctx.fillStyle = drawingConfig?.text_color ?? labelColor
+            ctx.fillText(label, left, bottom)
+        }
+
+        if (boxesEnabled && boxLabelsEnabled) drawLabel(x1, y1 - labelGap, false)
+        if (pointsEnabled && pointLabelsEnabled) drawLabel(centerX, centerY - pointRadius - labelGap, true)
     })
 }

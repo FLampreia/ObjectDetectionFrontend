@@ -4,7 +4,7 @@ import { FullScreenModal } from "@/components/custom/detection/full-screen-modal
 import { Maximize02 } from "@untitledui/icons"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { EmptyFile } from "./empty-file"
-import type { Area, Detection } from "@/types"
+import type { Area, Detection, ReportConfig } from "@/types"
 import { Download } from "lucide-react"
 import { drawAnnotatedImage } from "@/utils/draw-annotated-image"
 
@@ -12,10 +12,11 @@ interface ImageDisplayBoxProps {
     imageUrl: string | null
     detections: Detection[]
     area: Area | null
+    drawingConfig?: ReportConfig
     onImageLoad: (width: number, height: number) => void
 }
 
-export function ImageDisplayBox({ imageUrl, detections, area, onImageLoad }: ImageDisplayBoxProps) {
+export function ImageDisplayBox({ imageUrl, detections, area, drawingConfig, onImageLoad }: ImageDisplayBoxProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const imgRef = useRef<HTMLImageElement>(null)
     const fullImgRef = useRef<HTMLImageElement>(null)
@@ -26,13 +27,13 @@ export function ImageDisplayBox({ imageUrl, detections, area, onImageLoad }: Ima
     const draw = useCallback((img: HTMLImageElement | null, canvas: HTMLCanvasElement | null) => {
         if (!canvas || !img?.complete || !img.naturalWidth || !img.naturalHeight) return
 
-        drawAnnotatedImage({ canvas, source: img, detections, area })
+        drawAnnotatedImage({ canvas, source: img, detections, area, drawingConfig })
         // object-contain may leave empty space inside the image element.
         const rect = img.getBoundingClientRect()
         const scale = Math.min(rect.width / img.naturalWidth, rect.height / img.naturalHeight)
         canvas.style.width = `${img.naturalWidth * scale}px`
         canvas.style.height = `${img.naturalHeight * scale}px`
-    }, [detections, area])
+    }, [detections, area, drawingConfig])
 
     useEffect(() => {
         const observer = new ResizeObserver(() => {
@@ -52,7 +53,7 @@ export function ImageDisplayBox({ imageUrl, detections, area, onImageLoad }: Ima
         setDownloadError(null)
         try {
             const canvas = document.createElement("canvas")
-            drawAnnotatedImage({ canvas, source: img, detections, area, includeSource: true })
+            drawAnnotatedImage({ canvas, source: img, detections, area, drawingConfig, includeSource: true })
             const link = document.createElement("a")
             link.download = "detections.png"
             link.href = canvas.toDataURL("image/png")

@@ -83,7 +83,7 @@ export function TextResultDisplay({
 
                     {detections.map((d, index) => (
                         <p key={index} className="pl-3">
-                            {d.class_name} - {(d.confidence * 100).toFixed(1)}%
+                            {index + 1}. {d.class_name} - {(d.confidence * 100).toFixed(1)}%
                         </p>
                     ))}
 

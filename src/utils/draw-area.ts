@@ -4,12 +4,14 @@ interface DrawAreaOptions {
     canvas: HTMLCanvasElement
     source: HTMLImageElement | HTMLVideoElement
     area: Area | null
+    areaColor?: string
 }
 
 export function drawArea({
     canvas,
     source,
     area,
+    areaColor = "blue",
 }: DrawAreaOptions) {
 
     if (!area) return
@@ -22,11 +24,6 @@ export function drawArea({
             ? source.naturalWidth
             : source.videoWidth
 
-    const height =
-        source instanceof HTMLImageElement
-            ? source.naturalHeight
-            : source.videoHeight
-
     const { x1, y1, x2, y2 } = area
 
     const x = Math.min(x1, x2)
@@ -36,7 +33,7 @@ export function drawArea({
 
     const lineWidth = Math.max(2, Math.min(8, width * 0.005))
 
-    ctx.strokeStyle = "blue"
+    ctx.strokeStyle = areaColor
     ctx.lineWidth = lineWidth
 
     ctx.strokeRect(x, y, w, h)

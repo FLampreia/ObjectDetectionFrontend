@@ -15,6 +15,9 @@ import { AlgorithmSelect } from "@/components/custom/detection/algorithm-select"
 import { MinConfidenceInput } from "@/components/custom/detection/min-confidence-input"
 import { useAlgorithms } from "@/hooks/use-algorithms"
 import { SelectTeamBox } from "@/components/custom/detection/select-team-box"
+import { ImageAnnotationSettings } from "@/components/custom/detection/image-annotation-settings"
+import { DEFAULT_DRAWING_CONFIG } from "@/config/drawing"
+import type { ReportConfig } from "@/types"
 
 export function PhotoDetectionSection() {
     const {
@@ -48,6 +51,10 @@ export function PhotoDetectionSection() {
     } = useAlgorithms()
 
     const [isAreaOpen, setIsAreaOpen] = useState(false)
+    const [drawingConfig, setDrawingConfig] = useState<ReportConfig>({
+        ...DEFAULT_DRAWING_CONFIG,
+        dot_label_enable: true,
+    })
     const [imageSize, setImageSize] = useState({
         width: 0,
         height: 0,
@@ -95,7 +102,10 @@ export function PhotoDetectionSection() {
                     />
                 </div>
 
-                <div className="flex flex-wrap gap-4 justify-end">
+                <div className="flex flex-wrap items-center gap-4 justify-end">
+                    
+                    <ImageAnnotationSettings config={drawingConfig} onChange={setDrawingConfig} />
+
                     <Button
                         iconLeading={<PenLine />}
                         color="secondary"
@@ -134,6 +144,7 @@ export function PhotoDetectionSection() {
                     imageUrl={imageUrl}
                     detections={detections}
                     area={area}
+                    drawingConfig={drawingConfig}
                     onImageLoad={(width, height) =>
                         setImageSize({
                             width,
