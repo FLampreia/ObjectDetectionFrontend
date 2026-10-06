@@ -1,244 +1,211 @@
-"use client"
+"use client";
 
-import { useEffect, useRef, useState } from "react"
+import {
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+    type PointerEvent,
+} from "react";
+import { Eraser, Save, Scan, Minus } from "lucide-react";
+import { Button } from "@/components/base/buttons/button";
+import {
+    ButtonGroup,
+    ButtonGroupItem,
+} from "@/components/base/button-group/button-group";
+import type { Area, Line } from "@/types";
 
-import { Eraser, Save } from "lucide-react"
-
-import { Button } from "@/components/base/buttons/button"
-
-import { Area } from "@/types"
+type DrawType = "area" | "line";
+type Point = { x: number; y: number };
+type Drag = { pointerId: number; type: DrawType; start: Point; current: Point };
 
 interface Props {
-    imageUrl: string | null
-    area: Area | null
-    onSave: (area: Area | null) => void
+    imageUrl: string | null;
+    area: Area | null;
+    line?: Line | null;
+    allowLine?: boolean;
+    onSave: (area: Area | null, line: Line | null) => void;
+}
+
+function getDrawing(type: DrawType, start: Point, end: Point): Area | Line {
+    if (type === "area") {
+        return {
+            x1: Math.round(Math.min(start.x, end.x)),
+            y1: Math.round(Math.min(start.y, end.y)),
+            x2: Math.round(Math.max(start.x, end.x)),
+            y2: Math.round(Math.max(start.y, end.y)),
+        };
+    }
+
+    return {
+        x1: Math.round(start.x),
+        y1: Math.round(start.y),
+        x2: Math.round(end.x),
+        y2: Math.round(end.y),
+    };
 }
 
 export function DrawAreaModal({
     imageUrl,
     area,
+    line = null,
+    allowLine = true,
     onSave,
 }: Props) {
-    const canvasRef = useRef<HTMLCanvasElement>(null)
-    const imageRef = useRef<HTMLImageElement>(null)
+    const [selectedTypeOfDraw, setSelectedTypeOfDraw] =
+        useState<DrawType>("area");
+    const [finalRect, setFinalRect] = useState<Area | null>(area);
+    const [finalLine, setFinalLine] = useState<Line | null>(line);
+    const [isDragging, setIsDragging] = useState(false);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const imageRef = useRef<HTMLImageElement>(null);
+    const dragRef = useRef<Drag | null>(null);
 
-    const [startPoint, setStartPoint] = useState<{
-        x: number
-        y: number
-    } | null>(null)
+    const redraw = useCallback(
+        (preview: Drag | null = null) => {
+            const canvas = canvasRef.current;
+            const ctx = canvas?.getContext("2d");
+            if (!canvas || !ctx) return;
 
-    const [currentPoint, setCurrentPoint] = useState<{
-        x: number
-        y: number
-    } | null>(null)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.lineWidth = 2;
 
-    const [isDragging, setIsDragging] = useState(false)
+            const rect =
+                preview?.type === "area"
+                    ? getDrawing("area", preview.start, preview.current)
+                    : finalRect;
+            const segment =
+                preview?.type === "line"
+                    ? getDrawing("line", preview.start, preview.current)
+                    : finalLine;
 
-    const [finalRect, setFinalRect] = useState<Area | null>(area)
+            if (rect) {
+                ctx.strokeStyle = "blue";
+                ctx.strokeRect(rect.x1, rect.y1, rect.x2 - rect.x1, rect.y2 - rect.y1);
+            }
+            if (allowLine && segment) {
+                ctx.strokeStyle = "yellow";
+                ctx.beginPath();
+                ctx.moveTo(segment.x1, segment.y1);
+                ctx.lineTo(segment.x2, segment.y2);
+                ctx.stroke();
+            }
+        },
+        [finalRect, finalLine, allowLine],
+    );
 
-    function clearCanvas() {
-        const canvas = canvasRef.current
-        const ctx = canvas?.getContext("2d")
+    useEffect(() => {
+        const img = imageRef.current;
+        const canvas = canvasRef.current;
+        if (!imageUrl || !img || !canvas) return;
 
-        if (!canvas || !ctx) return
+        const handleLoad = () => {
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            redraw(dragRef.current);
+        };
 
-        ctx.clearRect(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        )
+        img.addEventListener("load", handleLoad);
+        if (img.complete && img.naturalWidth > 0) handleLoad();
+        return () => img.removeEventListener("load", handleLoad);
+    }, [imageUrl, redraw]);
+
+    function getPoint(e: PointerEvent<HTMLCanvasElement>): Point | null {
+        const canvas = e.currentTarget;
+        const rect = canvas.getBoundingClientRect();
+        if (!rect.width || !rect.height || !imageRef.current?.naturalWidth)
+            return null;
+
+        return {
+            x: Math.max(
+                0,
+                Math.min(
+                    canvas.width,
+                    ((e.clientX - rect.left) * canvas.width) / rect.width,
+                ),
+            ),
+            y: Math.max(
+                0,
+                Math.min(
+                    canvas.height,
+                    ((e.clientY - rect.top) * canvas.height) / rect.height,
+                ),
+            ),
+        };
     }
 
-    function drawArea(rect: Area) {
-        const canvas = canvasRef.current
-        const ctx = canvas?.getContext("2d")
+    function handlePointerDown(e: PointerEvent<HTMLCanvasElement>) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.button !== 0 || dragRef.current) return;
+        const point = getPoint(e);
+        if (!point) return;
 
-        if (!canvas || !ctx) return
-
-        const { x1, y1, x2, y2 } = rect
-
-        const x = Math.min(x1, x2)
-        const y = Math.min(y1, y2)
-
-        const width = Math.abs(x2 - x1)
-        const height = Math.abs(y2 - y1)
-
-        ctx.strokeStyle = "blue"
-        ctx.lineWidth = 2
-
-        ctx.strokeRect(
-            x,
-            y,
-            width,
-            height
-        )
+        e.currentTarget.setPointerCapture(e.pointerId);
+        const drag: Drag = {
+            pointerId: e.pointerId,
+            type: allowLine ? selectedTypeOfDraw : "area",
+            start: point,
+            current: point,
+        };
+        dragRef.current = drag;
+        setIsDragging(true);
+        redraw(drag);
     }
 
-    function handlePointerDown(
-        e: React.PointerEvent<HTMLCanvasElement>
-    ) {
-        e.preventDefault()
-        e.stopPropagation()
+    function handlePointerMove(e: PointerEvent<HTMLCanvasElement>) {
+        e.preventDefault();
+        e.stopPropagation();
+        const drag = dragRef.current;
+        if (!drag || drag.pointerId !== e.pointerId) return;
+        const point = getPoint(e);
+        if (!point) return;
 
-        const canvas = canvasRef.current
+        drag.current = point;
+        redraw(drag);
+    }
 
-        if (!canvas) return
+    function handlePointerUp(e: PointerEvent<HTMLCanvasElement>) {
+        e.preventDefault();
+        e.stopPropagation();
+        const drag = dragRef.current;
+        if (!drag || drag.pointerId !== e.pointerId) return;
+        const drawing = getDrawing(
+            drag.type,
+            drag.start,
+            getPoint(e) ?? drag.current,
+        );
+        const valid =
+            drag.type === "area"
+                ? drawing.x1 !== drawing.x2 && drawing.y1 !== drawing.y2
+                : drawing.x1 !== drawing.x2 || drawing.y1 !== drawing.y2;
 
-        // Começar um novo desenho apaga a área anterior
-        clearCanvas()
-
-        setFinalRect(null)
-        setStartPoint(null)
-        setCurrentPoint(null)
-
-        const rect = canvas.getBoundingClientRect()
-        const img = imageRef.current
-
-        if (!img) return
-
-        const point = {
-            x: (e.clientX - rect.left) * img.naturalWidth / rect.width,
-            y: (e.clientY - rect.top) * img.naturalHeight / rect.height,
+        dragRef.current = null;
+        setIsDragging(false);
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+            e.currentTarget.releasePointerCapture(e.pointerId);
         }
-
-        setStartPoint(point)
-        setCurrentPoint(point)
-        setIsDragging(true)
-    }
-
-    function handlePointerMove(
-        e: React.PointerEvent<HTMLCanvasElement>
-    ) {
-        e.preventDefault()
-        e.stopPropagation()
-
-        if (!isDragging || !startPoint) return
-
-        const canvas = canvasRef.current
-
-        if (!canvas) return
-
-        const rect = canvas.getBoundingClientRect()
-        const img = imageRef.current
-
-        if (!img) return
-
-        const point = {
-            x: (e.clientX - rect.left) * img.naturalWidth / rect.width,
-            y: (e.clientY - rect.top) * img.naturalHeight / rect.height,
+        if (valid) {
+            if (drag.type === "area") setFinalRect(drawing);
+            else setFinalLine(drawing);
+        } else {
+            redraw();
         }
-
-        setCurrentPoint(point)
-
-        drawRect(startPoint, point)
     }
 
-    function handlePointerUp(
-        e: React.PointerEvent<HTMLCanvasElement>
-    ) {
-        e.preventDefault()
-        e.stopPropagation()
-
-        setIsDragging(false)
-
-        if (!startPoint || !currentPoint) return
-
-        const canvas = canvasRef.current
-
-        if (!canvas) return
-
-        const finalRect: Area = {
-            x1: Math.round(Math.min(startPoint.x, currentPoint.x)),
-            y1: Math.round(Math.min(startPoint.y, currentPoint.y)),
-            x2: Math.round(Math.max(startPoint.x, currentPoint.x)),
-            y2: Math.round(Math.max(startPoint.y, currentPoint.y)),
-        }
-
-        setFinalRect(finalRect)
-    }
-
-    function drawRect(
-        p1: { x: number; y: number },
-        p2: { x: number; y: number }
-    ) {
-        const canvas = canvasRef.current
-        const ctx = canvas?.getContext("2d")
-
-        if (!canvas || !ctx) return
-
-        ctx.clearRect(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        )
-
-        const x = Math.min(p1.x, p2.x)
-        const y = Math.min(p1.y, p2.y)
-
-        const width = Math.abs(p2.x - p1.x)
-        const height = Math.abs(p2.y - p1.y)
-
-        ctx.strokeStyle = "blue"
-        ctx.lineWidth = 2
-
-        ctx.strokeRect(
-            x,
-            y,
-            width,
-            height
-        )
-    }
-
-    function save() {
-        onSave(finalRect)
-        console.log(finalRect)
+    function cancelDraw(e: PointerEvent<HTMLCanvasElement>) {
+        if (dragRef.current?.pointerId !== e.pointerId) return;
+        dragRef.current = null;
+        setIsDragging(false);
+        redraw();
     }
 
     function clear() {
-        setFinalRect(null)
-        setStartPoint(null)
-        setCurrentPoint(null)
-        setIsDragging(false)
-
-        clearCanvas()
+        dragRef.current = null;
+        setIsDragging(false);
+        setFinalRect(null);
+        setFinalLine(null);
     }
-
-    // Inicializa o canvas e desenha a área existente
-    useEffect(() => {
-        if (!imageUrl) return
-
-        const img = imageRef.current
-        const canvas = canvasRef.current
-
-        if (!img || !canvas) return
-
-        const handleLoad = () => {
-            canvas.width = img.naturalWidth
-            canvas.height = img.naturalHeight
-            canvas.style.width = `${img.clientWidth}px`
-            canvas.style.height = `${img.clientHeight}px`
-
-            if (area) {
-                setFinalRect(area)
-                drawArea(area)
-            } else {
-                setFinalRect(null)
-                clearCanvas()
-            }
-        }
-
-        if (img.complete) {
-            handleLoad()
-        } else {
-            img.onload = handleLoad
-        }
-
-        return () => {
-            img.onload = null
-        }
-    }, [imageUrl])
 
     return (
         <div
@@ -250,36 +217,63 @@ export function DrawAreaModal({
             <div className="relative">
                 <img
                     ref={imageRef}
-                    src={imageUrl ?? ""}
+                    src={imageUrl ?? undefined}
                     className="max-h-[90vh] max-w-[90vw] object-contain block"
-                    alt=""
+                    alt={
+                        allowLine
+                            ? "Image for drawing an area or line"
+                            : "Image for drawing an area"
+                    }
+                    draggable={false}
                 />
-
                 <canvas
                     ref={canvasRef}
                     onPointerDown={handlePointerDown}
                     onPointerMove={handlePointerMove}
                     onPointerUp={handlePointerUp}
-                    className="absolute top-0 left-0 cursor-crosshair"
+                    onPointerCancel={cancelDraw}
+                    onLostPointerCapture={cancelDraw}
+                    className="absolute inset-0 w-full h-full cursor-crosshair touch-none"
                 />
             </div>
-
             <div className="absolute bottom-4 flex gap-3">
+                {allowLine && (
+                    <ButtonGroup
+                        size="sm"
+                        disallowEmptySelection
+                        isDisabled={isDragging}
+                        selectedKeys={[selectedTypeOfDraw]}
+                        onSelectionChange={(keys) => {
+                            const selected = Array.from(keys)[0];
+                            if (selected === "area" || selected === "line")
+                                setSelectedTypeOfDraw(selected);
+                        }}
+                    >
+                        <ButtonGroupItem id="area" iconLeading={<Scan />}>
+                            Area
+                        </ButtonGroupItem>
+                        <ButtonGroupItem id="line" iconLeading={<Minus />}>
+                            Line
+                        </ButtonGroupItem>
+                    </ButtonGroup>
+                )}
                 <Button
-                    onClick={save}
+                    onClick={() => onSave(finalRect, allowLine ? finalLine : null)}
                     iconLeading={Save}
+                    size="md"
+                    isDisabled={isDragging || !imageUrl}
                 >
-                    Save Area
+                    {allowLine ? "Save" : "Save Area"}
                 </Button>
-
                 <Button
                     color="secondary-destructive"
                     onClick={clear}
                     iconLeading={Eraser}
+                    size="md"
                 >
-                    Clear Area
+                    Clear All
                 </Button>
             </div>
         </div>
-    )
+    );
 }

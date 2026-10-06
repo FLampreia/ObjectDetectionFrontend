@@ -1,4 +1,4 @@
-import type { Area, Detection, ReportConfig } from "@/types"
+import type { Area, Detection, Line, ReportConfig } from "@/types"
 
 interface DrawNotationsOptions {
     canvas: HTMLCanvasElement
@@ -60,8 +60,8 @@ export function drawNotations({
         let y2 = by2
 
         if (area) {
-            const ax = area.x1 
-            const ay = area.y1 
+            const ax = area.x1
+            const ay = area.y1
 
             x1 += ax
             y1 += ay

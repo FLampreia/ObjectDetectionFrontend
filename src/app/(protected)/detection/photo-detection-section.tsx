@@ -170,6 +170,7 @@ export function PhotoDetectionSection() {
                 <DrawAreaModal
                     imageUrl={imageUrl}
                     area={area}
+                    allowLine={false}
                     onSave={(newArea) => {
                         setArea(newArea)
                         setIsAreaOpen(false)

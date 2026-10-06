@@ -31,6 +31,8 @@ export function VideoDetectionSection() {
 
         area,
         setArea,
+        line,
+        setLine,
 
         selectedAlgorithm,
         setSelectedAlgorithm,
@@ -116,6 +118,7 @@ export function VideoDetectionSection() {
                             setImageUrl(firstFrame)
 
                             setArea(null)
+                            setLine(null)
                         }}
                     />
 
@@ -199,6 +202,7 @@ export function VideoDetectionSection() {
                     videoRef={videoRef}
                     videoUrl={videoUrl}
                     area={area}
+                    line={line}
                     detections={detections}
                     onImageLoad={(width, height) =>
                         setVideoInfo({
@@ -216,6 +220,7 @@ export function VideoDetectionSection() {
                     detections={detections}
                     trackedDetections={trackedDetections}
                     area={area}
+                    line={line}
                     imageWidth={videoInfo.width}
                     imageHeight={videoInfo.height}
                     videoCurrentTime={videoCurrentTime}
@@ -231,8 +236,10 @@ export function VideoDetectionSection() {
                 <DrawAreaModal
                     imageUrl={imageUrl}
                     area={area}
-                    onSave={(newArea) => {
+                    line={line}
+                    onSave={(newArea, newLine) => {
                         setArea(newArea)
+                        setLine(newLine)
                         setIsAreaOpen(false)
                         setDetections([])
                         setTrackedDetections(new Map())

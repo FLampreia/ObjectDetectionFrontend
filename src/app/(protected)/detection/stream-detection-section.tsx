@@ -31,6 +31,8 @@ export function StreamDetectionSection() {
         setSelectedClasses,
         area,
         setArea,
+        line,
+        setLine,
         selectedAlgorithm,
         setSelectedAlgorithm,
         selectedTeamId,
@@ -396,6 +398,7 @@ export function StreamDetectionSection() {
                     videoStream={cameraStream}
                     streamUrl={inputType === "url" ? connectedUrl : ""}
                     area={area}
+                    line={line}
                     detections={detections}
                     loading={loading}
                     onVideoReady={setVideoReady}
@@ -412,6 +415,7 @@ export function StreamDetectionSection() {
                     detections={detections}
                     trackedDetections={trackedDetections}
                     area={area}
+                    line={line}
                     imageWidth={videoInfo.width}
                     imageHeight={videoInfo.height}
                 />
@@ -427,8 +431,10 @@ export function StreamDetectionSection() {
                 <DrawAreaModal
                     imageUrl={areaImageUrl}
                     area={area}
-                    onSave={newArea => {
+                    line={line}
+                    onSave={(newArea, newLine) => {
                         setArea(newArea)
+                        setLine(newLine)
                         setIsAreaOpen(false)
                         setAreaImageUrl(null)
                         setDetections([])

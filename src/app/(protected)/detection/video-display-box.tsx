@@ -4,13 +4,15 @@ import { FullScreenModal } from "@/components/custom/detection/full-screen-modal
 import { EmptyFile } from "./empty-file"
 import { Maximize02 } from "@untitledui/icons"
 import { RefObject, useEffect, useRef, useState } from "react"
-import { Area, Detection } from "@/types"
+import { Area, Detection, Line } from "@/types"
 import { drawNotations } from "@/utils/draw-notations"
 import { drawArea } from "@/utils/draw-area"
+import { drawLine } from "@/utils/draw-line"
 
 interface VideoDisplayBoxProps {
     videoUrl: string | null,
     area: Area | null,
+    line: Line | null
     detections: Detection[]
     videoRef: RefObject<HTMLVideoElement | null>
     loading: boolean
@@ -22,6 +24,7 @@ interface VideoDisplayBoxProps {
 export function VideoDisplayBox({
     videoUrl,
     area,
+    line,
     videoRef,
     detections,
     loading,
@@ -52,19 +55,26 @@ export function VideoDisplayBox({
 
         ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-        // A área é sempre desenhada
+        // Area always draw
         drawArea({
             canvas,
             source: video,
             area,
         })
 
-        // As deteções só são desenhadas durante a deteção
+        // Line always draw
+        drawLine({
+            canvas,
+            source: video,
+            line
+        })
+
+        // Detections only draw during processing
         if (loading) {
             drawNotations({
                 canvas,
                 source: video,
-                detections,
+                detections: loading ? detections : [],
                 area,
             })
         }
@@ -73,7 +83,7 @@ export function VideoDisplayBox({
     useEffect(() => {
         draw(videoRef.current, canvasRef.current)
 
-    }, [detections, area])
+    }, [detections, area, line, loading])
 
     return (
         <>

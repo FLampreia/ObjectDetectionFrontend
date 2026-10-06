@@ -4,15 +4,17 @@ import { EmptyFile } from "./empty-file"
 
 import { RefObject, useEffect, useRef } from "react"
 
-import { Area, Detection } from "@/types"
+import { Area, Detection, Line } from "@/types"
 
 import { drawNotations } from "@/utils/draw-notations"
 import { drawArea } from "@/utils/draw-area"
+import { drawLine } from "@/utils/draw-line"
 
 interface StreamDisplayBoxProps {
     videoStream: MediaStream | null
     streamUrl: string
     area: Area | null
+    line: Line | null
     detections: Detection[]
     videoRef: RefObject<HTMLVideoElement | null>
     loading: boolean
@@ -24,6 +26,7 @@ export function StreamDisplayBox({
     videoStream,
     streamUrl,
     area,
+    line,
     videoRef,
     detections,
     loading,
@@ -64,20 +67,27 @@ export function StreamDisplayBox({
 
         ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-        // A área é sempre desenhada
+        // Area always draw
         drawArea({
             canvas,
             source: video,
             area,
         })
 
-        // As deteções só são desenhadas durante a deteção
+        // Line always draw
+        drawLine({
+            canvas,
+            source: video,
+            line
+        })
+
+        // Detections only draw during processing
         if (loading) {
             drawNotations({
                 canvas,
                 source: video,
-                detections,
-                area,
+                detections: loading ? detections : [],
+                area
             })
         }
     }
@@ -119,7 +129,7 @@ export function StreamDisplayBox({
     // Redesenha sempre que a área/deteções/loading mudam
     useEffect(() => {
         draw(videoRef.current, canvasRef.current)
-    }, [detections, area, loading])
+    }, [detections, area, line, loading])
 
     return (
         <div className="w-full h-64 lg:h-112 rounded-lg overflow-hidden flex items-center justify-center bg-secondary ring-secondary ring-inset lg:rounded-xl lg:ring-1">

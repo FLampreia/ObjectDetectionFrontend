@@ -11,12 +11,17 @@ export type VideoProcessingResponse = {
     detections_per_frame: Detection[]
 }
 
-export type Area = {
+type TwoPoints = {
     x1: number
     y1: number
     x2: number
     y2: number
 }
+
+export type Area = TwoPoints;
+
+export type Line = TwoPoints;
+
 
 export type AlgorithmObj = {
     name: string
