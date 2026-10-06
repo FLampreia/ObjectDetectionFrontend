@@ -19,9 +19,9 @@ export function MinConfidenceInput({
             isRequired
             orientation="horizontal"
             label="5. Minimum Confidence (%)"
-            hint="0-100%"
+            hint="25-100%"
             value={value}
-            minValue={0}
+            minValue={25}
             maxValue={100}
             onChange={(val: number) => {
                 const clamped = Math.max(0, Math.min(100, val))
