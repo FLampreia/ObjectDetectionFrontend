@@ -18,9 +18,10 @@ const MODES = [
     { id: "both", label: "Boxes and points" },
 ]
 
-export function ImageAnnotationSettings({ config, onChange }: {
+export function ImageAnnotationSettings({ config, onChange, isDisabled }: {
     config: ReportConfig
     onChange: (config: ReportConfig) => void
+    isDisabled: boolean
 }) {
     const [isOpen, setIsOpen] = useState(false)
     const descriptionId = useId()
@@ -51,7 +52,7 @@ export function ImageAnnotationSettings({ config, onChange }: {
 
     return (
         <div className="mr-auto">
-            <Button color="secondary" iconLeading={<SlidersHorizontal />} onPress={() => setIsOpen(true)}>
+            <Button color="secondary" iconLeading={<SlidersHorizontal />} onPress={() => setIsOpen(true)} isDisabled={isDisabled}>
                 Appearance
             </Button>
             <ModalOverlay isOpen={isOpen} onOpenChange={setIsOpen} isDismissable>

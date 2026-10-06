@@ -104,7 +104,7 @@ export function PhotoDetectionSection() {
 
                 <div className="flex flex-wrap items-center gap-4 justify-end">
                     
-                    <ImageAnnotationSettings config={drawingConfig} onChange={setDrawingConfig} />
+                    <ImageAnnotationSettings config={drawingConfig} onChange={setDrawingConfig} isDisabled={loading} />
 
                     <Button
                         iconLeading={<PenLine />}
