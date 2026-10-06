@@ -1,13 +1,9 @@
 "use client"
 
 import { Table } from "@/components/application/table/table";
-import { ButtonUtility } from "@/components/base/buttons/button-utility";
-import { ListDetection, ListObjects } from "@/types";
-import { Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { ListObjects } from "@/types";
+
 import { SortDescriptor } from "react-aria-components";
-import { DetectionObjectsModal } from "../../teams/modals/detections-objects-modal";
 
 type Props = {
     objects: ListObjects[];

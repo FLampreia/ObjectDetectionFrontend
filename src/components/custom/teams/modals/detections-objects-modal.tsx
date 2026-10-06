@@ -2,7 +2,7 @@
 
 import { Dialog, Modal, ModalOverlay } from "@/components/application/modals/modal"
 import { PaginationPageMinimalCenter } from "@/components/application/pagination/pagination"
-import { Table, TableCard } from "@/components/application/table/table"
+import { TableCard } from "@/components/application/table/table"
 import { Badge } from "@/components/base/badges/badges"
 import { Button } from "@/components/base/buttons/button"
 
@@ -13,6 +13,7 @@ import { NotFoundTable } from "../../not-found-table"
 import { MultiSelect } from "@/components/base/select/multi-select"
 import { ExtractSingleReportModal } from "../../detection/extract-single-report-modal"
 import { useState } from "react"
+import { ObjectsTable } from "../../detection/tables/objects-table"
 
 type DetectionObjectsModalProps = {
     isOpen: boolean;
@@ -106,12 +107,12 @@ export function DetectionObjectsModal({
                 onOpenChange={onOpenChange}
             >
 
-                <Modal>
+                <Modal className="w-full max-w-7xl overflow-hidden">
                     <Dialog
-                        className="w-[80vw] max-w-8xl mx-auto space-y-4 p-6 overflow-y-auto lg:overflow-hidden h-[80vh] flex flex-col"
+                        className="flex h-[85dvh] min-h-0 flex-col gap-4 overflow-hidden p-4 sm:p-6"
                         aria-label="objects"
                     >
-                        <div className="flex items-center justify-between">
+                        <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
 
                             <div className="flex flex-1 flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-tertiary">
@@ -165,9 +166,9 @@ export function DetectionObjectsModal({
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.5fr] lg:flex-1 lg:min-h-0">
+                        <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto lg:grid-cols-[1fr_1.5fr] lg:grid-rows-[minmax(0,1fr)] lg:gap-6 lg:overflow-hidden">
                             {/* RESUMO - 1/3 */}
-                            <div className="min-w-0 rounded-lg border border-secondary bg-primary p-4">
+                            <div className="min-w-0 rounded-lg border border-secondary bg-primary p-4 lg:min-h-0 lg:overflow-y-auto">
 
 
                                 <h3 className="text-sm font-semibold text-primary">
@@ -271,9 +272,10 @@ export function DetectionObjectsModal({
                             {/* TABELA - 2/3 */}
                             <TableCard.Root
                                 size="sm"
-                                className="min-h-0 h-full flex flex-col overflow-hidden"
+                                className="flex h-[28rem] min-w-0 flex-col overflow-hidden lg:h-full lg:min-h-0"
                             >
                                 <TableCard.Header
+                                    className="shrink-0"
                                     title="Objects Detected"
                                     badge={filteredObjects.length}
                                     description="All objects detected in the selected detection"
@@ -318,8 +320,8 @@ export function DetectionObjectsModal({
                                     }
                                 />
 
-                                <div className="flex-1 min-h-0 p-4">
-                                    <div className="min-w-0 h-full overflow-hidden">
+                                <div className="min-h-0 flex-1 overflow-auto">
+                                    <div className="min-w-0">
                                         {isLoading ? (
                                             <div className="flex justify-center py-8">
                                                 Loading objects...
@@ -329,61 +331,30 @@ export function DetectionObjectsModal({
                                                 {error}
                                             </div>
                                         ) : paginatedObjects.length !== 0 ? (
-                                            <div className="h-full flex flex-col overflow-y-auto">
-
-                                                <Table
-                                                    aria-label="ObjectsDetected"
-                                                    sortDescriptor={sortDescriptor}
-                                                    onSortChange={setSortDescriptor}
-                                                >
-                                                    <Table.Header>
-                                                        <Table.Head id="obj_name" label="Name" isRowHeader allowsSorting className="sticky top-0 z-10 bg-secondary" />
-                                                        <Table.Head id="obj_class" label="Class" allowsSorting className="sticky top-0 z-10 bg-secondary" />
-                                                        <Table.Head id="obj_conf" label="Confidence (%)" allowsSorting className="sticky top-0 z-10 bg-secondary" />
-
-                                                    </Table.Header>
-                                                    <Table.Body items={paginatedObjects} className="overflow-y-auto">
-                                                        {(objects) => (
-                                                            <Table.Row id={objects.id}>
-                                                                <Table.Cell>
-                                                                    {objects.obj_name}
-                                                                </Table.Cell>
-
-                                                                <Table.Cell>
-                                                                    {objects.obj_class_id}
-                                                                </Table.Cell>
-
-                                                                <Table.Cell>
-                                                                    {(objects.confidence * 100).toFixed(1)} %
-                                                                </Table.Cell>
-
-                                                            </Table.Row>
-                                                        )}
-                                                    </Table.Body>
-                                                </Table>
-                                            </div>
+                                            <ObjectsTable
+                                                objects={paginatedObjects}
+                                                sortDescriptor={sortDescriptor}
+                                                setSortChange={setSortDescriptor}
+                                            />
 
                                         ) : (
                                             <NotFoundTable type="object" />
                                         )}
                                     </div>
                                 </div>
-
-                                <div className="shrink-0 border-t border-secondary bg-primary">
-
-
-                                    <PaginationPageMinimalCenter
-                                        page={currentPage}
-                                        total={totalPages}
-                                        onPageChange={setCurrentPage}
-                                        className="px-4 py-3 md:px-6 md:pt-3 md:pb-4"
-                                    />
-                                </div>
                             </TableCard.Root>
 
 
                         </div>
 
+                        <div className="shrink-0 border-t border-secondary bg-primary">
+                            <PaginationPageMinimalCenter
+                                page={currentPage}
+                                total={Math.max(1, totalPages)}
+                                onPageChange={setCurrentPage}
+                                className="border-t-0 pt-3"
+                            />
+                        </div>
                     </Dialog>
                 </Modal>
             </ModalOverlay>
