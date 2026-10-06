@@ -1,11 +1,11 @@
 import config from "@/config/api";
-import { getAccessToken } from "./auth";
+import { authFetch, getAccessToken } from "./auth";
 import { VideoProcessingResponse, ListDetection } from "@/types";
 
 export async function processImage(formData: FormData) {
     const token = getAccessToken();
 
-    const response = await fetch(`${config.API_URL}/detect/image`, {
+    const response = await authFetch(`${config.API_URL}/detect/image`, {
         method: "POST",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -35,7 +35,7 @@ export async function processImage(formData: FormData) {
 export async function getDetections(): Promise<ListDetection[]> {
     const token = getAccessToken();
 
-    const response = await fetch(`${config.API_URL}/detections/all`, {
+    const response = await authFetch(`${config.API_URL}/detections/all`, {
         method: "GET",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -56,7 +56,7 @@ export async function getDetections(): Promise<ListDetection[]> {
 export async function getDetectionsTeam(teamId: string): Promise<ListDetection[]> {
     const token = getAccessToken();
 
-    const response = await fetch(`${config.API_URL}/team/${teamId}/detections`, {
+    const response = await authFetch(`${config.API_URL}/team/${teamId}/detections`, {
         method: "GET",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -93,7 +93,7 @@ export async function storeDetections(
         params.append("chosen_team_id", chosenTeamId);
     }
 
-    const response = await fetch(
+    const response = await authFetch(
         `${config.API_URL}/save/detections?${params.toString()}`,
         {
             method: "POST",

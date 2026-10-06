@@ -1,5 +1,5 @@
 import config from "@/config/api";
-import { getAccessToken } from "./auth";
+import { authFetch, getAccessToken } from "./auth";
 import type { ReportConfig } from "@/types";
 
 export async function getDetectionReportInterval(
@@ -8,7 +8,7 @@ export async function getDetectionReportInterval(
 ) {
     const token = getAccessToken();
 
-    const response = await fetch(
+    const response = await authFetch(
         `${config.API_URL}/report/detection/interval?start_date=${startDate}&end_date=${endDate}`,
         {
             method: "GET",
@@ -40,7 +40,7 @@ export async function getSingleDetectionReport(
         ]),
     );
 
-    const response = await fetch(
+    const response = await authFetch(
         `${config.API_URL}/report/detection/${detectionId}?${params.toString()}`,
         {
             method: "GET",

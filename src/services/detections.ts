@@ -1,11 +1,11 @@
 import config from "@/config/api";
-import { getAccessToken } from "./auth";
+import { authFetch, getAccessToken } from "./auth";
 
 
 export async function getObjects(detectionId: string) {
     const token = getAccessToken();
 
-    const response = await fetch(`${config.API_URL}/detections/${detectionId}/objects`, {
+    const response = await authFetch(`${config.API_URL}/detections/${detectionId}/objects`, {
         method: "GET",
         headers: {
             Authorization: `Bearer ${token}`,

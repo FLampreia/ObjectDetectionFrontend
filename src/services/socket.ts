@@ -1,11 +1,11 @@
 import config from "@/config/api";
-import { getAccessToken } from "./auth";
+import { authFetch, getAccessToken } from "./auth";
 
 
 export async function askSocketSessionId() {
     const token = getAccessToken();
 
-    const response = await fetch(`${config.API_URL}/socket/session`, {
+    const response = await authFetch(`${config.API_URL}/socket/session`, {
         method: "POST",
         headers: {
             Authorization: `Bearer ${token}`,

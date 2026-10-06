@@ -1,11 +1,11 @@
 import config from "@/config/api";
-import { getAccessToken } from "./auth";
+import { authFetch, getAccessToken } from "./auth";
 import { Team } from "@/types/index";
 
 export async function addTeam(teamname: string) {
     const token = getAccessToken();
 
-    const response = await fetch(`${config.API_URL}/team`, {
+    const response = await authFetch(`${config.API_URL}/team`, {
         method: "POST",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -31,7 +31,7 @@ export async function addTeam(teamname: string) {
 export async function getLoggedTeams(): Promise<Team[]> {
     const token = getAccessToken();
 
-    const response = await fetch(`${config.API_URL}/team/logged`, {
+    const response = await authFetch(`${config.API_URL}/team/logged`, {
         method: "GET",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -53,7 +53,7 @@ export async function getLoggedTeams(): Promise<Team[]> {
 export async function getAllTeams(): Promise<Team[]> {
     const token = getAccessToken();
 
-    const response = await fetch(`${config.API_URL}/team`, {
+    const response = await authFetch(`${config.API_URL}/team`, {
         method: "GET",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -73,7 +73,7 @@ export async function getAllTeams(): Promise<Team[]> {
 export async function toggleFavorite(teamId: string) {
     const token = getAccessToken();
 
-    const response = await fetch(`${config.API_URL}/team/${teamId}/fav`, {
+    const response = await authFetch(`${config.API_URL}/team/${teamId}/fav`, {
         method: "PATCH",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -90,7 +90,7 @@ export async function toggleFavorite(teamId: string) {
 export async function deleteTeam(teamId: string) {
     const token = getAccessToken();
 
-    const response = await fetch(`${config.API_URL}/team/${teamId}`, {
+    const response = await authFetch(`${config.API_URL}/team/${teamId}`, {
         method: "DELETE",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -107,7 +107,7 @@ export async function deleteTeam(teamId: string) {
 export async function updateTeam(teamId: string, teamName: string) {
     const token = getAccessToken();
 
-    const response = await fetch(`${config.API_URL}/team/${teamId}`, {
+    const response = await authFetch(`${config.API_URL}/team/${teamId}`, {
         method: "PATCH",
         headers: {
             Authorization: `Bearer ${token}`,
