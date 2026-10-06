@@ -22,7 +22,7 @@ export default function TopModelsChart({
     const hasData = top_models && top_models.length > 0;
 
     return (
-        <div className="h-full min-w-0 rounded-lg border border-secondary bg-primary p-4">
+        <div className="flex h-full min-w-0 flex-col rounded-lg border border-secondary bg-primary p-4">
             <h3 className="text-sm font-semibold text-primary">
                 Top Used Models
             </h3>
@@ -32,7 +32,7 @@ export default function TopModelsChart({
             </p>
 
             {hasData ? (
-                <div className="mt-5 h-[calc(100%-4.5rem)]">
+                <div className="mt-5 h-72 min-h-72 min-w-0 flex-1">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart
                             data={top_models}
@@ -104,7 +104,7 @@ export default function TopModelsChart({
                     </ResponsiveContainer>
                 </div>
             ) : (
-                <div className="flex h-[calc(100%-4.5rem)] items-center justify-center">
+                <div className="mt-5 flex h-72 min-h-72 flex-1 items-center justify-center">
                     <p className="text-sm text-tertiary">
                         No detections
                     </p>
