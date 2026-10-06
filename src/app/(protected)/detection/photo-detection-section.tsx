@@ -171,8 +171,10 @@ export function PhotoDetectionSection() {
                     imageUrl={imageUrl}
                     area={area}
                     allowLine={false}
-                    onSave={(newArea) => {
+                    colors={{ areaColor: drawingConfig.area_color, lineColor: "#FFFF00" }}
+                    onSave={(newArea, _newLine, colors) => {
                         setArea(newArea)
+                        setDrawingConfig((config) => ({ ...config, area_color: colors.areaColor }))
                         setIsAreaOpen(false)
                         setDetections([])
                         setTrackedDetections(new Map())

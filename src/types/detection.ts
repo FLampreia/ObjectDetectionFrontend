@@ -22,6 +22,11 @@ export type Area = TwoPoints;
 
 export type Line = TwoPoints;
 
+export type DrawingColors = {
+    areaColor: string;
+    lineColor: string;
+};
+
 
 export type AlgorithmObj = {
     name: string

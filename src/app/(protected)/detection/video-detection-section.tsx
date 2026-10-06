@@ -33,6 +33,8 @@ export function VideoDetectionSection() {
         setArea,
         line,
         setLine,
+        drawingColors,
+        setDrawingColors,
 
         selectedAlgorithm,
         setSelectedAlgorithm,
@@ -199,6 +201,7 @@ export function VideoDetectionSection() {
 
             <section className="mt-4 grid grid-cols-1 lg:grid-cols-[13fr_7fr] gap-4 w-full items-start">
                 <VideoDisplayBox
+                    colors={drawingColors}
                     videoRef={videoRef}
                     videoUrl={videoUrl}
                     area={area}
@@ -234,12 +237,14 @@ export function VideoDetectionSection() {
                 onClose={() => setIsAreaOpen(false)}
             >
                 <DrawAreaModal
+                    colors={drawingColors}
                     imageUrl={imageUrl}
                     area={area}
                     line={line}
-                    onSave={(newArea, newLine) => {
+                    onSave={(newArea, newLine, colors) => {
                         setArea(newArea)
                         setLine(newLine)
+                        setDrawingColors(colors)
                         setIsAreaOpen(false)
                         setDetections([])
                         setTrackedDetections(new Map())

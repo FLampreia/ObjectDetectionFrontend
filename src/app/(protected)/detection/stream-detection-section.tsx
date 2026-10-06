@@ -33,6 +33,8 @@ export function StreamDetectionSection() {
         setArea,
         line,
         setLine,
+        drawingColors,
+        setDrawingColors,
         selectedAlgorithm,
         setSelectedAlgorithm,
         selectedTeamId,
@@ -394,6 +396,7 @@ export function StreamDetectionSection() {
             <section className="mt-4 grid grid-cols-1 lg:grid-cols-[13fr_7fr] gap-4 w-full items-start">
 
                 <StreamDisplayBox
+                    colors={drawingColors}
                     videoRef={videoRef}
                     videoStream={cameraStream}
                     streamUrl={inputType === "url" ? connectedUrl : ""}
@@ -429,12 +432,14 @@ export function StreamDetectionSection() {
                 }}
             >
                 <DrawAreaModal
+                    colors={drawingColors}
                     imageUrl={areaImageUrl}
                     area={area}
                     line={line}
-                    onSave={(newArea, newLine) => {
+                    onSave={(newArea, newLine, colors) => {
                         setArea(newArea)
                         setLine(newLine)
+                        setDrawingColors(colors)
                         setIsAreaOpen(false)
                         setAreaImageUrl(null)
                         setDetections([])

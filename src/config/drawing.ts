@@ -1,4 +1,9 @@
-import type { ReportConfig } from "@/types"
+import type { DrawingColors, ReportConfig } from "@/types"
+
+export const DEFAULT_AREA_LINE_COLORS: Readonly<DrawingColors> = {
+    areaColor: "#0000FF",
+    lineColor: "#FFFF00",
+}
 
 export const DEFAULT_DRAWING_CONFIG: Readonly<ReportConfig> = {
     bbox_enable: true,

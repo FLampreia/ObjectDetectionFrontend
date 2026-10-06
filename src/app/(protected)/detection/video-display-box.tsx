@@ -4,7 +4,7 @@ import { FullScreenModal } from "@/components/custom/detection/full-screen-modal
 import { EmptyFile } from "./empty-file"
 import { Maximize02 } from "@untitledui/icons"
 import { RefObject, useEffect, useRef, useState } from "react"
-import { Area, Detection, Line } from "@/types"
+import { Area, Detection, DrawingColors, Line } from "@/types"
 import { drawNotations } from "@/utils/draw-notations"
 import { drawArea } from "@/utils/draw-area"
 import { drawLine } from "@/utils/draw-line"
@@ -13,6 +13,7 @@ interface VideoDisplayBoxProps {
     videoUrl: string | null,
     area: Area | null,
     line: Line | null
+    colors: DrawingColors
     detections: Detection[]
     videoRef: RefObject<HTMLVideoElement | null>
     loading: boolean
@@ -25,6 +26,7 @@ export function VideoDisplayBox({
     videoUrl,
     area,
     line,
+    colors,
     videoRef,
     detections,
     loading,
@@ -60,13 +62,15 @@ export function VideoDisplayBox({
             canvas,
             source: video,
             area,
+            areaColor: colors.areaColor,
         })
 
         // Line always draw
         drawLine({
             canvas,
             source: video,
-            line
+            line,
+            lineColor: colors.lineColor,
         })
 
         // Detections only draw during processing
@@ -83,7 +87,7 @@ export function VideoDisplayBox({
     useEffect(() => {
         draw(videoRef.current, canvasRef.current)
 
-    }, [detections, area, line, loading])
+    }, [detections, area, line, loading, colors])
 
     return (
         <>

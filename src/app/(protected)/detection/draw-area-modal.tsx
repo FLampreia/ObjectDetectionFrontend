@@ -13,7 +13,8 @@ import {
     ButtonGroup,
     ButtonGroupItem,
 } from "@/components/base/button-group/button-group";
-import type { Area, Line } from "@/types";
+import type { Area, DrawingColors, Line } from "@/types";
+import { DEFAULT_AREA_LINE_COLORS } from "@/config/drawing";
 
 type DrawType = "area" | "line";
 type Point = { x: number; y: number };
@@ -24,7 +25,8 @@ interface Props {
     area: Area | null;
     line?: Line | null;
     allowLine?: boolean;
-    onSave: (area: Area | null, line: Line | null) => void;
+    colors?: DrawingColors;
+    onSave: (area: Area | null, line: Line | null, colors: DrawingColors) => void;
 }
 
 function getDrawing(type: DrawType, start: Point, end: Point): Area | Line {
@@ -50,12 +52,15 @@ export function DrawAreaModal({
     area,
     line = null,
     allowLine = true,
+    colors = DEFAULT_AREA_LINE_COLORS,
     onSave,
 }: Props) {
     const [selectedTypeOfDraw, setSelectedTypeOfDraw] =
         useState<DrawType>("area");
     const [finalRect, setFinalRect] = useState<Area | null>(area);
     const [finalLine, setFinalLine] = useState<Line | null>(line);
+    const [areaColor, setAreaColor] = useState(colors.areaColor);
+    const [lineColor, setLineColor] = useState(colors.lineColor);
     const [isDragging, setIsDragging] = useState(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const imageRef = useRef<HTMLImageElement>(null);
@@ -80,18 +85,18 @@ export function DrawAreaModal({
                     : finalLine;
 
             if (rect) {
-                ctx.strokeStyle = "blue";
+                ctx.strokeStyle = areaColor;
                 ctx.strokeRect(rect.x1, rect.y1, rect.x2 - rect.x1, rect.y2 - rect.y1);
             }
             if (allowLine && segment) {
-                ctx.strokeStyle = "yellow";
+                ctx.strokeStyle = lineColor;
                 ctx.beginPath();
                 ctx.moveTo(segment.x1, segment.y1);
                 ctx.lineTo(segment.x2, segment.y2);
                 ctx.stroke();
             }
         },
-        [finalRect, finalLine, allowLine],
+        [finalRect, finalLine, allowLine, areaColor, lineColor],
     );
 
     useEffect(() => {
@@ -236,7 +241,7 @@ export function DrawAreaModal({
                     className="absolute inset-0 w-full h-full cursor-crosshair touch-none"
                 />
             </div>
-            <div className="absolute bottom-4 flex gap-3">
+            <div className="absolute bottom-4 mx-4 flex max-w-[calc(100%-2rem)] flex-wrap items-center justify-center gap-3 rounded-xl bg-primary p-3 shadow-lg">
                 {allowLine && (
                     <ButtonGroup
                         size="sm"
@@ -257,8 +262,30 @@ export function DrawAreaModal({
                         </ButtonGroupItem>
                     </ButtonGroup>
                 )}
+                <label className="flex items-center gap-2 text-sm font-medium text-secondary">
+                    Area color
+                    <input
+                        type="color"
+                        value={areaColor}
+                        onChange={(event) => setAreaColor(event.target.value)}
+                        disabled={isDragging}
+                        className="h-9 w-12 cursor-pointer rounded-lg border border-secondary bg-primary p-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                </label>
+                {allowLine && (
+                    <label className="flex items-center gap-2 text-sm font-medium text-secondary">
+                        Line color
+                        <input
+                            type="color"
+                            value={lineColor}
+                            onChange={(event) => setLineColor(event.target.value)}
+                            disabled={isDragging}
+                            className="h-9 w-12 cursor-pointer rounded-lg border border-secondary bg-primary p-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50"
+                        />
+                    </label>
+                )}
                 <Button
-                    onClick={() => onSave(finalRect, allowLine ? finalLine : null)}
+                    onClick={() => onSave(finalRect, allowLine ? finalLine : null, { areaColor, lineColor })}
                     iconLeading={Save}
                     size="md"
                     isDisabled={isDragging || !imageUrl}

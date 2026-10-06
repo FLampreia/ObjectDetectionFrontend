@@ -1,6 +1,7 @@
 import { processImage, storeDetections } from "@/services/detect"
 import { askSocketSessionId, connectWebSocket } from "@/services/socket"
-import { Detection, Area, Line, VideoProcessingResponse } from "@/types"
+import { Detection, Area, Line, DrawingColors, VideoProcessingResponse } from "@/types"
+import { DEFAULT_AREA_LINE_COLORS } from "@/config/drawing"
 import { cocoClassesItems } from "@/utils/coco-classes"
 import { useQueryClient } from "@tanstack/react-query"
 import { useEffect, useRef, useState } from "react"
@@ -104,6 +105,7 @@ export function useFileDetection() {
     const [imageUrl, setImageUrl] = useState<string | null>(null)
     const [area, setArea] = useState<Area | null>(null)
     const [line, setLine] = useState<Line | null>(null)
+    const [drawingColors, setDrawingColors] = useState<DrawingColors>({ ...DEFAULT_AREA_LINE_COLORS })
     const [detections, setDetections] = useState<Detection[]>([])
     const [trackedDetections, setTrackedDetections] = useState<Map<number, Detection>>(
         new Map()
@@ -555,6 +557,8 @@ export function useFileDetection() {
         setArea,
         line,
         setLine,
+        drawingColors,
+        setDrawingColors,
 
         selectedAlgorithm,
         setSelectedAlgorithm,
