@@ -78,8 +78,8 @@ export async function storeDetections(
     result: VideoProcessingResponse,
     algorithm: string,
     confThreshold: number,
-    chosenTeamId?: string | null,
     type: string,
+    chosenTeamId?: string | null,
 ) {
     const token = getAccessToken();
 

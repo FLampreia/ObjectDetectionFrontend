@@ -11,7 +11,7 @@ import { Heading } from "react-aria-components";
 type Props = {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    teamId: string | null;
+    teamId: string;
 };
 
 export function AddMemberModal({ isOpen, onOpenChange, teamId }: Props) {

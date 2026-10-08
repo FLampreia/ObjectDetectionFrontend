@@ -1,12 +1,11 @@
-import { BarChartSquare02, Camera01, File05, Users01 } from "@untitledui/icons";
+import { BarChartSquare02, Camera01, Users01 } from "@untitledui/icons";
 import { SidebarNavigationSectionsSubheadings, type NavSectionType } from "../../application/app-navigation/sidebar-navegation/sidebar-sections-subheadings";
 import { Avatar } from "@/components/base/avatar/avatar";
 import { Button } from "@/components/base/buttons/button";
-import { Star } from "lucide-react";
+import { History, Star } from "lucide-react";
 import { usePathname } from "next/navigation";
 import type { User } from "@/types";
 import { useTeams } from "@/hooks/use-team";
-import { History } from "lucide-react";
 
 
 
@@ -39,7 +38,7 @@ export const Sidebar = ({ user }: { user: User }) => {
                 label: team.name,
                 href: `/team/${team.id}`,
                 icon: () => (
-                    <div className="flex items-center justify-center w-5 h-5 mr-2">
+                    <div className="mr-3 flex size-5 shrink-0 items-center justify-center">
                         <Avatar
                             size="xs"
                             initials={team.name[0].toUpperCase()}

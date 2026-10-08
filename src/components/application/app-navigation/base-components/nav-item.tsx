@@ -7,8 +7,8 @@ import { Badge } from "@/components/base/badges/badges";
 import { cx, sortCx } from "@/utils/cx";
 
 const styles = sortCx({
-    root: "group relative flex max-h-9 w-full cursor-pointer items-center rounded-md bg-primary outline-focus-ring transition duration-100 ease-linear select-none hover:bg-primary_hover focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2",
-    rootSelected: "bg-secondary hover:bg-secondary_hover",
+    root: "group relative flex min-h-11 w-full cursor-pointer items-center rounded-xl bg-primary outline-focus-ring transition duration-150 ease-linear select-none hover:bg-secondary focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-2",
+    rootSelected: "bg-brand-solid shadow-xs hover:bg-brand-solid_hover",
 });
 
 interface NavItemBaseProps {
@@ -39,8 +39,8 @@ export const NavItemBase = ({ current, type, badge, href, icon: Icon, children, 
         <Icon
             aria-hidden="true"
             className={cx(
-                "mr-2 size-5 shrink-0 text-fg-quaternary transition-inherit-all group-hover/item:text-fg-quaternary_hover",
-                current && "text-fg-quaternary_hover",
+                "mr-3 size-5 shrink-0 text-tertiary transition-inherit-all group-hover/item:text-primary",
+                current && "text-white group-hover/item:text-white",
             )}
         />
     );
@@ -59,7 +59,7 @@ export const NavItemBase = ({ current, type, badge, href, icon: Icon, children, 
             className={cx(
                 "flex-1 text-sm font-semibold text-secondary transition-inherit-all group-hover/item:text-secondary_hover",
                 truncate && "truncate",
-                current && "text-secondary_hover",
+                current && "text-white group-hover/item:text-white",
             )}
         >
             {children}
@@ -105,7 +105,7 @@ export const NavItemBase = ({ current, type, badge, href, icon: Icon, children, 
             href={href!}
             target={isExternal ? "_blank" : "_self"}
             rel="noopener noreferrer"
-            className={cx("group/item p-2", styles.root, current && styles.rootSelected)}
+            className={cx("group/item px-3 py-2.5", styles.root, current && styles.rootSelected)}
             onClick={onClick}
             aria-current={current ? "page" : undefined}
         >

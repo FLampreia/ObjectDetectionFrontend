@@ -306,7 +306,7 @@ export function useFileDetection() {
 
             const conf_threshold = minConfidence !== null ? minConfidence / 100 : 0
 
-            await storeDetections(result, selectedAlgorithm, conf_threshold, selectedTeamId, "video")
+            await storeDetections(result, selectedAlgorithm, conf_threshold, "video", selectedTeamId)
 
             ws.close()
             console.log("Connections Finished")
@@ -497,8 +497,8 @@ export function useFileDetection() {
                 result,
                 selectedAlgorithm,
                 conf_threshold,
-                selectedTeamId,
-                "stream"
+                "stream",
+                selectedTeamId
             )
 
             await queryClient.invalidateQueries({

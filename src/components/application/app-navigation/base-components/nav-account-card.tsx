@@ -127,7 +127,7 @@ export const NavAccountCard = ({
     const isDesktop = useBreakpoint("lg");
 
     return (
-        <div ref={triggerRef} className="relative flex items-center gap-3 rounded-xl p-3 ring-1 ring-secondary ring-inset">
+        <div ref={triggerRef} className="relative flex items-center gap-3 rounded-xl bg-secondary p-3 ring-1 ring-secondary ring-inset">
             <AvatarLabelGroup
                 size="md"
                 title={user.username}
@@ -137,7 +137,7 @@ export const NavAccountCard = ({
             />
 
             <AriaDialogTrigger>
-                <AriaButton className="absolute top-2 right-2 flex cursor-pointer items-center justify-center rounded-md p-1.5 text-fg-quaternary outline-focus-ring transition duration-100 ease-linear hover:bg-primary_hover hover:text-fg-quaternary_hover focus-visible:outline-2 focus-visible:outline-offset-2 pressed:bg-primary_hover pressed:text-fg-quaternary_hover">
+                <AriaButton aria-label="Open account menu" className="absolute top-2 right-2 flex cursor-pointer items-center justify-center rounded-lg bg-primary p-1.5 text-tertiary outline-focus-ring transition duration-100 ease-linear hover:bg-primary_hover hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 pressed:bg-primary_hover">
                     <ChevronSelectorVertical className="size-4 shrink-0 stroke-[2.25px]" />
                 </AriaButton>
                 <AriaPopover
