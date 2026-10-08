@@ -3,19 +3,20 @@
 import { Table } from "@/components/application/table/table";
 import { ButtonUtility } from "@/components/base/buttons/button-utility";
 import { ListDetection } from "@/types";
-import { Menu, Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Menu } from "lucide-react";
 import { useState } from "react";
-import { SortDescriptor } from "react-aria-components";
+import { Selection, SortDescriptor } from "react-aria-components";
 import { DetectionObjectsModal } from "../../teams/modals/detections-objects-modal";
 
 type Props = {
     detections: ListDetection[];
     sortDescriptor?: SortDescriptor;
     onSortChange?: (value: SortDescriptor) => void;
+    selectedKeys?: Set<string>;
+    onSelectionChange?: (keys: Selection) => void;
 };
 
-export function DetectionsTable({ detections, sortDescriptor, onSortChange }: Props) {
+export function DetectionsTable({ detections, sortDescriptor, onSortChange, selectedKeys, onSelectionChange }: Props) {
     const [selectedDetection, setSelectedDetection] = useState<ListDetection | null>(null)
     const [isDetectionObjOpen, setIsDetectionObjOpen] = useState(false);
 
@@ -25,6 +26,10 @@ export function DetectionsTable({ detections, sortDescriptor, onSortChange }: Pr
                 aria-label="Detections"
                 sortDescriptor={sortDescriptor}
                 onSortChange={onSortChange}
+                selectionMode={onSelectionChange ? "multiple" : "none"}
+                selectionBehavior={onSelectionChange ? "toggle" : "replace"}
+                selectedKeys={selectedKeys}
+                onSelectionChange={onSelectionChange}
             >
                 <Table.Header>
                     <Table.Head id="created_at" label="Date" isRowHeader allowsSorting />

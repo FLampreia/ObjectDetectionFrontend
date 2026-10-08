@@ -2,26 +2,22 @@
 
 import { TableCard } from "@/components/application/table/table";
 import { NotFoundTable } from "@/components/custom/not-found-table";
-import { useQueryClient } from "@tanstack/react-query";
-import { Team } from "@/types";
-import { useTeamDetections } from "@/hooks/use-team-detections";
+import type { ListDetection } from "@/types";
 import { DetectionsTable } from "@/components/custom/detection/tables/detections-table";
-import { Calendar, SearchLg } from "@untitledui/icons";
-import { InputDate } from "@/components/base/input/input-date";
 import { PaginationPageMinimalCenter } from "@/components/application/pagination/pagination";
-import { DatePicker } from "@/components/application/date-picker/date-picker";
 import { Button } from "@/components/base/buttons/button";
-import { Eraser } from "lucide-react";
+import { Eraser, ListChecks, Trash2, X } from "lucide-react";
 import { DateRangePicker } from "@/components/application/date-picker/date-range-picker";
-import { getLocalTimeZone, today } from "@internationalized/date";
 import { useState } from "react";
-import { DateValue } from "react-aria-components";
+import type { Selection } from "react-aria-components";
 import { useDetections } from "@/hooks/use-detections";
 import { getDetectionReportInterval } from "@/services/reports";
+import { DeleteDetectionConfirmationModal } from "@/components/custom/detection/delete-detection-confirmation-modal";
 
 export function AllDetectionsSection() {
-
-
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+    const [isSelecting, setIsSelecting] = useState(false);
     const {
         detections,
         allDetections,
@@ -35,6 +31,29 @@ export function AllDetectionsSection() {
 
         error,
     } = useDetections();
+
+    // Only detections in the current filtered results can be deleted.
+    const selectedDetectionIds = allDetections
+        .filter((detection: ListDetection) => selectedIds.has(detection.id))
+        .map((detection: ListDetection) => detection.id);
+    const selectedCount = selectedDetectionIds.length;
+    const pageSelectedKeys = new Set<string>(
+        detections.filter((detection: ListDetection) => selectedIds.has(detection.id))
+            .map((detection: ListDetection) => detection.id),
+    );
+
+    function handleSelectionChange(keys: Selection) {
+        // The table header checkbox selects this page; preserve other pages.
+        const pageKeys = keys === "all"
+            ? detections.map((detection: ListDetection) => detection.id)
+            : [...keys].map(String);
+        setSelectedIds((previous) => {
+            const next = new Set(previous);
+            detections.forEach((detection: ListDetection) => next.delete(detection.id));
+            pageKeys.forEach((id: string) => next.add(id));
+            return next;
+        });
+    }
 
     async function handleGenerateReport() {
         if (!dateRange) return;
@@ -62,6 +81,7 @@ export function AllDetectionsSection() {
     }
 
     return (
+        <>
         <TableCard.Root size="sm">
             <TableCard.Header
                 title={"All Detections"}
@@ -76,7 +96,10 @@ export function AllDetectionsSection() {
                             <Button
                                 size="md"
                                 color="secondary"
-                                onClick={() => setDateRange(null)}
+                                onClick={() => {
+                                    setSelectedIds(new Set());
+                                    setDateRange(null);
+                                }}
                                 aria-label="Clear date"
                             >
                                 <Eraser size={20} />
@@ -88,7 +111,10 @@ export function AllDetectionsSection() {
                             aria-label="Date range picker"
                             shouldCloseOnSelect={false}
                             value={dateRange}
-                            onChange={setDateRange}
+                            onChange={(value) => {
+                                setSelectedIds(new Set());
+                                setDateRange(value);
+                            }}
                         />
 
                         <Button
@@ -99,16 +125,69 @@ export function AllDetectionsSection() {
                             Extract Report
                         </Button>
 
+                        <Button
+                            size="md"
+                            color="secondary"
+                            iconLeading={isSelecting ? X : ListChecks}
+                            isDisabled={!isSelecting && (allDetections.length === 0 || !!error)}
+                            aria-expanded={isSelecting}
+                            aria-controls="detection-selection-actions"
+                            onPress={() => {
+                                setSelectedIds(new Set());
+                                setIsSelecting((previous) => !previous);
+                            }}
+                        >
+                            {isSelecting ? "Cancel selection" : "Select detections"}
+                        </Button>
+
                     </div>
                 }
             />
 
-            {allDetections.length !== 0
+            {isSelecting && (
+            <div id="detection-selection-actions" className="flex flex-wrap items-center gap-3 border-b border-secondary bg-secondary px-4 py-3 md:px-5">
+                <p role="status" className="mr-auto text-sm text-secondary">
+                    <span className="font-semibold text-primary">{selectedCount}</span> selected
+                </p>
+
+                <Button
+                    color="secondary"
+                    size="sm"
+                    isDisabled={allDetections.length === 0 || selectedCount === allDetections.length}
+                    onPress={() => setSelectedIds(new Set(allDetections.map((detection: ListDetection) => detection.id)))}
+                >
+                    Select all
+                </Button>
+
+                <Button color="secondary" size="sm" isDisabled={selectedCount === 0} onPress={() => setSelectedIds(new Set())}>
+                    Deselect all
+                </Button>
+
+                <Button
+                    color="secondary-destructive"
+                    size="sm"
+                    iconLeading={Trash2}
+                    isDisabled={selectedCount === 0}
+                    onPress={() => setIsDeleteOpen(true)}
+                >
+                    Delete detections
+                </Button>
+
+                <p className="w-full text-xs text-tertiary">Select all includes every page in the current date filter.</p>
+                
+            </div>
+            )}
+
+            {error ? (
+                <p role="alert" className="px-4 py-6 text-sm text-error-primary md:px-5">{error}</p>
+            ) : allDetections.length !== 0
                 ?
                 <DetectionsTable
                     detections={detections}
                     sortDescriptor={sortDescriptor}
                     onSortChange={setSortDescriptor}
+                    selectedKeys={isSelecting ? pageSelectedKeys : undefined}
+                    onSelectionChange={isSelecting ? handleSelectionChange : undefined}
                 />
                 :
                 <NotFoundTable type="detection" />
@@ -116,11 +195,25 @@ export function AllDetectionsSection() {
 
             <PaginationPageMinimalCenter
                 page={currentPage}
-                total={totalDetections}
+                total={Math.max(1, totalDetections)}
                 onPageChange={setCurrentPage}
                 className="px-4 py-3 md:px-6 md:pt-3 md:pb-4"
             />
         </TableCard.Root>
+
+        {isDeleteOpen && (
+            <DeleteDetectionConfirmationModal
+                isOpen={isDeleteOpen}
+                onOpenChange={setIsDeleteOpen}
+                detection_id={selectedDetectionIds}
+                onDeleted={() => {
+                    setSelectedIds(new Set());
+                    setIsSelecting(false);
+                    setCurrentPage(1);
+                }}
+            />
+        )}
+        </>
 
     )
 }
