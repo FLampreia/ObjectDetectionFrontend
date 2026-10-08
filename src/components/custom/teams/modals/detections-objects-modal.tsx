@@ -8,12 +8,13 @@ import { Button } from "@/components/base/buttons/button"
 
 import { useDetectionObjects } from "@/hooks/use-detections-objects"
 import { ListDetection } from "@/types"
-import { X } from "lucide-react"
+import { Trash, X } from "lucide-react"
 import { NotFoundTable } from "../../not-found-table"
 import { MultiSelect } from "@/components/base/select/multi-select"
 import { ExtractSingleReportModal } from "../../detection/extract-single-report-modal"
 import { useState } from "react"
 import { ObjectsTable } from "../../detection/tables/objects-table"
+import { DeleteDetectionConfirmationModal } from "../../detection/delete-detection-confirmation-modal"
 
 type DetectionObjectsModalProps = {
     isOpen: boolean;
@@ -30,6 +31,7 @@ export function DetectionObjectsModal({
 }: DetectionObjectsModalProps) {
 
     const [isExtractOpen, setIsExtractOpen] = useState(false);
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
     const {
         objects,
@@ -148,7 +150,7 @@ export function DetectionObjectsModal({
                             <div className="flex items-center gap-3">
                                 <Button
                                     size="md"
-                                    onClick={()=>{
+                                    onClick={() => {
                                         setIsExtractOpen(true)
                                     }}
                                 >
@@ -156,13 +158,22 @@ export function DetectionObjectsModal({
                                 </Button>
 
                                 <Button
+                                    color="secondary-destructive"
+                                    size="md"
+                                    onClick={() => {
+                                        setIsDeleteOpen(true)
+                                    }}
+                                    iconLeading = {<Trash size={20}/>}
+                                />
+
+                                <Button
                                     color="secondary"
-                                    size="sm"
+                                    size="md"
                                     onClick={() => onOpenChange(false)}
                                     aria-label="Close"
-                                >
-                                    <X size={18} />
-                                </Button>
+                                    iconLeading={<X size={20} />}
+                                />
+
                             </div>
                         </div>
 
@@ -364,6 +375,15 @@ export function DetectionObjectsModal({
                     isOpen={isExtractOpen}
                     onOpenChange={setIsExtractOpen}
                     detection_id={detection.id}
+                />
+            )}
+
+            {isDeleteOpen && (
+                <DeleteDetectionConfirmationModal
+                    isOpen={isDeleteOpen}
+                    onOpenChange={setIsDeleteOpen}
+                    detection_id={detection.id}
+                    onDeleted={() => onOpenChange(false)}
                 />
             )}
         </>

@@ -54,7 +54,7 @@ export function TeamDetectionsSection({ teamId }: Props) {
                                 onClick={() => setSearchDate(null)}
                                 aria-label="Clear date"
                             >
-                                <Eraser size={16} />
+                                <Eraser size={20} />
                             </Button>
                         )}
                         <DatePicker size="md" aria-label="Date picker" value={searchDate} onChange={setSearchDate} />

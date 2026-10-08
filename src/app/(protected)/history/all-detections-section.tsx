@@ -79,7 +79,7 @@ export function AllDetectionsSection() {
                                 onClick={() => setDateRange(null)}
                                 aria-label="Clear date"
                             >
-                                <Eraser size={16} />
+                                <Eraser size={20} />
                             </Button>
                         )}
 
