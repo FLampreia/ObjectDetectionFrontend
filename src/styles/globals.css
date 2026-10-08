@@ -26,6 +26,17 @@
     transition-timing-function: inherit;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html,
+    body {
+        scroll-behavior: auto;
+    }
+}
+
 html,
 body {
     font-family: var(--font-body);

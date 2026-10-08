@@ -1,26 +1,22 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 type Props = {
-  title: string;
-  desc: string;
-  icon: LucideIcon;
+    title: string;
+    desc: string;
+    icon: LucideIcon;
 };
 
 export default function FeatureCard({ title, desc, icon: Icon }: Props) {
-  return (
-    <motion.div
-      whileHover={{ scale: 1.05 }}
-      className="bg-primary/40 p-6 rounded-2xl ring-secondary ring-inset  lg:rounded-xl lg:ring-1"
-    >
-      <div className="flex items-center gap-3 mb-3">
-        <Icon className="w-6 h-6 text-blue-400 shrink-0" />
-        <h3 className="text-lg font-semibold text-white">{title}</h3>
-      </div>
+    return (
+        <article className="h-full rounded-xl border border-secondary bg-primary p-6 shadow-xs transition-colors hover:border-brand">
+            
+            <div className="mb-5 flex size-11 items-center justify-center rounded-xl bg-brand-solid text-white shadow-xs">
+                <Icon aria-hidden="true" className="size-5" />
+            </div>
 
-      <p className="text-sm text-blue-300">{desc}</p>
-    </motion.div>
-  );
+            <h3 className="text-md font-semibold text-primary">{title}</h3>
+            
+            <p className="mt-2 text-sm leading-6 text-tertiary">{desc}</p>
+        </article>
+    );
 }

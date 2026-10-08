@@ -1,62 +1,51 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import AppTitle from "@/components/custom/welcome/textTitles";
+import { ArrowUpRight } from "lucide-react";
+import { Link } from "react-aria-components";
+import { NavAccountCard } from "@/components/application/app-navigation/base-components/nav-account-card";
+import { Button } from "@/components/base/buttons/button";
+import { NavigationBrand } from "@/components/custom/layout/navigation-brand";
 import { useAuth } from "@/hooks/use-auth";
-import { Button } from "../../base/buttons/button";
-import { NavAccountCard } from "../../application/app-navigation/base-components/nav-account-card";
-
-
 
 export default function Header() {
-  const router = useRouter();
+    const { user } = useAuth();
 
-  const { user } = useAuth();
-  const menuRef = useRef<HTMLDivElement>(null);
+    return (
+        <header className="sticky top-0 z-40 w-full border-b border-primary bg-primary/95 backdrop-blur-md">
+            <div className="mx-auto flex min-h-20 max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+                <NavigationBrand href="/" />
 
+                <nav aria-label="Welcome page navigation" className="hidden items-center gap-6 lg:flex">
+                    {[
+                        { href: "#features", label: "Features" },
+                        { href: "#workflow", label: "How it works" },
+                        { href: "#demo", label: "Preview" },
+                    ].map((item) => (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            className="rounded-md text-sm font-medium text-tertiary outline-focus-ring transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4"
+                        >
+                            {item.label}
+                        </Link>
+                    ))}
+                </nav>
 
-
-  return (
-    <header className="w-full py-4 px-6 ring-secondary bg-primary/40 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-
-        {/* Left - Title */}
-        <div
-          className="cursor-pointer z-50"
-          onClick={() => {
-            router.push("/");
-          }}
-        >
-          <AppTitle size="xs" />
-        </div>
-
-
-        {/* Right - Auth/User + Mobile Toggle */}
-        <div className="flex items-center gap-4">
-          {user ? (
-
-            <div className="relative" ref={menuRef}>
-
-              {/* Desktop */}
-              <div className="hidden md:block cursor-pointer">
-                <NavAccountCard user={user}/>
-              </div>
-
-              {/* Mobile - only avatar */}
-              <div className="md:hidden">
-                <NavAccountCard user={user}/>
-              </div>
-
+                {user ? (
+                    <>
+                        <div className="hidden w-64 md:block">
+                            <NavAccountCard user={user} />
+                        </div>
+                        <Button href="/dashboard" color="secondary" size="sm" className="md:hidden">
+                            Dashboard
+                        </Button>
+                    </>
+                ) : (
+                    <Button href="/auth" size="md" iconTrailing={ArrowUpRight}>
+                        Get started
+                    </Button>
+                )}
             </div>
-          ) : (
-            <Button size="lg" onClick={() => router.push("/auth")}>
-              Get Started
-            </Button>
-          )}
-        </div>
-      </div>
-    </header>
-  );
+        </header>
+    );
 }
-
