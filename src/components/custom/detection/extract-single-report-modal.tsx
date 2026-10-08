@@ -89,7 +89,7 @@ export function ExtractSingleReportModal({ isOpen, onOpenChange, detection_id }:
             isDismissable={!isGenerating}
             isKeyboardDismissDisabled={isGenerating}
         >
-            <Modal className="w-full max-w-lg">
+            <Modal className="w-full max-w-2xl">
                 <Dialog className="p-5 sm:p-6" aria-describedby={descriptionId}>
                     <ModalHeader
                         title="Extract report"

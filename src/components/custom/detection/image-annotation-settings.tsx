@@ -56,7 +56,7 @@ export function ImageAnnotationSettings({ config, onChange, isDisabled }: {
                 Appearance
             </Button>
             <ModalOverlay isOpen={isOpen} onOpenChange={setIsOpen} isDismissable>
-                <Modal className="w-full max-w-md">
+                <Modal className="w-full max-w-2xl">
                     <Dialog className="p-5 sm:p-6" aria-describedby={descriptionId}>
                         <ModalHeader
                             title="Image appearance"
