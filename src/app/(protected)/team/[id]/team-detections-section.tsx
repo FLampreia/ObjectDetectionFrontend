@@ -63,6 +63,7 @@ export function TeamDetectionsSection({ teamId }: Props) {
 
             <TableState isLoading={isLoading} error={error} isEmpty={allDetections.length === 0} type="detection">
                     <DetectionsTable
+                        showUsername
                         detections={detections}
                         sortDescriptor={sortDescriptor}
                         onSortChange={setSortDescriptor}

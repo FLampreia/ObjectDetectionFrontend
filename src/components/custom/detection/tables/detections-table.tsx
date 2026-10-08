@@ -14,9 +14,10 @@ type Props = {
     onSortChange?: (value: SortDescriptor) => void;
     selectedKeys?: Set<string>;
     onSelectionChange?: (keys: Selection) => void;
+    showUsername?: boolean;
 };
 
-export function DetectionsTable({ detections, sortDescriptor, onSortChange, selectedKeys, onSelectionChange }: Props) {
+export function DetectionsTable({ detections, sortDescriptor, onSortChange, selectedKeys, onSelectionChange, showUsername = false }: Props) {
     const [selectedDetection, setSelectedDetection] = useState<ListDetection | null>(null)
     const [isDetectionObjOpen, setIsDetectionObjOpen] = useState(false);
 
@@ -33,7 +34,7 @@ export function DetectionsTable({ detections, sortDescriptor, onSortChange, sele
             >
                 <Table.Header>
                     <Table.Head id="created_at" label="Date" isRowHeader allowsSorting />
-                    <Table.Head id="username" label="User" allowsSorting />
+                    {showUsername && <Table.Head id="username" label="User" allowsSorting />}
                     <Table.Head id="model" label="Model" allowsSorting />
                     <Table.Head id="type" label="Type" allowsSorting />
                     <Table.Head id="conf_threshold" label="Confidence (%)" allowsSorting />
@@ -49,9 +50,11 @@ export function DetectionsTable({ detections, sortDescriptor, onSortChange, sele
                                 {new Date(detection.created_at).toLocaleString()}
                             </Table.Cell>
 
-                            <Table.Cell>
-                                {detection.username}
-                            </Table.Cell>
+                            {showUsername && (
+                                <Table.Cell>
+                                    {detection.username}
+                                </Table.Cell>
+                            )}
 
                             <Table.Cell>
                                 {detection.model}
