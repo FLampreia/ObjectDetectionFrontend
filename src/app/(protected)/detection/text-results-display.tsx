@@ -4,6 +4,7 @@ import { Badge } from "@/components/base/badges/badges";
 import type { Area, Detection, Line } from "@/types";
 import { ScanSearch } from "lucide-react";
 import { Tab, TabList, TabPanel, Tabs } from "react-aria-components";
+import { cx } from "@/utils/cx";
 
 interface TextDisplayBoxProps {
     type: string;
@@ -15,6 +16,7 @@ interface TextDisplayBoxProps {
     imageHeight: number;
     videoDuration?: number;
     videoCurrentTime?: number;
+    layout?: "compact" | "expanded";
 }
 
 function formatTime(seconds: number) {
@@ -43,7 +45,9 @@ export function TextResultDisplay({
     imageHeight,
     videoDuration,
     videoCurrentTime,
+    layout = "compact",
 }: TextDisplayBoxProps) {
+    const expanded = layout === "expanded";
     const classes = new Map<
         number,
         { id: number; name: string; count: number; confidenceTotal: number }
@@ -97,9 +101,9 @@ export function TextResultDisplay({
     return (
         <section
             aria-label={`${type} detection results`}
-            className="flex h-112 min-w-0 flex-col overflow-hidden rounded-lg border border-secondary bg-primary lg:rounded-xl"
+            className={cx("flex min-w-0 flex-col overflow-hidden rounded-xl border border-secondary bg-primary", !expanded && "h-112")}
         >
-            <div className="shrink-0 px-4 pt-4">
+            <div className={cx("shrink-0", expanded ? "px-5 pt-5 sm:px-6 sm:pt-6" : "px-4 pt-4")}>
                 <div className="flex items-center justify-between gap-3">
                     <h2 className="text-md font-semibold text-primary">
                         Detection results
@@ -109,7 +113,7 @@ export function TextResultDisplay({
                     </Badge>
                 </div>
 
-                <p className="mt-1 text-xs text-tertiary">
+                <p className={cx("mt-1 text-tertiary", expanded ? "text-sm" : "text-xs")}>
                     {isImage
                         ? "Summary of the detected objects"
                         : "Results for the current frame"}
@@ -127,7 +131,7 @@ export function TextResultDisplay({
                         },
                     ].map((stat) => (
                         <div key={stat.label} className="min-w-0 px-3">
-                            <dt className="text-xs text-tertiary">{stat.label}</dt>
+                            <dt className={cx("text-tertiary", expanded ? "text-sm" : "text-xs")}>{stat.label}</dt>
                             <dd className="mt-1 text-lg font-semibold tabular-nums text-primary">
                                 {stat.value}
                             </dd>
@@ -142,7 +146,7 @@ export function TextResultDisplay({
             >
                 <TabList
                     aria-label="Result views"
-                    className="mx-4 flex shrink-0 gap-5 border-b border-secondary"
+                    className={cx("flex shrink-0 gap-5 border-b border-secondary", expanded ? "mx-5 sm:mx-6" : "mx-4")}
                 >
                     <Tab id="overview" className={tabClassName}>
                         Overview
@@ -159,62 +163,64 @@ export function TextResultDisplay({
 
                 <TabPanel
                     id="overview"
-                    className="min-h-0 flex-1 space-y-5 overflow-y-auto p-4 outline-hidden"
+                    className={cx("outline-hidden", expanded ? "grid items-start gap-6 p-5 sm:p-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]" : "min-h-0 flex-1 space-y-5 overflow-y-auto p-4")}
                 >
-                    <div>
-                        <h3 className="text-sm font-semibold text-primary">
-                            Objects by class
-                        </h3>
-                        {hasDetections ? (
-                            <ul className="mt-2 divide-y divide-secondary">
-                                {classSummary.map((item) => (
-                                    <li
-                                        key={item.id}
-                                        className="flex items-center justify-between gap-3 py-2.5"
-                                    >
-                                        <div className="min-w-0">
-                                            <p className="truncate text-sm font-medium text-secondary">
-                                                {item.name}
-                                            </p>
-                                            <p className="mt-0.5 text-xs text-tertiary">
-                                                Avg. confidence{" "}
-                                                {percentage(item.confidenceTotal / item.count)}
-                                            </p>
-                                        </div>
-                                        <Badge color="gray" size="sm">
-                                            {item.count}
-                                        </Badge>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            emptyState
+                    <div className="min-w-0 space-y-5">
+                        <div>
+                            <h3 className="text-sm font-semibold text-primary">
+                                Objects by class
+                            </h3>
+                            {hasDetections ? (
+                                <ul className="mt-2 divide-y divide-secondary">
+                                    {classSummary.map((item) => (
+                                        <li
+                                            key={item.id}
+                                            className="flex items-center justify-between gap-3 py-2.5"
+                                        >
+                                            <div className="min-w-0">
+                                                <p className={cx("text-sm font-medium text-secondary", expanded ? "break-words" : "truncate")}>
+                                                    {item.name}
+                                                </p>
+                                                <p className={cx("mt-0.5 text-tertiary", expanded ? "text-sm" : "text-xs")}>
+                                                    Avg. confidence{" "}
+                                                    {percentage(item.confidenceTotal / item.count)}
+                                                </p>
+                                            </div>
+                                            <Badge color="gray" size="sm">
+                                                {item.count}
+                                            </Badge>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                emptyState
+                            )}
+                        </div>
+
+                        {hasDetections && (
+                            <dl className={cx("flex flex-wrap justify-between gap-3 border-t border-secondary pt-3", expanded ? "text-sm" : "text-xs")}>
+                                <div>
+                                    <dt className="text-tertiary">Lowest confidence</dt>
+                                    <dd className="mt-1 font-medium tabular-nums text-secondary">
+                                        {percentage(lowest)}
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt className="text-tertiary">Highest confidence</dt>
+                                    <dd className="mt-1 font-medium tabular-nums text-secondary">
+                                        {percentage(highest)}
+                                    </dd>
+                                </div>
+                            </dl>
                         )}
                     </div>
 
-                    {hasDetections && (
-                        <dl className="flex flex-wrap justify-between gap-3 border-t border-secondary pt-3 text-xs">
-                            <div>
-                                <dt className="text-tertiary">Lowest confidence</dt>
-                                <dd className="mt-1 font-medium tabular-nums text-secondary">
-                                    {percentage(lowest)}
-                                </dd>
-                            </div>
-                            <div>
-                                <dt className="text-tertiary">Highest confidence</dt>
-                                <dd className="mt-1 font-medium tabular-nums text-secondary">
-                                    {percentage(highest)}
-                                </dd>
-                            </div>
-                        </dl>
-                    )}
-
-                    <div className="border-t border-secondary pt-4">
+                    <div className={expanded ? "min-w-0 rounded-lg border border-secondary bg-secondary p-5" : "border-t border-secondary pt-4"}>
                         <h3 className="text-sm font-semibold text-primary">
                             {type} details
                         </h3>
 
-                        <dl className="mt-3 space-y-2 text-xs">
+                        <dl className={cx("mt-3", expanded ? "space-y-4 text-sm" : "space-y-2 text-xs")}>
                             <div className="flex justify-between gap-3">
                                 <dt className="text-tertiary">Resolution</dt>
                                 <dd className="text-right font-medium tabular-nums text-secondary">
@@ -271,30 +277,30 @@ export function TextResultDisplay({
 
                 <TabPanel
                     id="objects"
-                    className="min-h-0 flex-1 overflow-y-auto p-4 outline-hidden"
+                    className={cx("outline-hidden", expanded ? "p-5 sm:p-6" : "min-h-0 flex-1 overflow-y-auto p-4")}
                 >
                     {hasDetections ? (
                         <>
-                            <p className="mb-2 text-xs text-tertiary">
+                            <p className={cx("mb-3 text-tertiary", expanded ? "text-sm" : "text-xs")}>
                                 Numbers match the labels drawn on the image.
                             </p>
 
-                            <ol className="divide-y divide-secondary">
+                            <ol className={expanded ? "grid gap-3 xl:grid-cols-2" : "divide-y divide-secondary"}>
                                 {detections.map((detection, index) => (
-                                    <li key={index} className="flex items-start gap-3 py-3">
+                                    <li key={index} className={cx("flex items-start gap-3", expanded ? "min-w-0 rounded-lg border border-secondary p-4" : "py-3")}>
                                         <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-secondary text-xs font-semibold tabular-nums text-secondary">
                                             {index + 1}
                                         </span>
                                         <div className="min-w-0 flex-1">
                                             <div className="flex items-center justify-between gap-2">
-                                                <p className="truncate text-sm font-medium text-primary">
+                                                <p className={cx("text-sm font-medium text-primary", expanded ? "break-words" : "truncate")}>
                                                     {detection.class_name}
                                                 </p>
                                                 <Badge color="gray" size="sm">
                                                     {percentage(detection.confidence)}
                                                 </Badge>
                                             </div>
-                                            <p className="mt-1 text-xs tabular-nums text-tertiary">
+                                            <p className={cx("mt-1 tabular-nums text-tertiary", expanded ? "text-sm" : "text-xs")}>
                                                 Box{" "}
                                                 {Math.round(
                                                     Math.abs(detection.bbox[2] - detection.bbox[0]),
@@ -318,24 +324,24 @@ export function TextResultDisplay({
                 {trackedDetections !== undefined && (
                     <TabPanel
                         id="tracked"
-                        className="min-h-0 flex-1 overflow-y-auto p-4 outline-hidden"
+                        className={cx("outline-hidden", expanded ? "p-5 sm:p-6" : "min-h-0 flex-1 overflow-y-auto p-4")}
                     >
-                        <p className="mb-3 text-xs text-tertiary">
+                        <p className={cx("mb-3 text-tertiary", expanded ? "text-sm" : "text-xs")}>
                             {trackedDetections.length} tracked objects across processed
                             frames.
                         </p>
                         {trackedDetections.length > 0 ? (
-                            <ul className="divide-y divide-secondary">
+                            <ul className={expanded ? "grid gap-3 xl:grid-cols-2" : "divide-y divide-secondary"}>
                                 {trackedDetections.map((detection, index) => (
                                     <li
                                         key={detection.track_id ?? index}
-                                        className="flex items-center justify-between gap-3 py-3"
+                                        className={cx("flex items-center justify-between gap-3", expanded ? "min-w-0 rounded-lg border border-secondary p-4" : "py-3")}
                                     >
                                         <div className="min-w-0">
-                                            <p className="truncate text-sm font-medium text-primary">
+                                            <p className={cx("text-sm font-medium text-primary", expanded ? "break-words" : "truncate")}>
                                                 {detection.class_name}
                                             </p>
-                                            <p className="mt-1 text-xs tabular-nums text-tertiary">
+                                            <p className={cx("mt-1 tabular-nums text-tertiary", expanded ? "text-sm" : "text-xs")}>
                                                 Track #{detection.track_id ?? "—"}
                                             </p>
                                         </div>

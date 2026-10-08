@@ -5,7 +5,7 @@ import { MinConfidenceInput } from "@/components/custom/detection/min-confidence
 import { MultiSelectClassesBox } from "@/components/custom/detection/multi-select-class-box"
 import { SelectTeamBox } from "@/components/custom/detection/select-team-box"
 import { Camera01 } from "@untitledui/icons"
-import { PenLine } from "lucide-react"
+import { Film, PenLine, SlidersHorizontal } from "lucide-react"
 import { useRef, useState } from "react"
 import { useAlgorithms } from "@/hooks/use-algorithms"
 import { useFileDetection } from "@/hooks/use-file-detection"
@@ -99,57 +99,69 @@ export function VideoDetectionSection() {
 
     return (
         <>
-            <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+            <section aria-labelledby="video-configuration-title" className="overflow-hidden rounded-xl border border-secondary bg-primary">
+                <div className="flex items-start gap-3 border-b border-secondary bg-secondary px-5 py-4">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-secondary bg-primary text-brand-secondary">
+                        <SlidersHorizontal className="size-4" aria-hidden="true" />
+                    </div>
+                    <div>
+                        <h2 id="video-configuration-title" className="text-sm font-semibold text-primary">Video configuration</h2>
+                        <p className="mt-1 text-sm text-tertiary">Upload a video and choose how to detect and track its objects.</p>
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 items-start gap-x-6 gap-y-5 p-5 sm:grid-cols-2 xl:grid-cols-6">
+                    <div className="min-w-0 xl:col-span-2">
+                        <FileUploadInput
+                            type="video"
+                            accepted="MP4, MKV"
+                            onFileSelect={async (file) => {
+                                if (videoUrl) {
+                                    URL.revokeObjectURL(videoUrl)
+                                }
 
+                                const url = URL.createObjectURL(file)
 
-                    <FileUploadInput
-                        type="video"
-                        accepted="MP4, MKV"
-                        onFileSelect={async (file) => {
-                            if (videoUrl) {
-                                URL.revokeObjectURL(videoUrl)
-                            }
+                                setFile(file)
+                                setVideoUrl(url)
 
-                            const url = URL.createObjectURL(file)
+                                const firstFrame = await extractFirstFrame(url)
+                                setImageUrl(firstFrame)
 
-                            setFile(file)
-                            setVideoUrl(url)
-
-                            const firstFrame = await extractFirstFrame(url)
-                            setImageUrl(firstFrame)
-
-                            setArea(null)
-                            setLine(null)
-                        }}
-                    />
-
-                    <AlgorithmSelect
-                        algorithms={algorithms}
-                        selectedAlgorithm={selectedAlgorithm}
-                        onAlgorithmChange={setSelectedAlgorithm}
-                    />
-
-                    <MultiSelectClassesBox
-                        selectedKeys={selectedClasses}
-                        onSelectionChange={setSelectedClasses}
-                    />
-
-                    <SelectTeamBox
-                        selectedTeamId={selectedTeamId}
-                        onTeamChange={setSelectedTeamId}
-                    />
-
-
-                    <MinConfidenceInput
-                        value={minConfidence}
-                        onChange={(confValue) => {
-                            setMinConfidence(confValue)
-                        }}
-                    />
+                                setArea(null)
+                                setLine(null)
+                            }}
+                        />
+                    </div>
+                    <div className="min-w-0 xl:col-span-2">
+                        <AlgorithmSelect
+                            algorithms={algorithms}
+                            selectedAlgorithm={selectedAlgorithm}
+                            onAlgorithmChange={setSelectedAlgorithm}
+                        />
+                    </div>
+                    <div className="min-w-0 sm:col-span-2 xl:col-span-2">
+                        <MultiSelectClassesBox
+                            selectedKeys={selectedClasses}
+                            onSelectionChange={setSelectedClasses}
+                        />
+                    </div>
+                    <div className="min-w-0 xl:col-span-3">
+                        <SelectTeamBox
+                            selectedTeamId={selectedTeamId}
+                            onTeamChange={setSelectedTeamId}
+                        />
+                    </div>
+                    <div className="min-w-0 xl:col-span-3">
+                        <MinConfidenceInput
+                            value={minConfidence}
+                            onChange={(confValue) => {
+                                setMinConfidence(confValue)
+                            }}
+                        />
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap gap-4 justify-end">
+                <div className="flex flex-wrap items-center justify-end gap-3 border-t border-secondary px-5 py-4">
                     <Button
                         iconLeading={<PenLine />}
                         color="secondary"
@@ -162,7 +174,7 @@ export function VideoDetectionSection() {
                         iconLeading={<Camera01 />}
                         onClick={async () => {
                             if (!videoRef.current) return
-                            
+
                             // Reset video
                             videoRef.current.pause()
 
@@ -192,33 +204,45 @@ export function VideoDetectionSection() {
                                 ((selectedClasses as Set<string | number> | undefined)?.size ?? 0) === 0
                             )
                         }
+                        isLoading={loading}
+                        showTextWhileLoading
                     >
                         {loading ? "Detecting..." : "Detect"}
                     </Button>
 
                 </div>
-            </div>
+            </section>
 
-            <section className="mt-4 grid grid-cols-1 lg:grid-cols-[13fr_7fr] gap-4 w-full items-start">
-                <VideoDisplayBox
-                    colors={drawingColors}
-                    videoRef={videoRef}
-                    videoUrl={videoUrl}
-                    area={area}
-                    line={line}
-                    detections={detections}
-                    onImageLoad={(width, height) =>
-                        setVideoInfo({
-                            width,
-                            height,
-                        })
-                    }
-                    onDurationChange={setVideoDuration}
-                    onCurrentTimeChange={setVideoCurrentTime}
-                    loading={loading}
-                />
+            <div className="mt-6 flex w-full flex-col gap-6">
+                <section aria-labelledby="video-preview-title" className="min-w-0">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <h2 id="video-preview-title" className="flex items-center gap-2 text-sm font-semibold text-primary">
+                            <Film className="size-4 text-tertiary" aria-hidden="true" />
+                            Video preview
+                        </h2>
+                        {file && <p className="min-w-0 break-all text-sm text-tertiary">{file.name}</p>}
+                    </div>
+                    <VideoDisplayBox
+                        colors={drawingColors}
+                        videoRef={videoRef}
+                        videoUrl={videoUrl}
+                        area={area}
+                        line={line}
+                        detections={detections}
+                        onImageLoad={(width, height) =>
+                            setVideoInfo({
+                                width,
+                                height,
+                            })
+                        }
+                        onDurationChange={setVideoDuration}
+                        onCurrentTimeChange={setVideoCurrentTime}
+                        loading={loading}
+                    />
+                </section>
 
                 <TextResultDisplay
+                    layout="expanded"
                     type="Video"
                     detections={detections}
                     trackedDetections={trackedDetections}
@@ -230,7 +254,7 @@ export function VideoDetectionSection() {
                     videoDuration={videoDuration}
                 />
 
-            </section>
+            </div>
 
             <FullScreenModal
                 isOpen={isAreaOpen}

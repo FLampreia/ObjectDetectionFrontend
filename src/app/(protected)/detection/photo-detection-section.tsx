@@ -5,7 +5,7 @@ import { MultiSelectClassesBox } from "@/components/custom/detection/multi-selec
 import { useState } from "react"
 import { ImageDisplayBox } from "./image-display-box"
 import { Button } from "@/components/base/buttons/button"
-import { PenLine } from "lucide-react"
+import { ImageIcon, PenLine, SlidersHorizontal } from "lucide-react"
 import { Camera01 } from "@untitledui/icons"
 import { useFileDetection } from "@/hooks/use-file-detection"
 import { TextResultDisplay } from "./text-results-display"
@@ -63,47 +63,59 @@ export function PhotoDetectionSection() {
 
     return (
         <>
-            <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
-
-
-                    <FileUploadInput
-                        type="photo"
-                        accepted="SVG, PNG, JPG"
-                        onFileSelect={(file) => {
-                            setFile(file)
-                            setArea(null)
-                            setDetections([])
-                            setTrackedDetections(new Map())
-                        }}
-                    />
-
-                    <AlgorithmSelect
-                        algorithms={algorithms}
-                        selectedAlgorithm={selectedAlgorithm}
-                        onAlgorithmChange={setSelectedAlgorithm}
-                    />
-
-                    <MultiSelectClassesBox
-                        selectedKeys={selectedClasses}
-                        onSelectionChange={setSelectedClasses}
-                    />
-
-                    <SelectTeamBox
-                        selectedTeamId={selectedTeamId}
-                        onTeamChange={setSelectedTeamId}
-                    />
-
-
-                    <MinConfidenceInput
-                        value={minConfidence}
-                        onChange={(confValue) => {
-                            setMinConfidence(confValue)
-                        }}
-                    />
+            <section aria-labelledby="photo-configuration-title" className="overflow-hidden rounded-xl border border-secondary bg-primary">
+                <div className="flex items-start gap-3 border-b border-secondary bg-secondary px-5 py-4">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-secondary bg-primary text-brand-secondary">
+                        <SlidersHorizontal className="size-4" aria-hidden="true" />
+                    </div>
+                    <div>
+                        <h2 id="photo-configuration-title" className="text-sm font-semibold text-primary">Photo configuration</h2>
+                        <p className="mt-1 text-sm text-tertiary">Upload a photo and choose how to detect its objects.</p>
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 items-start gap-x-6 gap-y-5 p-5 sm:grid-cols-2 xl:grid-cols-6">
+                    <div className="min-w-0 xl:col-span-2">
+                        <FileUploadInput
+                            type="photo"
+                            accepted="SVG, PNG, JPG"
+                            onFileSelect={(file) => {
+                                setFile(file)
+                                setArea(null)
+                                setDetections([])
+                                setTrackedDetections(new Map())
+                            }}
+                        />
+                    </div>
+                    <div className="min-w-0 xl:col-span-2">
+                        <AlgorithmSelect
+                            algorithms={algorithms}
+                            selectedAlgorithm={selectedAlgorithm}
+                            onAlgorithmChange={setSelectedAlgorithm}
+                        />
+                    </div>
+                    <div className="min-w-0 sm:col-span-2 xl:col-span-2">
+                        <MultiSelectClassesBox
+                            selectedKeys={selectedClasses}
+                            onSelectionChange={setSelectedClasses}
+                        />
+                    </div>
+                    <div className="min-w-0 xl:col-span-3">
+                        <SelectTeamBox
+                            selectedTeamId={selectedTeamId}
+                            onTeamChange={setSelectedTeamId}
+                        />
+                    </div>
+                    <div className="min-w-0 xl:col-span-3">
+                        <MinConfidenceInput
+                            value={minConfidence}
+                            onChange={(confValue) => {
+                                setMinConfidence(confValue)
+                            }}
+                        />
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-4 justify-end">
+                <div className="flex flex-wrap items-center justify-end gap-3 border-t border-secondary px-5 py-4">
 
                     <ImageAnnotationSettings config={drawingConfig} onChange={setDrawingConfig} isDisabled={loading} />
 
@@ -127,32 +139,44 @@ export function PhotoDetectionSection() {
                                 ((selectedClasses as Set<string | number> | undefined)?.size ?? 0) === 0
                             )
                         }
+                        isLoading={loading}
+                        showTextWhileLoading
                     >
                         {loading ? "Detecting..." : "Detect"}
                     </Button>
 
                 </div>
-            </div>
+            </section>
 
             {detectionError && (
                 <div className="mt-4"><InlineFeedback>{detectionError}</InlineFeedback></div>
             )}
 
-            <section className="mt-4 grid grid-cols-1 lg:grid-cols-[13fr_7fr] gap-4 w-full items-start">
-                <ImageDisplayBox
-                    imageUrl={imageUrl}
-                    detections={detections}
-                    area={area}
-                    drawingConfig={drawingConfig}
-                    onImageLoad={(width, height) =>
-                        setImageSize({
-                            width,
-                            height,
-                        })
-                    }
-                />
+            <div className="mt-6 flex w-full flex-col gap-6">
+                <section aria-labelledby="photo-preview-title" className="min-w-0">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <h2 id="photo-preview-title" className="flex items-center gap-2 text-sm font-semibold text-primary">
+                            <ImageIcon className="size-4 text-tertiary" aria-hidden="true" />
+                            Image preview
+                        </h2>
+                        {file && <p className="min-w-0 break-all text-sm text-tertiary">{file.name}</p>}
+                    </div>
+                    <ImageDisplayBox
+                        imageUrl={imageUrl}
+                        detections={detections}
+                        area={area}
+                        drawingConfig={drawingConfig}
+                        onImageLoad={(width, height) =>
+                            setImageSize({
+                                width,
+                                height,
+                            })
+                        }
+                    />
+                </section>
 
                 <TextResultDisplay
+                    layout="expanded"
                     type="Image"
                     detections={detections}
                     area={area}
@@ -160,7 +184,7 @@ export function PhotoDetectionSection() {
                     imageHeight={imageSize.height}
                 />
 
-            </section>
+            </div>
 
             <FullScreenModal
                 isOpen={isAreaOpen}

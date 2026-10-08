@@ -4,7 +4,7 @@ import { MinConfidenceInput } from "@/components/custom/detection/min-confidence
 import { MultiSelectClassesBox } from "@/components/custom/detection/multi-select-class-box"
 import { SelectTeamBox } from "@/components/custom/detection/select-team-box"
 import { Camera01 } from "@untitledui/icons"
-import { PenLine } from "lucide-react"
+import { PenLine, SlidersHorizontal, Tv } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { useAlgorithms } from "@/hooks/use-algorithms"
 import { useFileDetection } from "@/hooks/use-file-detection"
@@ -231,130 +231,145 @@ export function StreamDetectionSection() {
 
     return (
         <>
-            <div className="flex flex-col gap-4">
-
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+            <section aria-labelledby="stream-configuration-title" className="overflow-hidden rounded-xl border border-secondary bg-primary">
+                <div className="flex items-start gap-3 border-b border-secondary bg-secondary px-5 py-4">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-secondary bg-primary text-brand-secondary">
+                        <SlidersHorizontal className="size-4" aria-hidden="true" />
+                    </div>
+                    <div>
+                        <h2 id="stream-configuration-title" className="text-sm font-semibold text-primary">Stream configuration</h2>
+                        <p className="mt-1 text-sm text-tertiary">Connect a camera or stream and choose how to detect its objects.</p>
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 items-start gap-x-6 gap-y-5 p-5 sm:grid-cols-2 xl:grid-cols-6">
 
                     {/* Input type */}
 
-                    <Select
-                        isRequired
-                        size="md"
-                        label="1. Select the Input Type"
-                        placeholder="Select an input"
-                        value={inputType}
-                        onChange={handleInputTypeChange}
-                    >
-
-                        <Select.Item id="url">
-                            URL
-                        </Select.Item>
-
-                        <Select.Item id="camera">
-                            Camera
-                        </Select.Item>
-
-
-                    </Select>
-
-
-                    {/* Camera */}
-                    {inputType === "camera" && (
+                    <div className="min-w-0 xl:col-span-2">
                         <Select
                             isRequired
                             size="md"
-                            label="Select the Camera"
-                            placeholder="Select a camera"
-                            key={cameraId ?? undefined}
-                            onChange={key => {
-                                if (!key) {
-                                    setCameraId(null)
-                                    return
-                                }
-
-                                const deviceId = String(key)
-
-                                setCameraId(deviceId)
-                                startCamera(deviceId)
-                            }}
+                            label="1. Select the Input Type"
+                            placeholder="Select an input"
+                            value={inputType}
+                            onChange={handleInputTypeChange}
                         >
-                            {cameras.map(camera => (
-                                <Select.Item
-                                    key={camera.deviceId}
-                                    id={camera.deviceId}
-                                >
-                                    {camera.label ||
-                                        `Camera ${camera.deviceId.slice(0, 5)}`}
-                                </Select.Item>
-                            ))}
+
+                            <Select.Item id="url">
+                                URL
+                            </Select.Item>
+
+                            <Select.Item id="camera">
+                                Camera
+                            </Select.Item>
+
+
                         </Select>
-                    )}
+                    </div>
 
-                    {/* URL */}
-                    {inputType === "url" && (
-                        <div className="flex items-end gap-2">
-                            <Input
+                    <div className="min-w-0 sm:col-span-2 xl:col-span-4">
+                        {/* Camera */}
+                        {inputType === "camera" && (
+                            <Select
                                 isRequired
-                                label="Stream URL"
-                                type="url"
-                                value={streamUrl}
-                                onChange={setStreamUrl}
-                                placeholder="rtsp://..."
-                                className="flex-1"
-                                isDisabled={!!connectedUrl}
-                            />
+                                size="md"
+                                label="Select the Camera"
+                                placeholder="Select a camera"
+                                key={cameraId ?? undefined}
+                                onChange={key => {
+                                    if (!key) {
+                                        setCameraId(null)
+                                        return
+                                    }
 
-                            {connectedUrl ? (
-                                <Button
-                                    size="md"
-                                    color="secondary"
-                                    onClick={() => {
-                                        setConnectedUrl("")
-                                        setVideoReady(false)
-                                    }}
-                                >
-                                    Disconnect
-                                </Button>
-                            ) : (
-                                <Button
-                                    size="md"
-                                    color="secondary"
-                                    isDisabled={!streamUrl.trim() || isConnecting}
-                                    onClick={() => {
-                                        setConnectedUrl(streamUrl.trim())
-                                    }}
-                                >
-                                    {isConnecting ? "Connecting..." : "Connect"}
-                                </Button>
-                            )}
-                        </div>
-                    )}
+                                    const deviceId = String(key)
 
-                    <AlgorithmSelect
-                        algorithms={algorithms}
-                        selectedAlgorithm={selectedAlgorithm}
-                        onAlgorithmChange={setSelectedAlgorithm}
-                    />
+                                    setCameraId(deviceId)
+                                    startCamera(deviceId)
+                                }}
+                            >
+                                {cameras.map(camera => (
+                                    <Select.Item
+                                        key={camera.deviceId}
+                                        id={camera.deviceId}
+                                    >
+                                        {camera.label ||
+                                            `Camera ${camera.deviceId.slice(0, 5)}`}
+                                    </Select.Item>
+                                ))}
+                            </Select>
+                        )}
 
-                    <MultiSelectClassesBox
-                        selectedKeys={selectedClasses}
-                        onSelectionChange={setSelectedClasses}
-                    />
+                        {/* URL */}
+                        {inputType === "url" && (
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                                <Input
+                                    isRequired
+                                    label="Stream URL"
+                                    type="url"
+                                    value={streamUrl}
+                                    onChange={setStreamUrl}
+                                    placeholder="rtsp://..."
+                                    className="min-w-0 flex-1"
+                                    isDisabled={!!connectedUrl}
+                                />
 
-                    <SelectTeamBox
-                        selectedTeamId={selectedTeamId}
-                        onTeamChange={setSelectedTeamId}
-                    />
-
-                    <MinConfidenceInput
-                        value={minConfidence}
-                        onChange={confValue => {
-                            setMinConfidence(confValue)
-                        }}
-                    />
+                                {connectedUrl ? (
+                                    <Button
+                                        size="md"
+                                        color="secondary"
+                                        onClick={() => {
+                                            setConnectedUrl("")
+                                            setVideoReady(false)
+                                        }}
+                                    >
+                                        Disconnect
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        size="md"
+                                        color="secondary"
+                                        isDisabled={!streamUrl.trim() || isConnecting}
+                                        onClick={() => {
+                                            setConnectedUrl(streamUrl.trim())
+                                        }}
+                                    >
+                                        {isConnecting ? "Connecting..." : "Connect"}
+                                    </Button>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    <div className="min-w-0 xl:col-span-3">
+                        <AlgorithmSelect
+                            algorithms={algorithms}
+                            selectedAlgorithm={selectedAlgorithm}
+                            onAlgorithmChange={setSelectedAlgorithm}
+                        />
+                    </div>
+                    <div className="min-w-0 xl:col-span-3">
+                        <MultiSelectClassesBox
+                            selectedKeys={selectedClasses}
+                            onSelectionChange={setSelectedClasses}
+                        />
+                    </div>
+                    <div className="min-w-0 xl:col-span-3">
+                        <SelectTeamBox
+                            selectedTeamId={selectedTeamId}
+                            onTeamChange={setSelectedTeamId}
+                        />
+                    </div>
+                    <div className="min-w-0 xl:col-span-3">
+                        <MinConfidenceInput
+                            value={minConfidence}
+                            onChange={confValue => {
+                                setMinConfidence(confValue)
+                            }}
+                        />
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap gap-4 justify-end">
+                <div className="flex flex-wrap items-center justify-end gap-3 border-t border-secondary px-5 py-4">
 
                     <Button
                         iconLeading={<PenLine />}
@@ -391,29 +406,40 @@ export function StreamDetectionSection() {
                         </Button>
                     )}
                 </div>
-            </div >
+            </section>
 
-            <section className="mt-4 grid grid-cols-1 lg:grid-cols-[13fr_7fr] gap-4 w-full items-start">
-
-                <StreamDisplayBox
-                    colors={drawingColors}
-                    videoRef={videoRef}
-                    videoStream={cameraStream}
-                    streamUrl={inputType === "url" ? connectedUrl : ""}
-                    area={area}
-                    line={line}
-                    detections={detections}
-                    loading={loading}
-                    onVideoReady={setVideoReady}
-                    onImageLoad={(width, height) =>
-                        setVideoInfo({
-                            width,
-                            height,
-                        })
-                    }
-                />
+            <div className="mt-6 flex w-full flex-col gap-6">
+                <section aria-labelledby="stream-preview-title" className="min-w-0">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <h2 id="stream-preview-title" className="flex items-center gap-2 text-sm font-semibold text-primary">
+                            <Tv className="size-4 text-tertiary" aria-hidden="true" />
+                            Live preview
+                        </h2>
+                        <p role="status" className="text-sm text-tertiary">
+                            {loading ? "Detection running" : videoReady ? "Ready to detect" : "Connect a source to get started"}
+                        </p>
+                    </div>
+                    <StreamDisplayBox
+                        colors={drawingColors}
+                        videoRef={videoRef}
+                        videoStream={cameraStream}
+                        streamUrl={inputType === "url" ? connectedUrl : ""}
+                        area={area}
+                        line={line}
+                        detections={detections}
+                        loading={loading}
+                        onVideoReady={setVideoReady}
+                        onImageLoad={(width, height) =>
+                            setVideoInfo({
+                                width,
+                                height,
+                            })
+                        }
+                    />
+                </section>
 
                 <TextResultDisplay
+                    layout="expanded"
                     type="Stream"
                     detections={detections}
                     trackedDetections={trackedDetections}
@@ -422,7 +448,7 @@ export function StreamDetectionSection() {
                     imageWidth={videoInfo.width}
                     imageHeight={videoInfo.height}
                 />
-            </section>
+            </div>
 
             <FullScreenModal
                 isOpen={isAreaOpen}
