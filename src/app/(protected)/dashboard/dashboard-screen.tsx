@@ -13,6 +13,7 @@ import { DetectionsTable } from "@/components/custom/detection/tables/detections
 import { TableCard } from "@/components/application/table/table";
 import { NotFoundTable } from "@/components/custom/not-found-table";
 import { Loading } from "@/components/custom/layout/loading";
+import { InlineFeedback } from "@/components/custom/layout/inline-feedback";
 
 export default function DetectionScreen() {
     const router = useRouter();
@@ -34,7 +35,7 @@ export default function DetectionScreen() {
                 <Loading
                     details="load the dashboard"
                 />
-                
+
             </main>
         );
     }
@@ -47,7 +48,7 @@ export default function DetectionScreen() {
                     description="An overview of your detections, objects and model activity."
                     icon={<BarChartSquare02 />}
                 />
-                <p>An error occurred while loading data.</p>
+                <InlineFeedback>An error occurred while loading data. Please try again.</InlineFeedback>
             </main>
         );
     }

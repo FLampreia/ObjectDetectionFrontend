@@ -32,6 +32,7 @@ export default function TeamInfoScreen({ params }: PageProps) {
             />
 
             <ButtonGroup
+                disallowEmptySelection
                 selectedKeys={[selectedTeamTab]}
                 onSelectionChange={(keys) =>
                     setSelectedTeamTab(Array.from(keys)[0] as string)

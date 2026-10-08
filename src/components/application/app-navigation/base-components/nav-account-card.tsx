@@ -29,7 +29,7 @@ export type NavAccountType = {
 
 export const NavAccountMenu = ({
     className,
-    
+
     ...dialogProps
 }: AriaDialogProps & { className?: string; accounts?: NavAccountType[]; selectedAccountId?: string }) => {
     const focusManager = useFocusManager();
@@ -69,16 +69,26 @@ export const NavAccountMenu = ({
             ref={dialogRef}
             className={cx("w-66 rounded-xl bg-secondary_alt shadow-lg ring ring-secondary_alt outline-hidden", className)}
         >
-            <div className="rounded-xl bg-primary ring-1 ring-secondary">
-                <div className="flex flex-col gap-0.5 py-1.5">
-                    <NavAccountCardMenuItem label="Account settings" icon={Settings01} onClick={() => { router.push("/settings"); }} />
-                </div>
+            {({ close }) => (
+                <>
+                    <div className="rounded-xl bg-primary ring-1 ring-secondary">
+                        <div className="flex flex-col gap-0.5 py-1.5">
+                            <NavAccountCardMenuItem
+                                label="Account settings"
+                                icon={Settings01}
+                                onClick={() => {
+                                    close();
+                                    router.push("/settings");
+                                }}
+                            />
+                        </div>
+                    </div>
 
-            </div>
-
-            <div className="pt-1 pb-1.5">
-                <NavAccountCardMenuItem label="Sign out" icon={LogOut01} onClick={() => { logout() }} />
-            </div>
+                    <div className="pt-1 pb-1.5">
+                        <NavAccountCardMenuItem label="Sign out" icon={LogOut01} onClick={() => { logout() }} />
+                    </div>
+                </>
+            )}
         </AriaDialog>
     );
 };

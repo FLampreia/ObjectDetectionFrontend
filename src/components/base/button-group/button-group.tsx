@@ -19,9 +19,9 @@ export const styles = sortCx({
             // Disabled styles
             "disabled:cursor-not-allowed disabled:text-secondary/50 disabled:*:opacity-50",
             // Selected styles
-            "selected:bg-primary_hover selected:text-secondary_hover",
+            "selected:bg-brand-solid selected:text-white selected:hover:bg-brand-solid_hover selected:hover:text-white",
         ].join(" "),
-        icon: "pointer-events-none text-fg-quaternary transition-[inherit] group-hover/button-group:text-fg-quaternary_hover group-selected/button-group:text-fg-quaternary_hover",
+        icon: "pointer-events-none text-current transition-[inherit]",
     },
 
     sizes: {

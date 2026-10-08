@@ -21,7 +21,7 @@ export default function ProtectedLayout({
     }, [user, loading, router]);
 
 
-    if (loading) {
+    if (loading && !user) {
         return <LoadingPage />;
     }
 

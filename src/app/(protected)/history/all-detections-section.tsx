@@ -1,7 +1,7 @@
 "use client"
 
 import { TableCard } from "@/components/application/table/table";
-import { NotFoundTable } from "@/components/custom/not-found-table";
+import { TableState } from "@/components/custom/layout/table-state";
 import type { ListDetection } from "@/types";
 import { DetectionsTable } from "@/components/custom/detection/tables/detections-table";
 import { PaginationPageMinimalCenter } from "@/components/application/pagination/pagination";
@@ -30,6 +30,7 @@ export function AllDetectionsSection() {
         totalDetections,
 
         error,
+        isLoading,
     } = useDetections();
 
     // Only detections in the current filtered results can be deleted.
@@ -174,14 +175,11 @@ export function AllDetectionsSection() {
                 </Button>
 
                 <p className="w-full text-xs text-tertiary">Select all includes every page in the current date filter.</p>
-                
+
             </div>
             )}
 
-            {error ? (
-                <p role="alert" className="px-4 py-6 text-sm text-error-primary md:px-5">{error}</p>
-            ) : allDetections.length !== 0
-                ?
+            <TableState isLoading={isLoading} error={error} isEmpty={allDetections.length === 0} type="detection">
                 <DetectionsTable
                     detections={detections}
                     sortDescriptor={sortDescriptor}
@@ -189,9 +187,7 @@ export function AllDetectionsSection() {
                     selectedKeys={isSelecting ? pageSelectedKeys : undefined}
                     onSelectionChange={isSelecting ? handleSelectionChange : undefined}
                 />
-                :
-                <NotFoundTable type="detection" />
-            }
+            </TableState>
 
             <PaginationPageMinimalCenter
                 page={currentPage}

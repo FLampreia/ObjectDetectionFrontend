@@ -2,12 +2,14 @@
 
 import { Dialog, Modal, ModalOverlay } from "@/components/application/modals/modal";
 import { Button } from "@/components/base/buttons/button";
+import { ModalHeader } from "@/components/custom/layout/modal-parts";
+import { InlineFeedback } from "@/components/custom/layout/inline-feedback";
+import { FileBarChart } from "lucide-react";
 import { Toggle } from "@/components/base/toggle/toggle";
 import { DEFAULT_DRAWING_CONFIG } from "@/config/drawing";
 import { getSingleDetectionReport } from "@/services/reports";
 import type { ReportConfig } from "@/types";
 import { useId, useRef, useState } from "react";
-import { Heading } from "react-aria-components";
 
 type Props = {
     isOpen: boolean;
@@ -88,11 +90,15 @@ export function ExtractSingleReportModal({ isOpen, onOpenChange, detection_id }:
             isKeyboardDismissDisabled={isGenerating}
         >
             <Modal className="w-full max-w-lg">
-                <Dialog className="p-6" aria-describedby={descriptionId}>
-                    <Heading slot="title" className="text-xl font-semibold text-primary">Extract report</Heading>
-                    <p id={descriptionId} className="mt-1 text-sm text-tertiary">
-                        Customize the image annotations included in your PDF report.
-                    </p>
+                <Dialog className="p-5 sm:p-6" aria-describedby={descriptionId}>
+                    <ModalHeader
+                        title="Extract report"
+                        description="Customize the image annotations included in your PDF report."
+                        descriptionId={descriptionId}
+                        icon={<FileBarChart />}
+                        onClose={() => onOpenChange(false)}
+                        isDisabled={isGenerating}
+                    />
                     <form
                         className="mt-6 space-y-4"
                         aria-busy={isGenerating}
@@ -145,7 +151,7 @@ export function ExtractSingleReportModal({ isOpen, onOpenChange, detection_id }:
                             {renderColorInput("text_background_color", "Text background", !labelsEnabled)}
                             {renderColorInput("area_color", "Area color")}
                         </fieldset>
-                        {error && <p role="alert" className="rounded-lg border border-error_subtle bg-error-primary p-3 text-sm text-error-primary">{error}</p>}
+                        {error && <InlineFeedback>{error}</InlineFeedback>}
                         <p role="status" className="sr-only">{isGenerating ? "Generating PDF report. Please wait." : ""}</p>
                         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-secondary pt-4">
                             <Button

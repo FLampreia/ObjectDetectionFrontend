@@ -23,6 +23,7 @@ export default function TeamScreen() {
             />
 
             <ButtonGroup
+                disallowEmptySelection
                 selectedKeys={[selectedTeamTab]}
                 onSelectionChange={(keys) =>
                     setSelectedTeamTab(Array.from(keys)[0] as string)

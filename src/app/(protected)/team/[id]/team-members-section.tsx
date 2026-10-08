@@ -1,12 +1,11 @@
 "use client"
 
 import { TableCard } from "@/components/application/table/table";
-import { Button } from "@/components/base/buttons/button";
 import { MembersHeader } from "@/components/custom/teams/tables/headers/members-header";
 import { MembersTable } from "@/components/custom/teams/tables/rows/members-table";
 import { useMembers } from "@/hooks/use-members";
 import { useState } from "react";
-import { NotFoundTable } from "../../../../components/custom/not-found-table";
+import { TableState } from "@/components/custom/layout/table-state";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Team } from "@/types/team";
 import { PaginationPageMinimalCenter } from "@/components/application/pagination/pagination";
@@ -28,6 +27,7 @@ export function TeamMembersSection({ teamId }: Props) {
         setCurrentPage,
         totalMembers,
         error,
+        isLoading,
     } = useMembers(teamId);
 
     const queryClient = useQueryClient();
@@ -36,13 +36,12 @@ export function TeamMembersSection({ teamId }: Props) {
 
     const [isOpen, setIsOpen] = useState(false);
 
-    console.log(team)
 
     return (
-        <TableCard.Root>
+        <TableCard.Root size="sm">
             <TableCard.Header
                 title={team?.name ?? "Team"}
-                badge={members.length}
+                badge={allMembers.length}
                 description={`All members of ${team?.name ?? "team"}`}
                 contentTrailing={
                     <MembersHeader
@@ -55,21 +54,17 @@ export function TeamMembersSection({ teamId }: Props) {
                     />
                 }
             />
-            {allMembers.length != 0 ? (
-                <>
+            <TableState isLoading={isLoading} error={error} isEmpty={allMembers.length === 0} type="member">
                     <MembersTable
                         members={members}
                         sortDescriptor={sortDescriptor}
                         onSortChange={setSortDescriptor}
                         teamId={teamId}
                     />
-                </>
-            ) : (
-                <NotFoundTable type="member" />
-            )}
+            </TableState>
             <PaginationPageMinimalCenter
                 page={currentPage}
-                total={totalMembers}
+                total={Math.max(1, totalMembers)}
                 onPageChange={setCurrentPage}
                 className="px-4 py-3 md:px-6 md:pt-3 md:pb-4"
             />

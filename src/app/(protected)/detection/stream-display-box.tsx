@@ -191,7 +191,7 @@ export function StreamDisplayBox({
             ) : (
 
                 <div className="relative w-full h-full flex items-center justify-center">
-                    <EmptyFile />
+                    <EmptyFile source="stream" />
                 </div>
 
             )}

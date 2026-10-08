@@ -18,6 +18,7 @@ import { SelectTeamBox } from "@/components/custom/detection/select-team-box"
 import { ImageAnnotationSettings } from "@/components/custom/detection/image-annotation-settings"
 import { DEFAULT_DRAWING_CONFIG } from "@/config/drawing"
 import type { ReportConfig } from "@/types"
+import { InlineFeedback } from "@/components/custom/layout/inline-feedback"
 
 export function PhotoDetectionSection() {
     const {
@@ -103,7 +104,7 @@ export function PhotoDetectionSection() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-4 justify-end">
-                    
+
                     <ImageAnnotationSettings config={drawingConfig} onChange={setDrawingConfig} isDisabled={loading} />
 
                     <Button
@@ -134,9 +135,7 @@ export function PhotoDetectionSection() {
             </div>
 
             {detectionError && (
-                <p role="alert" className="mt-4 text-sm text-error-primary">
-                    {detectionError}
-                </p>
+                <div className="mt-4"><InlineFeedback>{detectionError}</InlineFeedback></div>
             )}
 
             <section className="mt-4 grid grid-cols-1 lg:grid-cols-[13fr_7fr] gap-4 w-full items-start">

@@ -5,9 +5,9 @@ import { Button } from "@/components/base/buttons/button"
 import { Select } from "@/components/base/select/select"
 import { Toggle } from "@/components/base/toggle/toggle"
 import type { ReportConfig } from "@/types"
-import { SlidersHorizontal, X } from "lucide-react"
+import { SlidersHorizontal } from "lucide-react"
+import { ModalActions, ModalHeader } from "@/components/custom/layout/modal-parts"
 import { useId, useState } from "react"
-import { Heading } from "react-aria-components"
 
 type AnnotationMode = "boxes" | "points" | "both"
 type ColorKey = "bbox_color" | "dot_color" | "text_color" | "text_background_color" | "area_color"
@@ -57,14 +57,14 @@ export function ImageAnnotationSettings({ config, onChange, isDisabled }: {
             </Button>
             <ModalOverlay isOpen={isOpen} onOpenChange={setIsOpen} isDismissable>
                 <Modal className="w-full max-w-md">
-                    <Dialog className="p-6" aria-describedby={descriptionId}>
-                        <div className="flex items-center justify-between gap-4">
-                            <Heading slot="title" className="text-xl font-semibold text-primary">Image appearance</Heading>
-                            <Button color="tertiary" size="sm" iconLeading={<X size={18} />} aria-label="Close appearance settings" onPress={() => setIsOpen(false)} />
-                        </div>
-                        <p id={descriptionId} className="mt-1 text-sm text-tertiary">
-                            Changes apply to the image and its download.
-                        </p>
+                    <Dialog className="p-5 sm:p-6" aria-describedby={descriptionId}>
+                        <ModalHeader
+                            title="Image appearance"
+                            description="Changes apply to the image and its download."
+                            descriptionId={descriptionId}
+                            icon={<SlidersHorizontal />}
+                            onClose={() => setIsOpen(false)}
+                        />
 
                         <div className="mt-6 space-y-5">
                             <Select
@@ -103,9 +103,9 @@ export function ImageAnnotationSettings({ config, onChange, isDisabled }: {
                             </div>
                         </div>
 
-                        <div className="mt-6 flex justify-end border-t border-secondary pt-4">
+                        <ModalActions>
                             <Button size="md" onPress={() => setIsOpen(false)}>Done</Button>
-                        </div>
+                        </ModalActions>
                     </Dialog>
                 </Modal>
             </ModalOverlay>

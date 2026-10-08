@@ -69,7 +69,7 @@ export function AlgorithmSelect({
 
                             <div className="flex items-center shrink-0">
                                 {algorithm?.installed ? (
-                                    <CheckCircle2 size={16} className="text-green-500" />
+                                    <CheckCircle2 size={16} className="text-success-primary" />
                                 ) : (
                                     <button
                                         title="Download"
@@ -82,7 +82,7 @@ export function AlgorithmSelect({
                                                 downloadAlgorithm(String(item.id))
                                             }
                                         }}
-                                        className="text-blue-500 hover:text-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="cursor-pointer rounded-md text-brand-secondary outline-focus-ring hover:text-brand-secondary_hover focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         {downloadingAlgorithm === String(item.id) ? (
                                             <Loader2 size={16} className="animate-spin" />

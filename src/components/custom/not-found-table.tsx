@@ -1,28 +1,19 @@
-"use client"
-import { Plus, } from "@untitledui/icons";
-import { EmptyState } from "@/components/application/empty-state/empty-state";
-import { Button } from "@/components/base/buttons/button";
+import { Search } from "lucide-react";
 
-interface Props {
-    type: string;
-}
+type Props = { type: string };
 
 export function NotFoundTable({ type }: Props) {
     return (
-        <div className="flex items-center justify-center overflow-hidden px-8 py-20">
-            <EmptyState size="sm">
-                <EmptyState.Header pattern="none">
-                    <EmptyState.FeaturedIcon color="gray" theme="modern-neue" />
-                </EmptyState.Header>
-
-                <EmptyState.Content>
-                    <EmptyState.Title>No {type}s found</EmptyState.Title>
-                    <EmptyState.Description>
-                        Your search did not match any {type}. Please try again or create a new {type}.
-                    </EmptyState.Description>
-                </EmptyState.Content>
-
-            </EmptyState>
+        <div className="flex flex-col items-center justify-center gap-4 px-5 py-12 text-center sm:py-16">
+            <div aria-hidden="true" className="flex size-12 items-center justify-center rounded-xl border border-secondary bg-secondary">
+                <Search className="size-6 text-tertiary" />
+            </div>
+            <div className="max-w-sm">
+                <h3 className="text-md font-semibold text-primary">No {type}s found</h3>
+                <p className="mt-2 text-sm leading-6 text-tertiary">
+                    There are no {type}s to show. If you are using filters, try adjusting or clearing them.
+                </p>
+            </div>
         </div>
-    )
+    );
 }

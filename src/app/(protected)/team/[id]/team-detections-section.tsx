@@ -1,13 +1,11 @@
 "use client"
 
 import { TableCard } from "@/components/application/table/table";
-import { NotFoundTable } from "../../../../components/custom/not-found-table";
+import { TableState } from "@/components/custom/layout/table-state";
 import { useQueryClient } from "@tanstack/react-query";
 import { Team } from "@/types";
 import { useTeamDetections } from "@/hooks/use-team-detections";
 import { DetectionsTable } from "@/components/custom/detection/tables/detections-table";
-import { Calendar, SearchLg } from "@untitledui/icons";
-import { InputDate } from "@/components/base/input/input-date";
 import { PaginationPageMinimalCenter } from "@/components/application/pagination/pagination";
 import { DatePicker } from "@/components/application/date-picker/date-picker";
 import { Button } from "@/components/base/buttons/button";
@@ -35,10 +33,11 @@ export function TeamDetectionsSection({ teamId }: Props) {
         totalDetections,
 
         error,
+        isLoading,
     } = useTeamDetections(teamId);
 
     return (
-        <TableCard.Root>
+        <TableCard.Root size="sm">
             <TableCard.Header
                 title={team?.name ?? "Team"}
                 badge={allDetections.length}
@@ -62,20 +61,16 @@ export function TeamDetectionsSection({ teamId }: Props) {
                 }
             />
 
-            {
-                allDetections.length !== 0
-                    ?
+            <TableState isLoading={isLoading} error={error} isEmpty={allDetections.length === 0} type="detection">
                     <DetectionsTable
                         detections={detections}
                         sortDescriptor={sortDescriptor}
                         onSortChange={setSortDescriptor}
                     />
-                    :
-                    <NotFoundTable type="detection" />
-            }
+            </TableState>
             <PaginationPageMinimalCenter
                 page={currentPage}
-                total={totalDetections}
+                total={Math.max(1, totalDetections)}
                 onPageChange={setCurrentPage}
                 className="px-4 py-3 md:px-6 md:pt-3 md:pb-4"
             />

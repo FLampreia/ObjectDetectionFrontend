@@ -9,7 +9,7 @@ import { LoggedTeamsHeader } from "@/components/custom/teams/tables/headers/logg
 import { LoggedTeamsTable } from "@/components/custom/teams/tables/rows/logged-teams-table";
 
 import { useTeams } from "@/hooks/use-team";
-import { NotFoundTable } from "../../../components/custom/not-found-table";
+import { TableState } from "@/components/custom/layout/table-state";
 
 
 export function MyTeamsSection() {
@@ -27,12 +27,13 @@ export function MyTeamsSection() {
         setSortDescriptor,
 
         error,
+        loading,
     } = useTeams();
 
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <TableCard.Root>
+        <TableCard.Root size="sm">
             <TableCard.Header
                 title="My Teams"
                 badge={allTeams.length}
@@ -47,20 +48,18 @@ export function MyTeamsSection() {
                     />
                 }
             />
-            {allTeams.length != 0 ? (
+            <TableState isLoading={loading} error={error} isEmpty={allTeams.length === 0} type="team">
                 <LoggedTeamsTable
                     teams={teams}
                     sortDescriptor={sortDescriptor}
                     onSortChange={setSortDescriptor}
                 />
-            ) : (
-                <NotFoundTable type="team"/>
-            )}
+            </TableState>
 
 
             <PaginationPageMinimalCenter
                 page={currentPageLogged}
-                total={totalPagesLogged}
+                total={Math.max(1, totalPagesLogged)}
                 onPageChange={setCurrentPageLogged}
                 className="px-4 py-3 md:px-6 md:pt-3 md:pb-4"
             />

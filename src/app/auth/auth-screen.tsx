@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight, FileBarChart, LogIn, ScanLine, UserPlus, Users }
 import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
 import { NavigationBrand } from "@/components/custom/layout/navigation-brand";
+import { InlineFeedback } from "@/components/custom/layout/inline-feedback";
 import { useAuth } from "@/hooks/use-auth";
 import { useResizeObserver } from "@/hooks/use-resize-observer";
 import { signup } from "@/services/auth";
@@ -127,7 +128,7 @@ export default function AuthScreen() {
                         <span className="text-brand-secondary">A clearer picture.</span>
                     </h2>
 
-                   <p className="mt-5 max-w-lg text-md leading-7 text-tertiary">
+                    <p className="mt-5 max-w-lg text-md leading-7 text-tertiary">
                         One place to detect objects, explore results and work together.
                         Pick up where you left off or start your first detection.
                     </p>
@@ -274,14 +275,14 @@ export default function AuthScreen() {
                             )}
 
                             {error && (
-                                <p role="alert" className="rounded-lg border border-error_subtle bg-error-primary p-3 text-sm text-error-primary">
+                                <InlineFeedback>
                                     {error}
-                                </p>
+                                </InlineFeedback>
                             )}
                             {success && (
-                                <p role="status" className="rounded-lg border border-secondary bg-secondary p-3 text-sm text-success-primary">
+                                <InlineFeedback tone="success">
                                     {success}
-                                </p>
+                                </InlineFeedback>
                             )}
 
                             <Button

@@ -6,15 +6,11 @@ import { PaginationPageMinimalCenter } from "@/components/application/pagination
 import { TableCard } from "@/components/application/table/table";
 
 
-import { LoggedTeamsHeader } from "@/components/custom/teams/tables/headers/logged-teams-header";
-import { LoggedTeamsTable } from "@/components/custom/teams/tables/rows/logged-teams-table";
 
 import { useTeams } from "@/hooks/use-team";
-import { NotFoundTable } from "../../../components/custom/not-found-table";
+import { TableState } from "@/components/custom/layout/table-state";
 import { ExploreTeamsHeader } from "@/components/custom/teams/tables/headers/explore-teams-header";
 import { ExploreTeamsTable } from "@/components/custom/teams/tables/rows/explore-teams-table";
-import { useQueryClient } from "@tanstack/react-query";
-import { Member } from "@/types/team";
 
 
 
@@ -33,12 +29,13 @@ export function ExploreTeamsSection() {
         setSortDescriptor,
 
         error,
+        loading,
     } = useTeams();
 
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <TableCard.Root>
+        <TableCard.Root size="sm">
             <TableCard.Header
                 title="Explore Teams"
                 badge={allTeams.length}
@@ -53,20 +50,18 @@ export function ExploreTeamsSection() {
                     />
                 }
             />
-            {allTeams.length != 0 ? (
+            <TableState isLoading={loading} error={error} isEmpty={allTeams.length === 0} type="team">
                 <ExploreTeamsTable
                     teams={teams}
                     sortDescriptor={sortDescriptor}
                     onSortChange={setSortDescriptor}
                 />
-            ) : (
-                <NotFoundTable type="team" />
-            )}
+            </TableState>
 
 
             <PaginationPageMinimalCenter
                 page={currentPageAll}
-                total={totalPagesAll}
+                total={Math.max(1, totalPagesAll)}
                 onPageChange={setCurrentPageAll}
                 className="px-4 py-3 md:px-6 md:pt-3 md:pb-4"
             />

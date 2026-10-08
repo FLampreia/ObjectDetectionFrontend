@@ -1,190 +1,159 @@
-
 "use client";
 
-import { useState } from "react";
-import { Save, Trash2, User, Lock, BadgeInfo, Settings } from "lucide-react";
-import { PageHeader } from "@/components/custom/layout/page-header";
-import { useAuth } from "@/hooks/use-auth";
-import { updateUsername, updateFullName, updatePassword, deletePassword } from "@/services/user";
+import { useRef, useState, type FormEvent } from "react";
+import { Lock, Save, Settings, Trash2, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/base/input/input";
 import { Button } from "@/components/base/buttons/button";
+import { InlineFeedback } from "@/components/custom/layout/inline-feedback";
+import { PageHeader } from "@/components/custom/layout/page-header";
+import { SectionCard } from "@/components/custom/layout/section-card";
+import { useAuth } from "@/hooks/use-auth";
+import { updateUsername, updateFullName, updatePassword, deletePassword } from "@/services/user";
+
+type Action = "profile" | "password" | "delete";
+type Feedback = { tone: "error" | "success"; message: string };
 
 export default function SettingsScreen() {
     const { user, refreshUser, logout } = useAuth();
-
+    const router = useRouter();
+    const pendingRef = useRef(false);
+    const [pending, setPending] = useState<Action | null>(null);
+    const [feedback, setFeedback] = useState<Partial<Record<Action, Feedback>>>({});
     const [username, setUsername] = useState(() => user?.username ?? "");
     const [fullName, setFullName] = useState(() => user?.full_name ?? "");
-
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [confirmDelete, setConfirmDelete] = useState("");
+    const isBusy = pending !== null;
 
-    const router = useRouter();
-
-    const handleProfileSave = async () => {
-        if (!user?.id) return;
-
+    async function perform(action: Action, operation: () => Promise<void>, successMessage?: string) {
+        if (pendingRef.current || !user?.id) return;
+        pendingRef.current = true;
+        setPending(action);
+        setFeedback((previous) => ({ ...previous, [action]: undefined }));
         try {
-
-            if (username != user?.username) {
-                await updateUsername(user.id, username);
-                await refreshUser();
+            await operation();
+            if (successMessage) {
+                setFeedback((previous) => ({ ...previous, [action]: { tone: "success", message: successMessage } }));
             }
-
-            if (fullName != user?.full_name) {
-                await updateFullName(user.id, fullName);
-                await refreshUser();
-            }
-
-
-
-        } catch (err) {
-            console.error(err);
+        } catch (error: unknown) {
+            setFeedback((previous) => ({
+                ...previous,
+                [action]: { tone: "error", message: error instanceof Error ? error.message : "Unable to save changes. Please try again." },
+            }));
+        } finally {
+            pendingRef.current = false;
+            setPending(null);
         }
-    };
+    }
 
-    const handlePasswordChange = async () => {
+    function handleProfileSave(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
         if (!user?.id) return;
+        void perform("profile", async () => {
+            if (username !== user.username) await updateUsername(user.id, username);
+            if (fullName !== user.full_name) await updateFullName(user.id, fullName);
+            await refreshUser();
+        }, "Your profile has been updated.");
+    }
 
+    function handlePasswordChange(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (!user?.id) return;
         if (newPassword !== confirmPassword) {
-            alert("Passwords do not match");
+            setFeedback((previous) => ({ ...previous, password: { tone: "error", message: "Passwords do not match." } }));
             return;
         }
-
-        try {
+        void perform("password", async () => {
             await updatePassword(user.id, newPassword, currentPassword);
             await refreshUser();
+            setCurrentPassword("");
+            setNewPassword("");
+            setConfirmPassword("");
+        }, "Your password has been updated.");
+    }
 
-            alert("Password updated successfully");
-        } catch (err) {
-            if (err instanceof Error) {
-                alert(err.message);
-            } else {
-                alert("Failed to update password");
-            }
-        }
-
-        //TODO utilizar set error ou forma mais otimizada
-
-        // TODO invalidar refresh tokens
-        // obrigar re-login
-        // ou regenerar access token
-
-
-    };
-
-    const handleDeleteAccount = async () => {
-        if (!user?.id) return;
-
-        try {
+    function handleDeleteAccount(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (!user?.id || confirmDelete !== user.username) return;
+        void perform("delete", async () => {
             await deletePassword(user.id);
-
             logout();
-
             router.replace("/");
+        });
+    }
 
-        } catch (err) {
-            console.error(err);
-        }
-    };
+    function renderFeedback(action: Action) {
+        const result = feedback[action];
+        return result ? <InlineFeedback tone={result.tone}>{result.message}</InlineFeedback> : null;
+    }
+
     return (
+        <main className="mx-auto w-full max-w-7xl flex-1">
+            <PageHeader title="Settings" description="Manage your profile, password and account preferences." icon={<Settings />} />
 
+            <div className="grid gap-6 pb-8 lg:grid-cols-2">
+                <SectionCard title="Personal information" description="Update the details shown on your profile." icon={<User />} className="flex flex-col" contentClassName="flex flex-1 flex-col">
+                    <form onSubmit={handleProfileSave} aria-busy={pending === "profile"} className="flex flex-1 flex-col gap-5">
+                        <Input label="Username" autoComplete="username" value={username} onChange={setUsername} isRequired isDisabled={isBusy} />
+                        <Input label="Full name" autoComplete="name" value={fullName} onChange={setFullName} isRequired isDisabled={isBusy} />
+                        <Input label="Email address" type="email" value={user?.email ?? ""} hint="Your email address cannot be changed here." isDisabled />
+                        {renderFeedback("profile")}
+                        <div className="mt-auto flex justify-end border-t border-secondary pt-5">
+                            <Button type="submit" size="md" iconLeading={Save} isDisabled={isBusy} isLoading={pending === "profile"} showTextWhileLoading>
+                                {pending === "profile" ? "Saving…" : "Save changes"}
+                            </Button>
+                        </div>
+                    </form>
+                </SectionCard>
 
-        <main className="flex-1 max-w-7xl mx-auto w-full flex-col justify-between">
+                <SectionCard title="Password & security" description="Choose a new password to protect your account." icon={<Lock />} className="flex flex-col" contentClassName="flex flex-1 flex-col">
+                    <form onSubmit={handlePasswordChange} aria-busy={pending === "password"} className="flex flex-1 flex-col gap-5">
+                        <Input label="Current password" type="password" autoComplete="current-password" value={currentPassword} onChange={setCurrentPassword} isRequired isDisabled={isBusy} />
+                        <Input label="New password" type="password" autoComplete="new-password" value={newPassword} onChange={setNewPassword} isRequired isDisabled={isBusy} />
+                        <Input label="Confirm new password" type="password" autoComplete="new-password" value={confirmPassword} onChange={setConfirmPassword} isRequired isDisabled={isBusy} />
+                        {renderFeedback("password")}
+                        <div className="mt-auto flex justify-end border-t border-secondary pt-5">
+                            <Button type="submit" size="md" iconLeading={Save} isDisabled={isBusy} isLoading={pending === "password"} showTextWhileLoading>
+                                {pending === "password" ? "Updating…" : "Update password"}
+                            </Button>
+                        </div>
+                    </form>
+                </SectionCard>
 
-            <PageHeader
-                title="Settings"
-                description="Manage your profile, password and account preferences."
-                icon={<Settings />}
-            />
-
-            <div className="space-y-8 pb-8">
-
-                {/* Profile */}
-                <section className="p-6 bg-primary pt-4 shadow-xs ring-secondary ring-inset lg:rounded-xl lg:ring-1">
-
-                    <div className="flex items-center gap-3 mb-6">
-                        <User className="w-5 h-5 text-emerald-400" />
-                        <h2 className="text-xl font-semibold">Account Personal Data</h2>
-                    </div>
-
-                    <div className="space-y-4">
-
-                        <Input type="text" label="Username" value={username} onChange={(value) => setUsername(value)} />
-
-                        <Input type="text" label="Full Name" value={fullName} onChange={(value) => setFullName(value)} />
-
-                        <Input type="text" label="Email" value={user?.email} isDisabled />
-
-                        <Button size="lg" iconLeading={<Save data-icon />} onClick={handleProfileSave}>
-                            Save Changes
-                        </Button>
-
-                    </div>
-                </section>
-
-                {/* Password */}
-                <section className="p-6 bg-primary pt-4 shadow-xs ring-secondary ring-inset lg:rounded-xl lg:ring-1">
-                    <div className="flex items-center gap-3 mb-6">
-                        <Lock className="w-5 h-5 text-emerald-400" />
-                        <h2 className="text-xl font-semibold">Privacy</h2>
-                    </div>
-
-                    <div className="space-y-4">
-
-
-                        <Input type="password" label="Current Password" placeholder="••••••••" onChange={(value) => setCurrentPassword(value)} />
-
-                        <Input type="password" label="New Password" placeholder="••••••••" onChange={(value) => setNewPassword(value)} />
-
-                        <Input type="password" label="Confirm New Password" placeholder="••••••••" onChange={(value) => setConfirmPassword(value)} />
-
-                        <Button size="lg" iconLeading={<Save data-icon />} onClick={handlePasswordChange}>
-                            Update Password
-                        </Button>
-                    </div>
-                </section>
-
-                {/* Eliminar Conta */}
-                <section className="bg-red-950/30 border border-red-900 rounded-2xl p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                        <BadgeInfo className="w-5 h-5 text-red-500" />
-                        <h2 className="text-xl font-semibold text-red-400">
-                            Delete Account
-                        </h2>
-                    </div>
-
-                    <p className="color">
-                        This action is permanent and cannot be undone.
-                    </p>
-
-                    <div className="mb-4">
-                        <label className="text-sm text-zinc-400 block mb-2">
-                            Write <span className="font-semibold text-white">{user?.username}</span>{" "}
-                            to confirm
-                        </label>
-
-                        <input
-                            type="text"
-                            value={confirmDelete}
-                            onChange={(e) => setConfirmDelete(e.target.value)}
-                            className="w-full  border border-zinc-700 rounded-xl px-4 py-3 outline-none focus:border-red-500"
-                        />
-                    </div>
-
-
-                    <Button
-                        onClick={handleDeleteAccount}
-                        size="lg"
-                        isDisabled={confirmDelete !== user?.username}
-                        className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-400 disabled:bg-zinc-700 disabled:text-zinc-400 transition px-5 py-3 rounded-xl font-medium cursor-pointer"
-                        iconLeading={Trash2}
-                    >
-                        Delete Account
-                    </Button>
-                </section>
+                <div className="lg:col-span-2">
+                    <SectionCard title="Delete account" description="Permanently delete your account. This action cannot be undone." icon={<Trash2 />} destructive>
+                        <form onSubmit={handleDeleteAccount} aria-busy={pending === "delete"} className="space-y-4">
+                            <div>
+                                <Input
+                                    label="Confirm your username"
+                                    hint={`Type ${user?.username ?? "your username"} to confirm account deletion.`}
+                                    value={confirmDelete}
+                                    onChange={setConfirmDelete}
+                                    autoComplete="off"
+                                    isRequired
+                                    isDisabled={isBusy}
+                                />
+                            </div>
+                            {renderFeedback("delete")}
+                            <div className="flex justify-end">
+                                <Button
+                                    type="submit"
+                                    size="md"
+                                    color="primary-destructive"
+                                    iconLeading={Trash2}
+                                    isDisabled={isBusy || !user?.username || confirmDelete !== user.username}
+                                    isLoading={pending === "delete"}
+                                    showTextWhileLoading
+                                >
+                                    {pending === "delete" ? "Deleting…" : "Delete account"}
+                                </Button>
+                            </div>
+                        </form>
+                    </SectionCard>
+                </div>
             </div>
         </main>
     );

@@ -147,6 +147,7 @@ export function useMembers(teamId: string) {
         removeMember,
 
         isMember,
+        isLoading,
 
 
         error: error ? "Failed to load members" : null,
