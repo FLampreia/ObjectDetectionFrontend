@@ -7,7 +7,8 @@ import TopModelsChart from "./top-models-chart";
 import InfoCards from "./info-cards";
 import { Button } from "@/components/base/buttons/button";
 import { useRouter } from "next/navigation";
-import { Camera01 } from "@untitledui/icons";
+import { BarChartSquare02, Camera01 } from "@untitledui/icons";
+import { PageHeader } from "@/components/custom/layout/page-header";
 import { DetectionsTable } from "@/components/custom/detection/tables/detections-table";
 import { TableCard } from "@/components/application/table/table";
 import { NotFoundTable } from "@/components/custom/not-found-table";
@@ -24,9 +25,11 @@ export default function DetectionScreen() {
     if (isLoading) {
         return (
             <main className="flex-1 max-w-7xl mx-auto w-full">
-                <h1 className="text-3xl font-bold mb-8 pt-8">
-                    Dashboard
-                </h1>
+                <PageHeader
+                    title="Dashboard"
+                    description="An overview of your detections, objects and model activity."
+                    icon={<BarChartSquare02 />}
+                />
 
                 <Loading
                     details="load the dashboard"
@@ -39,9 +42,11 @@ export default function DetectionScreen() {
     if (error) {
         return (
             <main className="flex-1 max-w-7xl mx-auto w-full">
-                <h1 className="text-3xl font-bold mb-8 pt-8">
-                    Dashboard
-                </h1>
+                <PageHeader
+                    title="Dashboard"
+                    description="An overview of your detections, objects and model activity."
+                    icon={<BarChartSquare02 />}
+                />
                 <p>An error occurred while loading data.</p>
             </main>
         );
@@ -50,19 +55,20 @@ export default function DetectionScreen() {
     return (
         <main className="flex-1 max-w-7xl mx-auto w-full">
 
-            <div className="flex flex-col gap-4 mb-8 pt-8 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-3xl font-bold">
-                    Dashboard
-                </h1>
-
-                <Button
-                    iconLeading={Camera01}
-                    onClick={() => router.push("/detection")}
-                    className="w-full sm:w-auto"
-                >
-                    New Detection
-                </Button>
-            </div>
+            <PageHeader
+                title="Dashboard"
+                description="An overview of your detections, objects and model activity."
+                icon={<BarChartSquare02 />}
+                actions={
+                    <Button
+                        iconLeading={Camera01}
+                        onClick={() => router.push("/detection")}
+                        className="w-full sm:w-auto"
+                    >
+                        New Detection
+                    </Button>
+                }
+            />
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 

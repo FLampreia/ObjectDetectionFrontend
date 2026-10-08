@@ -1,12 +1,11 @@
 "use client"
 
 import { ButtonGroup, ButtonGroupItem } from "@/components/base/button-group/button-group"
-import { Input } from "@/components/base/input/input"
-import { Plus, SearchSm, Folder } from "@untitledui/icons"
+import { SearchSm, Folder, Users01 } from "@untitledui/icons"
 import { useState } from "react"
 import { MyTeamsSection } from "./my-teams-section"
 import { ExploreTeamsSection } from "./explore-teams-section"
-import NotFound from "@/app/not-found"
+import { PageHeader } from "@/components/custom/layout/page-header";
 
 
 export default function TeamScreen() {
@@ -17,7 +16,11 @@ export default function TeamScreen() {
 
         <main className="flex-1 max-w-7xl mx-auto w-full flex-col justify-between">
 
-            <h1 className="text-3xl font-bold mb-8 pt-8">Teams</h1>
+            <PageHeader
+                title="Teams"
+                description="Collaborate with your teams and explore shared detections."
+                icon={<Users01 />}
+            />
 
             <ButtonGroup
                 selectedKeys={[selectedTeamTab]}

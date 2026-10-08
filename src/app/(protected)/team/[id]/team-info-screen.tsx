@@ -7,6 +7,7 @@ import { use, useState } from "react";
 import { Camera, Users } from "lucide-react";
 import { TeamDetectionsSection } from "./team-detections-section";
 import { useMembers } from "@/hooks/use-members";
+import { PageHeader } from "@/components/custom/layout/page-header";
 
 
 interface PageProps {
@@ -24,7 +25,11 @@ export default function TeamInfoScreen({ params }: PageProps) {
 
     return (
         <main className="flex-1 max-w-7xl mx-auto w-full flex-col justify-between">
-            <h1 className="text-3xl font-bold mb-8 pt-8">Teams</h1>
+            <PageHeader
+                title="Team overview"
+                description="View team members and explore shared detection results."
+                icon={<Users />}
+            />
 
             <ButtonGroup
                 selectedKeys={[selectedTeamTab]}

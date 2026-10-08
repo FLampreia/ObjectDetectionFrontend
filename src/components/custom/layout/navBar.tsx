@@ -6,6 +6,8 @@ import { Star } from "lucide-react";
 import { usePathname } from "next/navigation";
 import type { User } from "@/types";
 import { useTeams } from "@/hooks/use-team";
+import { History } from "lucide-react";
+
 
 
 
@@ -64,7 +66,7 @@ export const Sidebar = ({ user }: { user: User }) => {
                 {
                     label: "History",
                     href: "/history",
-                    icon: File05,
+                    icon: History,
                 },
                 {
                     label: "Teams",

@@ -2,7 +2,8 @@
 "use client";
 
 import { useState } from "react";
-import { Save, Trash2, User, Lock, BadgeInfo } from "lucide-react";
+import { Save, Trash2, User, Lock, BadgeInfo, Settings } from "lucide-react";
+import { PageHeader } from "@/components/custom/layout/page-header";
 import { useAuth } from "@/hooks/use-auth";
 import { updateUsername, updateFullName, updatePassword, deletePassword } from "@/services/user";
 import { useRouter } from "next/navigation";
@@ -93,7 +94,11 @@ export default function SettingsScreen() {
 
         <main className="flex-1 max-w-7xl mx-auto w-full flex-col justify-between">
 
-            <h1 className="text-3xl font-bold mb-8 pt-8">Settings</h1>
+            <PageHeader
+                title="Settings"
+                description="Manage your profile, password and account preferences."
+                icon={<Settings />}
+            />
 
             <div className="space-y-8 pb-8">
 
