@@ -105,7 +105,7 @@ export function ImageDisplayBox({ imageUrl, detections, area, drawingConfig, onI
             {downloadError && <p role="alert" className="mt-2 text-sm text-error-primary">{downloadError}</p>}
             {isOpen && imageUrl && (
                 <FullScreenModal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-                    <div className="relative flex h-full w-full items-center justify-center overflow-hidden">
+                    <div className="relative flex h-full w-full items-center justify-center overflow-hidden p-4 sm:p-6">
                         <img
                             ref={fullImgRef}
                             src={imageUrl}

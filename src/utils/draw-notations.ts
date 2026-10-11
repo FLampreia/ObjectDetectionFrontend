@@ -46,6 +46,7 @@ export function drawNotations({
     const pointsEnabled = drawingConfig?.dot_enable ?? false
     const boxLabelsEnabled = drawingConfig?.bbox_label_enable ?? true
     const pointLabelsEnabled = drawingConfig?.dot_label_enable ?? false
+
     ctx.font = font ?? `${fontSize}px sans-serif`
     ctx.textAlign = "left"
     ctx.textBaseline = "bottom"
@@ -59,6 +60,7 @@ export function drawNotations({
         let x2 = bx2
         let y2 = by2
 
+        // Adjusts bbox coordinates to match the defined area
         if (area) {
             const ax = area.x1
             const ay = area.y1
@@ -75,8 +77,10 @@ export function drawNotations({
         ctx.strokeStyle = drawingConfig?.bbox_color ?? boxColor
         ctx.lineWidth = lineWidth ?? Math.max(2, Math.min(width, height) * 0.003)
 
+        // Draw bbox
         if (boxesEnabled) ctx.strokeRect(x1, y1, w, h)
 
+        // Draw dot in the center
         const centerX = (x1 + x2) / 2
         const centerY = (y1 + y2) / 2
         if (pointsEnabled) {
@@ -86,6 +90,7 @@ export function drawNotations({
             ctx.fill()
         }
 
+        // Draw labels
         const label = `${index + 1} - ${(d.confidence * 100).toFixed(0)}%`
         const drawLabel = (x: number, y: number, centered: boolean) => {
             const textWidth = ctx.measureText(label).width
@@ -101,7 +106,8 @@ export function drawNotations({
             ctx.fillText(label, left, bottom)
         }
 
+        // Draw lables
         if (boxesEnabled && boxLabelsEnabled) drawLabel(x1, y1 - labelGap, false)
-        if (pointsEnabled && pointLabelsEnabled) drawLabel(centerX, centerY - pointRadius - labelGap, true)
+        if (pointsEnabled && pointLabelsEnabled && !boxesEnabled) drawLabel(centerX, centerY - pointRadius - labelGap, true)
     })
 }

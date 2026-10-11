@@ -105,14 +105,27 @@ export function DrawAreaModal({
         if (!imageUrl || !img || !canvas) return;
 
         const handleLoad = () => {
+            if (!img.naturalWidth || !img.naturalHeight) return;
             canvas.width = img.naturalWidth;
             canvas.height = img.naturalHeight;
+            const bounds = img.getBoundingClientRect();
+            const scale = Math.min(
+                bounds.width / img.naturalWidth,
+                bounds.height / img.naturalHeight,
+            );
+            canvas.style.width = `${img.naturalWidth * scale}px`;
+            canvas.style.height = `${img.naturalHeight * scale}px`;
             redraw(dragRef.current);
         };
 
+        const observer = new ResizeObserver(handleLoad);
+        observer.observe(img);
         img.addEventListener("load", handleLoad);
         if (img.complete && img.naturalWidth > 0) handleLoad();
-        return () => img.removeEventListener("load", handleLoad);
+        return () => {
+            observer.disconnect();
+            img.removeEventListener("load", handleLoad);
+        };
     }, [imageUrl, redraw]);
 
     function getPoint(e: PointerEvent<HTMLCanvasElement>): Point | null {
@@ -214,16 +227,16 @@ export function DrawAreaModal({
 
     return (
         <div
-            className="relative w-full h-full flex items-center justify-center"
+            className="relative w-full h-full flex items-center justify-center p-4 sm:p-6"
             onPointerDown={(e) => e.stopPropagation()}
             onPointerUp={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
         >
-            <div className="relative">
+            <div className="relative flex h-full w-full items-center justify-center overflow-hidden">
                 <img
                     ref={imageRef}
                     src={imageUrl ?? undefined}
-                    className="max-h-[90vh] max-w-[90vw] object-contain block"
+                    className="block h-full w-full object-contain"
                     alt={
                         allowLine
                             ? "Image for drawing an area or line"
@@ -238,69 +251,70 @@ export function DrawAreaModal({
                     onPointerUp={handlePointerUp}
                     onPointerCancel={cancelDraw}
                     onLostPointerCapture={cancelDraw}
-                    className="absolute inset-0 w-full h-full cursor-crosshair touch-none"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-crosshair touch-none"
                 />
             </div>
-            <div className="absolute bottom-4 mx-4 flex max-w-[calc(100%-2rem)] flex-wrap items-center justify-center gap-3 rounded-xl bg-primary p-3 shadow-lg">
-                {allowLine && (
-                    <ButtonGroup
-                        size="sm"
-                        disallowEmptySelection
-                        isDisabled={isDragging}
-                        selectedKeys={[selectedTypeOfDraw]}
-                        onSelectionChange={(keys) => {
-                            const selected = Array.from(keys)[0];
-                            if (selected === "area" || selected === "line")
-                                setSelectedTypeOfDraw(selected);
-                        }}
-                    >
-                        <ButtonGroupItem id="area" iconLeading={<Scan />}>
-                            Area
-                        </ButtonGroupItem>
-                        <ButtonGroupItem id="line" iconLeading={<Minus />}>
-                            Line
-                        </ButtonGroupItem>
-                    </ButtonGroup>
-                )}
-                <label className="flex items-center gap-2 text-sm font-medium text-secondary">
-                    Area color
-                    <input
-                        type="color"
-                        value={areaColor}
-                        onChange={(event) => setAreaColor(event.target.value)}
-                        disabled={isDragging}
-                        className="h-9 w-12 cursor-pointer rounded-lg border border-secondary bg-primary p-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50"
-                    />
-                </label>
-                {allowLine && (
+
+            {!isDragging && (
+                <div className="absolute bottom-4 mx-4 flex max-w-[calc(100%-2rem)] flex-wrap items-center justify-center gap-3 rounded-xl bg-primary p-3 shadow-lg">
+                    {allowLine && (
+                        <ButtonGroup
+                            size="sm"
+                            disallowEmptySelection
+                            selectedKeys={[selectedTypeOfDraw]}
+                            onSelectionChange={(keys) => {
+                                const selected = Array.from(keys)[0];
+                                if (selected === "area" || selected === "line")
+                                    setSelectedTypeOfDraw(selected);
+                            }}
+                        >
+                            <ButtonGroupItem id="area" iconLeading={<Scan />}>
+                                Area
+                            </ButtonGroupItem>
+                            <ButtonGroupItem id="line" iconLeading={<Minus />}>
+                                Line
+                            </ButtonGroupItem>
+                        </ButtonGroup>
+                    )}
                     <label className="flex items-center gap-2 text-sm font-medium text-secondary">
-                        Line color
+                        Area color
                         <input
                             type="color"
-                            value={lineColor}
-                            onChange={(event) => setLineColor(event.target.value)}
-                            disabled={isDragging}
+                            value={areaColor}
+                            onChange={(event) => setAreaColor(event.target.value)}
                             className="h-9 w-12 cursor-pointer rounded-lg border border-secondary bg-primary p-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50"
                         />
                     </label>
-                )}
-                <Button
-                    onClick={() => onSave(finalRect, allowLine ? finalLine : null, { areaColor, lineColor })}
-                    iconLeading={Save}
-                    size="md"
-                    isDisabled={isDragging || !imageUrl}
-                >
-                    {allowLine ? "Save" : "Save Area"}
-                </Button>
-                <Button
-                    color="secondary-destructive"
-                    onClick={clear}
-                    iconLeading={Eraser}
-                    size="md"
-                >
-                    Clear All
-                </Button>
-            </div>
+                    {allowLine && (
+                        <label className="flex items-center gap-2 text-sm font-medium text-secondary">
+                            Line color
+                            <input
+                                type="color"
+                                value={lineColor}
+                                onChange={(event) => setLineColor(event.target.value)}
+                                className="h-9 w-12 cursor-pointer rounded-lg border border-secondary bg-primary p-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-50"
+                            />
+                        </label>
+                    )}
+                    <Button
+                        onClick={() => onSave(finalRect, allowLine ? finalLine : null, { areaColor, lineColor })}
+                        iconLeading={Save}
+                        size="md"
+                        isDisabled={!imageUrl}
+                    >
+                        {allowLine ? "Save" : "Save Area"}
+                    </Button>
+                    <Button
+                        color="secondary-destructive"
+                        onClick={clear}
+                        iconLeading={Eraser}
+                        isDisabled={!imageUrl}
+                        size="md"
+                    >
+                        Clear All
+                    </Button>
+                </div>
+            )}
         </div>
     );
 }
