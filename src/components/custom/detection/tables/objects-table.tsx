@@ -4,6 +4,7 @@ import { Table } from "@/components/application/table/table";
 import { ListObjects } from "@/types";
 
 import { SortDescriptor } from "react-aria-components";
+import { MobileRowDetails } from "@/components/custom/layout/mobile-row-details";
 
 type Props = {
     objects: ListObjects[];
@@ -22,8 +23,8 @@ export function ObjectsTable({ objects, sortDescriptor, setSortChange }: Props) 
             >
                 <Table.Header>
                     <Table.Head id="obj_name" label="Name" isRowHeader allowsSorting />
-                    <Table.Head id="obj_class" label="Class" allowsSorting />
-                    <Table.Head id="obj_conf" label="Confidence (%)" allowsSorting />
+                    <Table.Head id="obj_class" label="Class" allowsSorting className="hidden md:table-cell" />
+                    <Table.Head id="obj_conf" label="Confidence" allowsSorting />
 
                 </Table.Header>
 
@@ -32,9 +33,10 @@ export function ObjectsTable({ objects, sortDescriptor, setSortChange }: Props) 
                         <Table.Row id={objects.id}>
                             <Table.Cell>
                                 {objects.obj_name}
+                                <MobileRowDetails items={[{ label: "Class ID", value: objects.obj_class_id }]} />
                             </Table.Cell>
 
-                            <Table.Cell>
+                            <Table.Cell className="hidden md:table-cell">
                                 {objects.obj_class_id}
                             </Table.Cell>
 

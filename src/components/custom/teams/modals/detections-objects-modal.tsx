@@ -111,13 +111,14 @@ export function DetectionObjectsModal({
 
                 <Modal className="w-full max-w-7xl overflow-hidden">
                     <Dialog
-                        className="flex h-[85dvh] min-h-0 flex-col gap-4 overflow-hidden p-4 sm:p-6"
+                        className="flex min-h-0 flex-col gap-4 overflow-y-auto p-4 sm:h-[85dvh] sm:p-6 lg:overflow-hidden"
                         aria-label="objects"
                     >
                         <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
 
-                            <div className="flex flex-1 flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-tertiary">
+                            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-2 break-words text-sm text-tertiary sm:justify-center">
+                                {detection.username && <span>User: <span className="font-medium text-secondary">{detection.username}</span></span>}
                                 <span>
                                     Created:
                                     <span className="font-medium text-secondary"> {new Date(detection.created_at).toLocaleString()}</span>
@@ -147,7 +148,7 @@ export function DetectionObjectsModal({
                                 </span>
                             </div>
 
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 [&>button:first-child]:flex-1 sm:gap-3 sm:[&>button:first-child]:flex-none">
                                 <Button
                                     size="md"
                                     onClick={() => {
@@ -160,6 +161,7 @@ export function DetectionObjectsModal({
                                 <Button
                                     color="secondary-destructive"
                                     size="md"
+                                    aria-label="Delete detection"
                                     onClick={() => {
                                         setIsDeleteOpen(true)
                                     }}
@@ -177,7 +179,7 @@ export function DetectionObjectsModal({
                             </div>
                         </div>
 
-                        <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto lg:grid-cols-[1fr_1.5fr] lg:grid-rows-[minmax(0,1fr)] lg:gap-6 lg:overflow-hidden">
+                        <div className="grid flex-none grid-cols-1 gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-[1fr_1.5fr] lg:grid-rows-[minmax(0,1fr)] lg:gap-6 lg:overflow-hidden">
                             {/* RESUMO - 1/3 */}
                             <div className="min-w-0 rounded-lg border border-secondary bg-primary p-4 lg:min-h-0 lg:overflow-y-auto">
 
@@ -283,7 +285,7 @@ export function DetectionObjectsModal({
                             {/* TABELA - 2/3 */}
                             <TableCard.Root
                                 size="sm"
-                                className="flex h-[28rem] min-w-0 flex-col overflow-hidden lg:h-full lg:min-h-0"
+                                className="flex min-w-0 flex-col overflow-hidden lg:h-full lg:min-h-0"
                             >
                                 <TableCard.Header
                                     className="shrink-0"
@@ -295,7 +297,7 @@ export function DetectionObjectsModal({
                                         <MultiSelect
                                             size="sm"
                                             placeholder="Select classes"
-                                            className="w-48"
+                                            className="w-full md:w-48"
                                             items={detectedClasses}
                                             selectedKeys={
                                                 selectedClasses === null

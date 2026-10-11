@@ -52,12 +52,13 @@ export function MembersHeader({
                         color="primary-destructive"
                         size="md"
                         iconLeading={Trash01}
+                        aria-label="Delete team"
                         onClick={() => {
                             setIsDeleteOpen(true)
                         }}
                         isDisabled={team?.is_favorite}
                     >
-                        Delete Team
+                        <span className="max-md:hidden">Delete Team</span>
                     </Button>
                 </>
             )}

@@ -14,6 +14,7 @@ import { useTeams } from "@/hooks/use-team";
 import { useAuth } from "@/hooks/use-auth";
 import { RemoveUserTeamModal } from "../../modals/remove-user-team-modal";
 import { useRouter } from "next/navigation";
+import { MobileRowDetails } from "@/components/custom/layout/mobile-row-details";
 
 
 
@@ -42,9 +43,9 @@ export function MembersTable({ teamId, members, sortDescriptor, onSortChange }: 
                 onSortChange={onSortChange}
             >
                 <Table.Header>
-                    <Table.Head id="role" label="Role" isRowHeader allowsSorting />
-                    <Table.Head id="username" label="Username" allowsSorting />
-                    <Table.Head id="email" label="Email" allowsSorting />
+                    <Table.Head id="role" label="Role" allowsSorting className="hidden md:table-cell" />
+                    <Table.Head id="username" label="Username" isRowHeader allowsSorting />
+                    <Table.Head id="email" label="Email" allowsSorting className="hidden md:table-cell" />
                     <Table.Head id="actions" />
                 </Table.Header>
 
@@ -62,7 +63,7 @@ export function MembersTable({ teamId, members, sortDescriptor, onSortChange }: 
                             <Table.Row
                                 id={member.user_id}
                             >
-                                <Table.Cell>
+                                <Table.Cell className="hidden md:table-cell">
                                     {member.role === "owner" ? (
                                         <BadgeWithIcon size="sm" color="blue" iconLeading={Crown} className="capitalize">
                                             {member.role}
@@ -81,15 +82,19 @@ export function MembersTable({ teamId, members, sortDescriptor, onSortChange }: 
                                 <Table.Cell>
                                     <div className="flex items-center gap-3">
                                         <Avatar
-                                            size="md"
+                                            size="md" className="max-md:hidden"
                                             initials={member.username[0].toUpperCase()}
                                         />
-                                        <p className="text-sm font-medium text-primary">
+                                        <p className="max-w-48 break-words text-sm font-medium text-primary md:max-w-none">
                                             {member.username}
                                         </p>
                                     </div>
+                                    <MobileRowDetails items={[
+                                        { label: "Role", value: member.role },
+                                        { label: "Email", value: member.email },
+                                    ]} />
                                 </Table.Cell>
-                                <Table.Cell>
+                                <Table.Cell className="hidden md:table-cell">
                                     <div className="flex items-center gap-3">
 
                                         <p className="text-sm font-medium text-tertiary">

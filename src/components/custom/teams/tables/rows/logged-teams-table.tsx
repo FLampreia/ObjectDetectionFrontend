@@ -15,6 +15,7 @@ import { EditTeamModal } from "../../modals/edit-team-modal";
 import { RemoveUserTeamModal } from "../../modals/remove-user-team-modal";
 import { useAuth } from "@/hooks/use-auth";
 import { RoleBadge } from "../../role-badge";
+import { MobileRowDetails } from "@/components/custom/layout/mobile-row-details";
 
 type Props = {
     teams: Team[];
@@ -47,10 +48,10 @@ export function LoggedTeamsTable({ teams, sortDescriptor, onSortChange }: Props)
                 onSortChange={onSortChange}
             >
                 <Table.Header>
-                    <Table.Head id="favorite" label="Favorite" />
+                    <Table.Head id="favorite"><span className="sr-only">Favorite</span></Table.Head>
                     <Table.Head id="name" label="Name" isRowHeader allowsSorting />
-                    <Table.Head id="created_at" label="Created at" allowsSorting />
-                    <Table.Head id="role" label="Role" allowsSorting />
+                    <Table.Head id="created_at" label="Created at" allowsSorting className="hidden md:table-cell" />
+                    <Table.Head id="role" label="Role" allowsSorting className="hidden md:table-cell" />
                     <Table.Head id="actions" />
                 </Table.Header>
 
@@ -79,25 +80,29 @@ export function LoggedTeamsTable({ teams, sortDescriptor, onSortChange }: Props)
                             <Table.Cell>
                                 <div className="flex items-center gap-3">
                                     <Avatar
-                                        size="md"
+                                        size="md" className="max-md:hidden"
                                         initials={team.name[0].toUpperCase()}
                                     />
-                                    <p className="text-sm font-medium text-primary">
+                                    <p className="max-w-40 break-words text-sm font-medium text-primary md:max-w-none">
                                         {team.name}
                                     </p>
                                 </div>
+                                <MobileRowDetails items={[
+                                    { label: "Role", value: team.current_user_role },
+                                    { label: "Created at", value: new Date(team.created_at).toLocaleDateString() },
+                                ]} />
                             </Table.Cell>
 
-                            <Table.Cell>
+                            <Table.Cell className="hidden md:table-cell">
                                 {new Date(team.created_at).toLocaleDateString()}
                             </Table.Cell>
 
-                            <Table.Cell>
+                            <Table.Cell className="hidden md:table-cell">
                                 <RoleBadge role={team.current_user_role} />
                             </Table.Cell>
 
                             <Table.Cell>
-                                <div className="flex justify-end">
+                                <div className="flex w-20 flex-wrap justify-end md:w-auto md:flex-nowrap">
 
                                     <ButtonUtility size="xs" color="tertiary" tooltip="List" icon={List} onClick={() => router.push(`/team/${team.id}`)} />
 

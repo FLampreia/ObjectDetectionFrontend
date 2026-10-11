@@ -34,12 +34,12 @@ export function DetectionsTable({ detections, sortDescriptor, onSortChange, sele
             >
                 <Table.Header>
                     <Table.Head id="created_at" label="Date" isRowHeader allowsSorting />
-                    {showUsername && <Table.Head id="username" label="User" allowsSorting />}
-                    <Table.Head id="model" label="Model" allowsSorting />
-                    <Table.Head id="type" label="Type" allowsSorting />
-                    <Table.Head id="conf_threshold" label="Confidence (%)" allowsSorting />
-                    <Table.Head id="processing_time_ms" label="Processing Time" allowsSorting />
-                    <Table.Head id="count" label="Nº Objects" allowsSorting />
+                    {showUsername && <Table.Head id="username" label="User" allowsSorting className="hidden md:table-cell" />}
+                    <Table.Head id="model" label="Model" allowsSorting className="hidden md:table-cell" />
+                    <Table.Head id="type" label="Type" allowsSorting className="hidden md:table-cell" />
+                    <Table.Head id="conf_threshold" label="Confidence (%)" allowsSorting className="hidden md:table-cell" />
+                    <Table.Head id="processing_time_ms" label="Processing Time" allowsSorting className="hidden md:table-cell" />
+                    <Table.Head id="count" label="Objects" allowsSorting />
                     <Table.Head id="actions" />
                 </Table.Header>
 
@@ -47,28 +47,32 @@ export function DetectionsTable({ detections, sortDescriptor, onSortChange, sele
                     {(detection) => (
                         <Table.Row id={detection.id}>
                             <Table.Cell>
-                                {new Date(detection.created_at).toLocaleString()}
+                                <span className="hidden md:inline">{new Date(detection.created_at).toLocaleString()}</span>
+                                <span className="md:hidden">
+                                    {new Date(detection.created_at).toLocaleDateString()}
+                                    <span className="mt-1 block text-xs">{new Date(detection.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · {detection.type}</span>
+                                </span>
                             </Table.Cell>
 
                             {showUsername && (
-                                <Table.Cell>
+                                <Table.Cell className="hidden md:table-cell">
                                     {detection.username}
                                 </Table.Cell>
                             )}
 
-                            <Table.Cell>
+                            <Table.Cell className="hidden md:table-cell">
                                 {detection.model}
                             </Table.Cell>
 
-                            <Table.Cell>
+                            <Table.Cell className="hidden md:table-cell">
                                 {detection.type}
                             </Table.Cell>
 
-                            <Table.Cell>
+                            <Table.Cell className="hidden md:table-cell">
                                 {detection.conf_threshold * 100} %
                             </Table.Cell>
 
-                            <Table.Cell>
+                            <Table.Cell className="hidden md:table-cell">
                                 {detection.processing_time_ms < 1000
                                     ? `${detection.processing_time_ms.toFixed(2)} ms`
                                     : detection.processing_time_ms < 60000
@@ -84,7 +88,7 @@ export function DetectionsTable({ detections, sortDescriptor, onSortChange, sele
                             <Table.Cell>
                                 <div className="flex justify-end">
                                     <ButtonUtility
-                                        size="xs"
+                                        size="sm"
                                         color="tertiary"
                                         tooltip="Details"
                                         icon={Menu}

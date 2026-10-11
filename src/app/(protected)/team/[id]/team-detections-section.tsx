@@ -45,7 +45,7 @@ export function TeamDetectionsSection({ teamId }: Props) {
                     `All detections associated to ${team?.name ?? "team"}`
                 }
                 contentTrailing={
-                    <div className="flex items-center gap-2">
+                    <div className="flex w-full min-w-0 items-center gap-2 md:w-auto">
                         {searchDate && (
                             <Button
                                 size="md"
@@ -56,7 +56,7 @@ export function TeamDetectionsSection({ teamId }: Props) {
                                 <Eraser size={20} />
                             </Button>
                         )}
-                        <DatePicker size="md" aria-label="Date picker" value={searchDate} onChange={setSearchDate} />
+                        <DatePicker className="min-w-0 flex-1 md:flex-none" size="md" aria-label="Date picker" value={searchDate} onChange={setSearchDate} />
                     </div>
                 }
             />

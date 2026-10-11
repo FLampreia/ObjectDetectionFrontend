@@ -78,8 +78,8 @@ export const DateRangePicker = ({ value: valueProp, defaultValue, onChange, onAp
 
     return (
         <AriaDateRangePicker aria-label="Date range picker" shouldCloseOnSelect={false} {...props} value={value} onChange={setValue}>
-            <AriaGroup>
-                <Button size={size} color="secondary" iconLeading={CalendarIcon}>
+            <AriaGroup className="min-w-0">
+                <Button size={size} color="secondary" iconLeading={CalendarIcon} className="w-full min-w-0 sm:w-auto">
                     {!value ? <span className="text-placeholder">Select dates</span> : `${formattedStartDate} – ${formattedEndDate}`}
                 </Button>
             </AriaGroup>
@@ -88,7 +88,7 @@ export const DateRangePicker = ({ value: valueProp, defaultValue, onChange, onAp
                 offset={8}
                 className={({ isEntering, isExiting }) =>
                     cx(
-                        "origin-(--trigger-anchor-point) will-change-transform",
+                        "max-w-[calc(100vw-1rem)] max-h-[calc(var(--visual-viewport-height,100dvh)-1rem)] overflow-auto origin-(--trigger-anchor-point) will-change-transform",
                         isEntering &&
                             "duration-150 ease-out animate-in fade-in placement-right:slide-in-from-left-0.5 placement-top:slide-in-from-bottom-0.5 placement-bottom:slide-in-from-top-0.5",
                         isExiting &&

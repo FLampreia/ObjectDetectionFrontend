@@ -123,7 +123,7 @@ export const RangeCalendar = ({ presets, visibleDuration, showOutOfRangeDates = 
                     months: visibleDurationMonths,
                 }}
             >
-                <div className="flex flex-col gap-3 px-6 py-5 md:gap-2">
+                <div className="flex min-w-0 flex-col gap-3 px-2 py-4 sm:px-6 sm:py-5 md:gap-2">
                     <header className={cx("relative flex items-center", visibleDurationMonths > 1 ? "justify-start" : "justify-between")}>
                         <Button slot="previous" iconLeading={ChevronLeft} size="sm" color="tertiary" className="size-8" />
 
@@ -135,15 +135,15 @@ export const RangeCalendar = ({ presets, visibleDuration, showOutOfRangeDates = 
                     </header>
 
                     {!isDesktop && (
-                        <div className="flex items-center gap-2 md:hidden">
-                            <InputDateBase slot="start" size="sm" className="flex-1" />
-                            <div className="text-md text-quaternary">–</div>
-                            <InputDateBase slot="end" size="sm" className="flex-1" />
+                        <div className="grid gap-2 sm:grid-cols-[1fr_auto_1fr] sm:items-center md:hidden">
+                            <InputDateBase slot="start" size="sm" className="min-w-0" />
+                            <div className="hidden text-md text-quaternary sm:block">–</div>
+                            <InputDateBase slot="end" size="sm" className="min-w-0" />
                         </div>
                     )}
 
                     {(showPresetsOnDesktop || !isDesktop) && presets && (
-                        <div className="mt-1 flex justify-between gap-3 px-2">
+                        <div className="mt-1 flex flex-wrap justify-between gap-1 sm:gap-3 sm:px-2">
                             {Object.values(presets).map((preset) => (
                                 <MobilePresetButton key={preset.label} value={preset.value}>
                                     {preset.label}
@@ -156,7 +156,7 @@ export const RangeCalendar = ({ presets, visibleDuration, showOutOfRangeDates = 
                         <AriaCalendarGridHeader>
                             {(day) => (
                                 <AriaCalendarHeaderCell className="border-b-4 border-transparent p-0">
-                                    <div className="flex size-10 items-center justify-center text-sm font-medium text-secondary">{day.slice(0, 2)}</div>
+                                    <div className="flex size-9 items-center justify-center text-sm font-medium text-secondary sm:size-10">{day.slice(0, 2)}</div>
                                 </AriaCalendarHeaderCell>
                             )}
                         </AriaCalendarGridHeader>

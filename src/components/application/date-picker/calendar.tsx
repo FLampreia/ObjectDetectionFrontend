@@ -81,7 +81,7 @@ export const Calendar = ({ highlightedDates, className, children, ...props }: Ca
                             <AriaCalendarGridHeader className="border-b-4 border-transparent">
                                 {(day) => (
                                     <AriaCalendarHeaderCell className="p-0">
-                                        <div className="flex size-10 items-center justify-center text-sm font-medium text-secondary">{day.slice(0, 2)}</div>
+                                        <div className="flex size-9 items-center justify-center text-sm font-medium text-secondary sm:size-10">{day.slice(0, 2)}</div>
                                     </AriaCalendarHeaderCell>
                                 )}
                             </AriaCalendarGridHeader>

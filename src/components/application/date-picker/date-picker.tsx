@@ -32,8 +32,8 @@ export const DatePicker = ({ value: valueProp, defaultValue, onChange, onApply, 
 
     return (
         <AriaDatePicker aria-label="Date picker" shouldCloseOnSelect={false} {...props} value={value} onChange={setValue}>
-            <AriaGroup>
-                <Button size={size} color="secondary" iconLeading={CalendarIcon}>
+            <AriaGroup className="min-w-0">
+                <Button size={size} color="secondary" iconLeading={CalendarIcon} className="w-full min-w-0 sm:w-auto">
                     {formattedDate}
                 </Button>
             </AriaGroup>
@@ -42,7 +42,7 @@ export const DatePicker = ({ value: valueProp, defaultValue, onChange, onApply, 
                 placement="bottom right"
                 className={({ isEntering, isExiting }) =>
                     cx(
-                        "origin-(--trigger-anchor-point) will-change-transform",
+                        "max-w-[calc(100vw-1rem)] max-h-[calc(var(--visual-viewport-height,100dvh)-1rem)] overflow-auto origin-(--trigger-anchor-point) will-change-transform",
                         isEntering &&
                             "duration-150 ease-out animate-in fade-in placement-right:slide-in-from-left-0.5 placement-top:slide-in-from-bottom-0.5 placement-bottom:slide-in-from-top-0.5",
                         isExiting &&
@@ -53,7 +53,7 @@ export const DatePicker = ({ value: valueProp, defaultValue, onChange, onApply, 
                 <AriaDialog aria-label="Date picker" className="rounded-2xl bg-primary shadow-xl ring ring-secondary_alt">
                     {({ close }) => (
                         <>
-                            <div className="flex px-6 py-5">
+                            <div className="flex px-2 py-4 sm:px-6 sm:py-5">
                                 <Calendar highlightedDates={highlightedDates} />
                             </div>
                             <div className="grid grid-cols-2 gap-3 border-t border-secondary p-4">

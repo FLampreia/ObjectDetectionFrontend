@@ -104,7 +104,7 @@ export function AllDetectionsSection() {
                     `Search for your old detections`
                 }
                 contentTrailing={
-                    <div className="flex flex-col gap-4 mb-4 xl:flex-row xl:items-end xl:justify-between">
+                    <div className="mb-4 grid w-full min-w-0 grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-end md:w-auto xl:justify-between">
 
                         {dateRange && (
                             <Button
@@ -123,6 +123,7 @@ export function AllDetectionsSection() {
                         )}
 
                         <DateRangePicker
+                            className="order-first col-span-2 min-w-0 w-full sm:order-none sm:w-auto"
                             size="md"
                             aria-label="Date range picker"
                             shouldCloseOnSelect={false}
@@ -135,7 +136,7 @@ export function AllDetectionsSection() {
                             }}
                         />
 
-                        <div className="flex max-w-sm flex-col gap-2" aria-busy={isGenerating}>
+                        <div className="flex min-w-0 flex-col gap-2 sm:max-w-sm" aria-busy={isGenerating}>
                             {reportError && <InlineFeedback>{reportError}</InlineFeedback>}
                             <Button
                                 size="md"

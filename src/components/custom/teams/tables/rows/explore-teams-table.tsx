@@ -15,6 +15,7 @@ import { EditTeamModal } from "../../modals/edit-team-modal";
 import { RemoveUserTeamModal } from "../../modals/remove-user-team-modal";
 import { useAuth } from "@/hooks/use-auth";
 import { RoleBadge } from "../../role-badge";
+import { MobileRowDetails } from "@/components/custom/layout/mobile-row-details";
 
 type Props = {
     teams: Team[];
@@ -48,8 +49,8 @@ export function ExploreTeamsTable({ teams, sortDescriptor, onSortChange }: Props
             >
                 <Table.Header>
                     <Table.Head id="name" label="Name" isRowHeader allowsSorting />
-                    <Table.Head id="created_at" label="Created at" allowsSorting />
-                    <Table.Head id="owner" label="Owner Name" allowsSorting />
+                    <Table.Head id="created_at" label="Created at" allowsSorting className="hidden md:table-cell" />
+                    <Table.Head id="owner" label="Owner Name" allowsSorting className="hidden md:table-cell" />
                     <Table.Head id="actions" />
                 </Table.Header>
 
@@ -62,20 +63,24 @@ export function ExploreTeamsTable({ teams, sortDescriptor, onSortChange }: Props
                             <Table.Cell>
                                 <div className="flex items-center gap-3">
                                     <Avatar
-                                        size="md"
+                                        size="md" className="max-md:hidden"
                                         initials={team.name[0].toUpperCase()}
                                     />
-                                    <p className="text-sm font-medium text-primary">
+                                    <p className="max-w-48 break-words text-sm font-medium text-primary md:max-w-none">
                                         {team.name}
                                     </p>
                                 </div>
+                                <MobileRowDetails items={[
+                                    { label: "Created at", value: new Date(team.created_at).toLocaleDateString() },
+                                    { label: "Owner", value: team.owner.email },
+                                ]} />
                             </Table.Cell>
 
-                            <Table.Cell>
+                            <Table.Cell className="hidden md:table-cell">
                                 {new Date(team.created_at).toLocaleDateString()}
                             </Table.Cell>
 
-                            <Table.Cell>
+                            <Table.Cell className="hidden md:table-cell">
                                 <div className="flex items-center gap-3">
                                     
                                     <p className="text-sm font-medium text-tertiary">
