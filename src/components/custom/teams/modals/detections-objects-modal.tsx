@@ -119,6 +119,7 @@ export function DetectionObjectsModal({
 
                             <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-2 break-words text-sm text-tertiary sm:justify-center">
                                 {detection.username && <span>User: <span className="font-medium text-secondary">{detection.username}</span></span>}
+                                {detection.team_name && <span>Team: <span className="font-medium text-secondary">{detection.team_name}</span></span>}
                                 <span>
                                     Created:
                                     <span className="font-medium text-secondary"> {new Date(detection.created_at).toLocaleString()}</span>

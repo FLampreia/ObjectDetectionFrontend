@@ -15,6 +15,13 @@ import { getDetectionReportInterval } from "@/services/reports";
 import { DeleteDetectionConfirmationModal } from "@/components/custom/detection/delete-detection-confirmation-modal";
 import { InlineFeedback } from "@/components/custom/layout/inline-feedback";
 import { useNotification } from "@/providers/notification-provider";
+import { Select } from "@/components/base/select/select";
+
+const detectionTypes = [
+    { id: "photo", label: "Photo" },
+    { id: "video", label: "Video" },
+    { id: "stream", label: "Stream" },
+];
 
 export function AllDetectionsSection() {
     const notify = useNotification();
@@ -34,10 +41,28 @@ export function AllDetectionsSection() {
         currentPage,
         setCurrentPage,
         totalDetections,
+        model, setModel, models,
+        detectionType, setDetectionType,
+        teamId, setTeamId, teams,
+        clearFilters,
 
         error,
         isLoading,
     } = useDetections();
+    const hasFilters = !!(dateRange || model || detectionType || teamId);
+
+    function changeFilter(change: () => void) {
+        setSelectedIds(new Set());
+        setReportError(null);
+        change();
+    }
+
+    const activeFilters = [
+        ...(dateRange ? [{ id: "dates", label: `Dates: ${dateRange.start.toString()} – ${dateRange.end.toString()}`, clear: () => setDateRange(null) }] : []),
+        ...(model ? [{ id: "model", label: `Model: ${model}`, clear: () => setModel(null) }] : []),
+        ...(detectionType ? [{ id: "type", label: `Type: ${detectionTypes.find((item) => item.id === detectionType)?.label}`, clear: () => setDetectionType(null) }] : []),
+        ...(teamId ? [{ id: "team", label: `Team: ${teamId === "unassigned" ? "No team" : teams.find((item) => item.id === teamId)?.label ?? "Unnamed team"}`, clear: () => setTeamId(null) }] : []),
+    ];
 
     // Only detections in the current filtered results can be deleted.
     const selectedDetectionIds = allDetections
@@ -71,6 +96,7 @@ export function AllDetectionsSection() {
             const blob = await getDetectionReportInterval(
                 dateRange.start.toString(),
                 dateRange.end.toString(),
+                { model, detectionType, teamId },
             );
 
             const url = window.URL.createObjectURL(blob);
@@ -104,37 +130,7 @@ export function AllDetectionsSection() {
                     `Search for your old detections`
                 }
                 contentTrailing={
-                    <div className="mb-4 grid w-full min-w-0 grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-end md:w-auto xl:justify-between">
-
-                        {dateRange && (
-                            <Button
-                                size="md"
-                                color="secondary"
-                                isDisabled={isGenerating}
-                                onClick={() => {
-                                    setSelectedIds(new Set());
-                                    setReportError(null);
-                                    setDateRange(null);
-                                }}
-                                aria-label="Clear date"
-                            >
-                                <Eraser size={20} />
-                            </Button>
-                        )}
-
-                        <DateRangePicker
-                            className="order-first col-span-2 min-w-0 w-full sm:order-none sm:w-auto"
-                            size="md"
-                            aria-label="Date range picker"
-                            shouldCloseOnSelect={false}
-                            value={dateRange}
-                            isDisabled={isGenerating}
-                            onChange={(value) => {
-                                setSelectedIds(new Set());
-                                setReportError(null);
-                                setDateRange(value);
-                            }}
-                        />
+                    <div className="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start md:w-auto">
 
                         <div className="flex min-w-0 flex-col gap-2 sm:max-w-sm" aria-busy={isGenerating}>
                             {reportError && <InlineFeedback>{reportError}</InlineFeedback>}
@@ -143,6 +139,7 @@ export function AllDetectionsSection() {
                                 isDisabled={!dateRange || isGenerating}
                                 isLoading={isGenerating}
                                 showTextWhileLoading
+                                aria-label="Export report for active filters"
                                 onClick={() => void handleGenerateReport()}
                             >
                                 {isGenerating ? "Exporting…" : reportError ? "Try again" : "Extract Report"}
@@ -167,6 +164,55 @@ export function AllDetectionsSection() {
                     </div>
                 }
             />
+
+            <div className="space-y-4 border-b border-secondary px-4 py-4 md:px-5">
+                <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <div className="min-w-0">
+                        <p className="mb-1.5 text-sm font-medium text-secondary">Dates</p>
+                        <DateRangePicker
+                            className="w-full min-w-0 [&_button]:w-full"
+                            size="md"
+                            aria-label="Date range picker"
+                            value={dateRange}
+                            isDisabled={isGenerating}
+                            onChange={(value) => changeFilter(() => setDateRange(value))}
+                        />
+                    </div>
+                    <Select label="Model" size="md" placeholder="All models" className="min-w-0"
+                        items={[{ id: "all", label: "All models" }, ...models.map((name) => ({ id: name, label: name }))]}
+                        value={model ?? "all"} isDisabled={isGenerating || isLoading}
+                        onChange={(key) => changeFilter(() => setModel(key === "all" || key === null ? null : String(key)))}>
+                        {(item) => <Select.Item id={item.id}>{item.label}</Select.Item>}
+                    </Select>
+                    <Select label="Detection type" size="md" className="min-w-0"
+                        items={[{ id: "all", label: "All types" }, ...detectionTypes]}
+                        value={detectionType ?? "all"} isDisabled={isGenerating}
+                        onChange={(key) => changeFilter(() => setDetectionType(key === "all" || key === null ? null : String(key) as ListDetection["type"]))}>
+                        {(item) => <Select.Item id={item.id}>{item.label}</Select.Item>}
+                    </Select>
+                    <Select label="Team" size="md" className="min-w-0"
+                        items={[{ id: "all", label: "All teams" }, { id: "unassigned", label: "No team" }, ...teams]}
+                        value={teamId ?? "all"} isDisabled={isGenerating || isLoading}
+                        onChange={(key) => changeFilter(() => setTeamId(key === "all" || key === null ? null : String(key)))}>
+                        {(item) => <Select.Item id={item.id}>{item.label}</Select.Item>}
+                    </Select>
+                </div>
+                {hasFilters && (
+                    <div className="flex flex-wrap items-center gap-2" aria-label="Active filters">
+                        {activeFilters.map((filter) => (
+                            <button key={filter.id} type="button" disabled={isGenerating}
+                                aria-label={`Clear ${filter.label}`} onClick={() => changeFilter(filter.clear)}
+                                className="flex max-w-full items-center gap-2 rounded-lg border border-secondary bg-secondary px-3 py-2 text-xs text-secondary hover:bg-primary_hover focus-visible:outline-2 focus-visible:outline-brand disabled:opacity-50">
+                                <span className="min-w-0 break-words">{filter.label}</span><X aria-hidden="true" className="size-4 shrink-0" />
+                            </button>
+                        ))}
+                        <Button color="link-gray" size="sm" iconLeading={Eraser} isDisabled={isGenerating} onPress={() => changeFilter(clearFilters)}>
+                            Clear all filters
+                        </Button>
+                    </div>
+                )}
+                <p role="status" className="text-xs text-tertiary">{allDetections.length} detections{hasFilters ? " match the active filters" : " in your history"}</p>
+            </div>
 
             {isSelecting && (
             <div id="detection-selection-actions" className="flex flex-wrap items-center gap-3 border-b border-secondary bg-secondary px-4 py-3 md:px-5">
@@ -197,7 +243,7 @@ export function AllDetectionsSection() {
                     Delete detections
                 </Button>
 
-                <p className="w-full text-xs text-tertiary">Select all includes every page in the current date filter.</p>
+                <p className="w-full text-xs text-tertiary">Select all includes every page matching the active filters.</p>
 
             </div>
             )}

@@ -41,7 +41,9 @@ export type ListDetection = {
     conf_threshold: number;
     processing_time_ms: number;
     count: number;
-    type: "image" | "video" | "stream";
+    type: "photo" | "video" | "stream";
+    team_id?: string | null;
+    team_name?: string | null;
 }
 
 export type ListObjects = {

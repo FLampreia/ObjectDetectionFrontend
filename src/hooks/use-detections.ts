@@ -4,12 +4,10 @@ import type { DateValue, SortDescriptor } from "react-aria-components";
 import { useQuery } from "@tanstack/react-query";
 
 import { ListDetection } from "@/types";
-import { getDetections, getDetectionsTeam } from "@/services/detect";
+import { getDetections } from "@/services/detect";
 import { useAuth } from "./use-auth";
-import { getLocalTimeZone, today } from "@internationalized/date";
-
-
-const now = today(getLocalTimeZone());
+import { getLocalTimeZone } from "@internationalized/date";
+import { filterDetections } from "@/utils/filter-detections";
 
 export function useDetections() {
 
@@ -22,6 +20,9 @@ export function useDetections() {
         end: DateValue;
     } | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
+    const [model, setModel] = useState<string | null>(null);
+    const [detectionType, setDetectionType] = useState<ListDetection["type"] | null>(null);
+    const [teamId, setTeamId] = useState<string | null>(null);
 
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
         column: "created_at",
@@ -35,6 +36,7 @@ export function useDetections() {
     } = useQuery({
         queryKey: ["detections", user?.id],
         queryFn: () => getDetections(),
+        enabled: !loading && !!user?.id,
         staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
         refetchOnMount: true,
@@ -51,35 +53,29 @@ export function useDetections() {
         setCurrentPage(1);
     };
 
+    const models = useMemo(() => [...new Set(detections.map((detection) => detection.model))].sort(), [detections]);
+    const teams = useMemo(() => {
+        const names = new Map<string, string>();
+        detections.forEach((detection) => {
+            if (detection.team_id) names.set(detection.team_id, detection.team_name ?? "Unnamed team");
+        });
+        return [...names].map(([id, label]) => ({ id, label })).sort((a, b) => a.label.localeCompare(b.label));
+    }, [detections]);
+
     const filteredDetections = useMemo(() => {
-        if (!dateRange) {
-            return detections;
-        }
+        const start = dateRange?.start.toDate(getLocalTimeZone());
+        const end = dateRange?.end.toDate(getLocalTimeZone());
+        end?.setHours(23, 59, 59, 999);
+        return filterDetections(detections, { model, detectionType, teamId, start, end });
+    }, [detections, dateRange, model, detectionType, teamId]);
 
-        const start = dateRange.start.toDate(
-            getLocalTimeZone()
-        );
-
-        const end = dateRange.end.toDate(
-            getLocalTimeZone()
-        );
-
-        // Garantir que o dia final inteiro é incluído
-        end.setHours(23, 59, 59, 999);
-
-        return detections.filter(
-            (detection: ListDetection) => {
-                const detectionDate = new Date(
-                    detection.created_at
-                );
-
-                return (
-                    detectionDate >= start &&
-                    detectionDate <= end
-                );
-            }
-        );
-    }, [detections, dateRange]);
+    function clearFilters() {
+        setDateRange(null);
+        setModel(null);
+        setDetectionType(null);
+        setTeamId(null);
+        setCurrentPage(1);
+    }
 
 
     const sortedDetections = useMemo(() => {
@@ -148,6 +144,15 @@ export function useDetections() {
 
         dateRange,
         setDateRange: onDateRangeChange,
+        model,
+        setModel: (value: string | null) => { setModel(value); setCurrentPage(1); },
+        detectionType,
+        setDetectionType: (value: ListDetection["type"] | null) => { setDetectionType(value); setCurrentPage(1); },
+        teamId,
+        setTeamId: (value: string | null) => { setTeamId(value); setCurrentPage(1); },
+        models,
+        teams,
+        clearFilters,
 
         currentPage,
         setCurrentPage,

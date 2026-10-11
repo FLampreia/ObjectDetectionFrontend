@@ -1,15 +1,21 @@
 import config from "@/config/api";
 import { authFetch, getAccessToken } from "./auth";
-import type { ReportConfig } from "@/types";
+import type { ReportConfig, ListDetection } from "@/types";
 
 export async function getDetectionReportInterval(
     startDate: string,
     endDate: string,
+    filters: { model?: string | null; detectionType?: ListDetection["type"] | null; teamId?: string | null } = {},
 ) {
     const token = getAccessToken();
+    const params = new URLSearchParams({ start_date: startDate, end_date: endDate });
+    if (filters.model) params.set("model", filters.model);
+    if (filters.detectionType) params.set("detection_type", filters.detectionType);
+    if (filters.teamId === "unassigned") params.set("unassigned", "true");
+    else if (filters.teamId) params.set("team_id", filters.teamId);
 
     const response = await authFetch(
-        `${config.API_URL}/report/detection/interval?start_date=${startDate}&end_date=${endDate}`,
+        `${config.API_URL}/report/detection/interval?${params.toString()}`,
         {
             method: "GET",
             headers: {
