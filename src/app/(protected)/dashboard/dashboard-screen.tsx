@@ -73,7 +73,7 @@ export default function DetectionScreen() {
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
-                {/* Coluna esquerda */}
+                {/* Left column */}
                 <div className="flex min-h-72 min-w-0 flex-col">
                     <InfoCards
                         total_detections={stats?.total_detections}
@@ -82,17 +82,17 @@ export default function DetectionScreen() {
                     />
                 </div>
 
-                {/* Coluna do meio */}
+                {/* Middle column */}
                 <div className="min-w-0">
                     <TopObjectsChart top_objetcs={stats?.top_objects} />
                 </div>
 
-                {/* Coluna direita */}
+                {/* Right column */}
                 <div className="min-w-0">
                     <TopModelsChart top_models={stats?.top_models} />
                 </div>
 
-                {/* Tabela de Ultimas deteções */}
+                {/* Latest detections table */}
                 <div className="lg:col-span-3 mb-8">
 
                     <TableCard.Root size="sm">

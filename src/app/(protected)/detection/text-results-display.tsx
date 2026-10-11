@@ -121,7 +121,7 @@ export function TextResultDisplay({
 
                 <dl className="mt-4 grid grid-cols-3 divide-x divide-secondary rounded-lg border border-secondary bg-secondary py-3">
                     {[
-                        { label: "Objects", value: String(detections.length) },
+                        { label: isImage ? "Objects" : "Frame objects", value: String(detections.length) },
                         { label: "Classes", value: String(classes.size) },
                         {
                             label: "Avg. confidence",
@@ -138,6 +138,16 @@ export function TextResultDisplay({
                         </div>
                     ))}
                 </dl>
+                {trackedDetections !== undefined && (
+                    <dl className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-secondary bg-secondary px-3 py-2">
+                        <dt className={cx("text-tertiary", expanded ? "text-sm" : "text-xs")}>
+                            Total new objects
+                        </dt>
+                        <dd className="text-lg font-semibold tabular-nums text-primary">
+                            {trackedDetections.length}
+                        </dd>
+                    </dl>
+                )}
             </div>
 
             <Tabs

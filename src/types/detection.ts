@@ -47,6 +47,9 @@ export type ListDetection = {
 }
 
 export type ListObjects = {
+    track_id?: number | null;
+    image_id?: string | null;
+    frame_number?: number | null;
     id: string;
     obj_name: string;
     obj_class_id: number;

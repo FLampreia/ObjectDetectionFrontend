@@ -36,7 +36,7 @@ export function useMembers(teamId: string) {
     } = useQuery({
         queryKey: ["members", teamId],
         queryFn: () => getMembersTeam(teamId),
-        staleTime: 1000 * 60 * 5, // 5 minutos de cache
+        staleTime: 1000 * 60 * 5, // Cache for 5 minutes.
         refetchOnWindowFocus: false,
         refetchOnMount: false,
     });

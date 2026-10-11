@@ -13,6 +13,10 @@ import { TextResultDisplay } from "./text-results-display"
 import { FullScreenModal } from "@/components/custom/detection/full-screen-modal"
 import { DrawAreaModal } from "./draw-area-modal"
 import { VideoDisplayBox } from "./video-display-box"
+import { ImageAnnotationSettings } from "@/components/custom/detection/image-annotation-settings"
+import { DEFAULT_DRAWING_CONFIG } from "@/config/drawing"
+import { ReportConfig } from "@/types"
+import { InlineFeedback } from "@/components/custom/layout/inline-feedback"
 
 export function VideoDetectionSection() {
     const {
@@ -26,6 +30,7 @@ export function VideoDetectionSection() {
         setTrackedDetections,
         detectVideo,
         loading,
+        detectionError,
         selectedClasses,
         setSelectedClasses,
 
@@ -99,6 +104,7 @@ export function VideoDetectionSection() {
 
     return (
         <>
+            {detectionError && <InlineFeedback>{detectionError}</InlineFeedback>}
             <section aria-labelledby="video-configuration-title" className="overflow-hidden rounded-xl border border-secondary bg-primary">
                 <div className="flex items-start gap-3 border-b border-secondary bg-secondary px-5 py-4">
                     <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-secondary bg-primary text-brand-secondary">

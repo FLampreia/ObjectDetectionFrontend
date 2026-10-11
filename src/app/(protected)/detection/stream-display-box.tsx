@@ -96,7 +96,7 @@ export function StreamDisplayBox({
         }
     }
 
-    // Liga o MediaStream ou URL ao elemento <video>
+    // Connect the MediaStream or URL to the <video> element.
     useEffect(() => {
         const video = videoRef.current
 
@@ -130,7 +130,7 @@ export function StreamDisplayBox({
         }
     }, [videoStream, streamUrl, videoRef])
 
-    // Redesenha sempre que a área/deteções/loading mudam
+    // Redraw whenever the area, detections, or loading state changes.
     useEffect(() => {
         draw(videoRef.current, canvasRef.current)
     }, [detections, area, line, loading, colors])

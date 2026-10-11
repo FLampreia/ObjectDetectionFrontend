@@ -1,6 +1,6 @@
-import { processImage, storeDetections } from "@/services/detect"
-import { askSocketSessionId, connectWebSocket } from "@/services/socket"
-import { Detection, Area, Line, DrawingColors, VideoProcessingResponse } from "@/types"
+import { processImage } from "@/services/detect"
+import { askSocketSessionId, connectWebSocket, processFrame, finishProcessing } from "@/services/socket"
+import { Detection, Area, Line, DrawingColors } from "@/types"
 import { DEFAULT_AREA_LINE_COLORS } from "@/config/drawing"
 import { cocoClassesItems } from "@/utils/coco-classes"
 import { useQueryClient } from "@tanstack/react-query"
@@ -13,29 +13,11 @@ async function captureFrame(
     video: HTMLVideoElement,
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
-    area?: Area | null
 ): Promise<Blob> {
 
-    if (area) {
-        const x = Math.min(area.x1, area.x2) 
-        const y = Math.min(area.y1, area.y2) 
-        const w = Math.abs(area.x2 - area.x1) 
-        const h = Math.abs(area.y2 - area.y1) 
-
-        canvas.width = w
-        canvas.height = h
-
-        ctx.drawImage(
-            video,
-            x, y, w, h,
-            0, 0, w, h
-        )
-    } else {
-        canvas.width = video.videoWidth
-        canvas.height = video.videoHeight
-
-        ctx.drawImage(video, 0, 0)
-    }
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    ctx.drawImage(video, 0, 0)
 
     return new Promise((resolve, reject) => {
         canvas.toBlob((blob) => {
@@ -49,56 +31,42 @@ async function captureFrame(
     })
 }
 
-async function waitDetections(ws: WebSocket): Promise<Detection[]> {
-    return new Promise((resolve, reject) => {
-
-        const handleMessage = (event: MessageEvent) => {
-
-            ws.removeEventListener("message", handleMessage);
-
-            const data = JSON.parse(event.data);
-
-            resolve(data.detections_per_frame);
+async function seekVideo(video: HTMLVideoElement, time: number): Promise<void> {
+    if (video.currentTime === time && !video.seeking) return;
+    await new Promise<void>((resolve, reject) => {
+        const cleanup = () => {
+            clearTimeout(timer);
+            video.removeEventListener("seeked", onSeeked);
+            video.removeEventListener("error", onError);
         };
-
-        const handleError = () => {
-            ws.removeEventListener("message", handleMessage);
-            reject(new Error("WebSocket error"));
-        };
-
-        ws.addEventListener("message", handleMessage, { once: true });
-        ws.addEventListener("error", handleError, { once: true });
-
+        const onSeeked = () => { cleanup(); resolve(); };
+        const onError = () => { cleanup(); reject(new Error("Unable to seek video")); };
+        const timer = setTimeout(onError, 15000);
+        video.addEventListener("seeked", onSeeked);
+        video.addEventListener("error", onError);
+        video.currentTime = time;
     });
 }
 
 async function advanceToNextFrame(video: HTMLVideoElement) {
-
-    return new Promise<void>((resolve) => {
-
-        video.currentTime += 1 / frames_processed_per_second;
-
-        video.onseeked = () => resolve();
-
-    });
-
+    await seekVideo(video, Math.min(video.duration, video.currentTime + 1 / frames_processed_per_second));
 }
 
-function waitFinished(ws: WebSocket): Promise<void> {
-    return new Promise((resolve) => {
-        const handler = (event: MessageEvent) => {
-            const message = JSON.parse(event.data);
-
-            if (message.status === "finished") {
-                ws.removeEventListener("message", handler);
-                resolve();
-            }
+async function waitForVideoData(video: HTMLVideoElement): Promise<void> {
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) return;
+    await new Promise<void>((resolve, reject) => {
+        const cleanup = () => {
+            clearTimeout(timer);
+            video.removeEventListener("loadeddata", onReady);
+            video.removeEventListener("error", onError);
         };
-
-        ws.addEventListener("message", handler);
+        const onReady = () => { cleanup(); resolve(); };
+        const onError = () => { cleanup(); reject(new Error("Video data is unavailable")); };
+        const timer = setTimeout(onError, 15000);
+        video.addEventListener("loadeddata", onReady);
+        video.addEventListener("error", onError);
     });
 }
-
 
 export function useFileDetection() {
     const [file, setFile] = useState<File | null>(null)
@@ -121,13 +89,36 @@ export function useFileDetection() {
     const detectionsRef = useRef<Detection[]>([]);
     const trackedDetectionsRef = useRef(new Map<number, Detection>());
 
-    const captureCanvas = useRef(document.createElement("canvas"));
+    const recordFrame = (frameDetections: Detection[]) => {
+        detectionsRef.current = frameDetections
+        for (const detection of frameDetections) {
+            if (detection.track_id != null && !trackedDetectionsRef.current.has(detection.track_id)) {
+                trackedDetectionsRef.current.set(detection.track_id, detection)
+            }
+        }
+    }
 
-    const captureCtx = useRef(
-        captureCanvas.current.getContext("2d")!
-    );
+    const publishResults = () => {
+        setDetections(detectionsRef.current)
+        setTrackedDetections(new Map(trackedDetectionsRef.current))
+    }
+
+    const captureCanvas = useRef<HTMLCanvasElement | null>(null);
+    const capture = (video: HTMLVideoElement) => {
+        const canvas = captureCanvas.current ?? document.createElement("canvas");
+        captureCanvas.current = canvas;
+        const context = canvas.getContext("2d");
+        if (!context) throw new Error("Unable to create capture canvas");
+        return captureFrame(video, canvas, context);
+    };
 
     const stopStreamRef = useRef(false)
+    const activeSocketRef = useRef<WebSocket | null>(null)
+
+    useEffect(() => () => {
+        stopStreamRef.current = true
+        activeSocketRef.current?.close()
+    }, [])
 
     const queryClient = useQueryClient();
 
@@ -205,6 +196,7 @@ export function useFileDetection() {
         if (!file || !selectedAlgorithm) return
 
         setLoading(true)
+        setDetectionError(null)
 
         setDetections([]);
         setTrackedDetections(new Map());
@@ -212,19 +204,24 @@ export function useFileDetection() {
         detectionsRef.current = []
         trackedDetectionsRef.current = new Map()
 
+        let ws: WebSocket | null = null
+
         try {
 
             // Ask for session id 
             const sessionId = await askSocketSessionId()
 
             // Connect to ws
-            const ws = await connectWebSocket(sessionId)
+            ws = await connectWebSocket(sessionId)
+            activeSocketRef.current = ws
             console.log("Connections Established")
 
             // Processing
             // Sending Parameters
             const parameters = {
                 algorithm: selectedAlgorithm,
+                detection_type: "video",
+                area,
                 chosen_team_id: selectedTeamId,
                 conf_threshold:
                     minConfidence !== null
@@ -239,77 +236,37 @@ export function useFileDetection() {
             ws.send(JSON.stringify(parameters))
 
             video.pause();
-            video.currentTime = 0;
+            await waitForVideoData(video);
+            await seekVideo(video, 0);
 
-            await new Promise<void>((resolve) => {
-                video.onseeked = () => resolve();
-            });
-
-            const start = performance.now();
             let lastUiUpdate = 0
+            let frameNumber = 0
 
             // Loop until the end of the video
             while (video.currentTime < video.duration) {
 
-                const frame = await captureFrame(video, captureCanvas.current, captureCtx.current, area);
+                const frame = await capture(video);
 
-                // Warns that is about to send a frame
-                ws.send(JSON.stringify({
-                    type: "frame"
-                }));
+                const detections = await processFrame(ws, frame, {
+                    frame_number: ++frameNumber, timestamp_ms: video.currentTime * 1000,
+                });
 
-                // Sends the frame
-                ws.send(frame);
-
-                // Receive notations
-                const detections = await waitDetections(ws);
-
-                // Frame detections
-                detectionsRef.current = detections;
+                // Accumulate new tracks before publishing the current frame.
+                recordFrame(detections)
 
                 const now = performance.now();
 
                 if (now - lastUiUpdate > 200) {
-                    setDetections(detectionsRef.current);
+                    publishResults();
                     lastUiUpdate = now;
                 }
-
-                // all video detections
-                detections.forEach(detection => {
-                    if (
-                        detection.track_id !== undefined &&
-                        !trackedDetectionsRef.current.has(detection.track_id)
-                    ) {
-                        trackedDetectionsRef.current.set(detection.track_id, detection);
-                    }
-                });
 
                 // Move to next frame
                 await advanceToNextFrame(video);
             }
 
-            // Warns that has ended
-            ws.send(JSON.stringify({
-                type: "finish"
-            }));
-
-            const end = performance.now();
-            console.log(`Tempo total: ${((end - start) / 1000).toFixed(2)} s`); //TODO retirar  
-
-            // Waits for the worker to end eveerything
-            await waitFinished(ws);
-
-            const result: VideoProcessingResponse = {
-                processing_time: (end - start),
-                detections_per_frame: Array.from(trackedDetectionsRef.current.values()),
-            }
-
-            const conf_threshold = minConfidence !== null ? minConfidence / 100 : 0
-
-            await storeDetections(result, selectedAlgorithm, conf_threshold, "video", selectedTeamId)
-
-            ws.close()
-            console.log("Connections Finished")
+            publishResults()
+            await finishProcessing(ws);
 
             await queryClient.invalidateQueries({
                 queryKey: ["dashboard-stats"],
@@ -319,8 +276,13 @@ export function useFileDetection() {
                 queryKey: ["detections"]
             });
 
+        } catch (error) {
+            setDetectionError(error instanceof Error ? error.message : "Video detection failed")
         } finally {
-            setTrackedDetections(new Map(trackedDetectionsRef.current));
+            ws?.close()
+            activeSocketRef.current = null
+
+            publishResults()
             setLoading(false)
         }
     }
@@ -331,6 +293,7 @@ export function useFileDetection() {
         stopStreamRef.current = false
 
         setLoading(true)
+        setDetectionError(null)
         setDetections([])
         setTrackedDetections(new Map())
 
@@ -345,12 +308,15 @@ export function useFileDetection() {
 
             // Connect to websocket
             ws = await connectWebSocket(sessionId)
+            activeSocketRef.current = ws
 
             console.log("Stream connection established")
 
             // Detection parameters
             const parameters = {
                 algorithm: selectedAlgorithm,
+                detection_type: "stream",
+                area,
                 chosen_team_id: selectedTeamId,
                 conf_threshold:
                     minConfidence !== null
@@ -366,32 +332,15 @@ export function useFileDetection() {
             ws.send(JSON.stringify(parameters))
 
             // Wait until the video has enough data
-            if (
-                video.readyState <
-                HTMLMediaElement.HAVE_CURRENT_DATA
-            ) {
-                await new Promise<void>((resolve) => {
-                    const handleCanPlay = () => {
-                        video.removeEventListener(
-                            "canplay",
-                            handleCanPlay
-                        )
-                        resolve()
-                    }
-
-                    video.addEventListener(
-                        "canplay",
-                        handleCanPlay
-                    )
-                })
-            }
+            await waitForVideoData(video)
 
             const frameInterval =
                 1000 / frames_processed_per_second
 
             let lastUiUpdate = 0
+            let frameNumber = 0
+            const streamStart = performance.now()
 
-            const start = performance.now();
 
             // Stream loop
             while (
@@ -404,62 +353,27 @@ export function useFileDetection() {
                 const frameStart = performance.now()
 
                 // Capture current frame
-                const frame = await captureFrame(
-                    video,
-                    captureCanvas.current,
-                    captureCtx.current,
-                    area
-                )
+                const frame = await capture(video)
 
                 // Check if detection was stopped while capturing
                 if (stopStreamRef.current) {
                     break
                 }
 
-                // Tell worker that a frame is coming
-                ws.send(
-                    JSON.stringify({
-                        type: "frame",
-                    })
-                )
+                const frameDetections = await processFrame(ws, frame, {
+                    frame_number: ++frameNumber, timestamp_ms: frameStart - streamStart,
+                })
 
-                // Send frame
-                ws.send(frame)
-
-                // Wait for worker response
-                const frameDetections =
-                    await waitDetections(ws)
-
-                // Check if detection was stopped
-                if (stopStreamRef.current) {
-                    break
-                }
-
-                // Save current detections
-                detectionsRef.current = frameDetections
+                // Accumulate new tracks before publishing the current frame.
+                recordFrame(frameDetections)
 
                 // Update UI at most 5 times per second
                 const now = performance.now()
 
                 if (now - lastUiUpdate >= 200) {
-                    setDetections(frameDetections)
+                    publishResults()
                     lastUiUpdate = now
                 }
-
-                // Store unique tracked detections
-                frameDetections.forEach((detection) => {
-                    if (
-                        detection.track_id !== undefined &&
-                        !trackedDetectionsRef.current.has(
-                            detection.track_id
-                        )
-                    ) {
-                        trackedDetectionsRef.current.set(
-                            detection.track_id,
-                            detection
-                        )
-                    }
-                })
 
                 // Keep configured FPS
                 const elapsed =
@@ -475,31 +389,8 @@ export function useFileDetection() {
                 }
             }
 
-            const end = performance.now();
-            console.log("Stream detection finished")
-
-            // Prepare result for database
-            const result: VideoProcessingResponse = {
-                processing_time: (end - start),
-                detections_per_frame:
-                    Array.from(
-                        trackedDetectionsRef.current.values()
-                    ),
-            }
-
-            const conf_threshold =
-                minConfidence !== null
-                    ? minConfidence / 100
-                    : 0
-
-            // Store stream detections
-            await storeDetections(
-                result,
-                selectedAlgorithm,
-                conf_threshold,
-                "stream",
-                selectedTeamId
-            )
+            publishResults()
+            await finishProcessing(ws)
 
             await queryClient.invalidateQueries({
                 queryKey: ["dashboard-stats"],
@@ -510,18 +401,18 @@ export function useFileDetection() {
             });
 
         } catch (error) {
+            setDetectionError(error instanceof Error ? error.message : "Stream detection failed")
             console.error(
                 "Stream detection error:",
                 error
             )
         } finally {
-            setTrackedDetections(
-                new Map(trackedDetectionsRef.current)
-            )
+            publishResults()
 
             if (ws) {
                 ws.close()
             }
+            activeSocketRef.current = null
 
             setLoading(false)
 

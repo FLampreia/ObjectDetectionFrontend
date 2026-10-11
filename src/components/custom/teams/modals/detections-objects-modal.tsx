@@ -181,7 +181,7 @@ export function DetectionObjectsModal({
                         </div>
 
                         <div className="grid flex-none grid-cols-1 gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-[1fr_1.5fr] lg:grid-rows-[minmax(0,1fr)] lg:gap-6 lg:overflow-hidden">
-                            {/* RESUMO - 1/3 */}
+                            {/* SUMMARY - 1/3 */}
                             <div className="min-w-0 rounded-lg border border-secondary bg-primary p-4 lg:min-h-0 lg:overflow-y-auto">
 
 
@@ -283,7 +283,7 @@ export function DetectionObjectsModal({
                                 </div>
                             </div>
 
-                            {/* TABELA - 2/3 */}
+                            {/* TABLE - 2/3 */}
                             <TableCard.Root
                                 size="sm"
                                 className="flex min-w-0 flex-col overflow-hidden lg:h-full lg:min-h-0"
