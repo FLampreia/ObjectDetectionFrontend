@@ -25,6 +25,8 @@ export function VideoDetectionSection() {
         imageUrl,
         setImageUrl,
         detections,
+        summaryDetections,
+        setSummaryDetections,
         setDetections,
         trackedDetections,
         setTrackedDetections,
@@ -250,7 +252,7 @@ export function VideoDetectionSection() {
                 <TextResultDisplay
                     layout="expanded"
                     type="Video"
-                    detections={detections}
+                    detections={summaryDetections}
                     trackedDetections={trackedDetections}
                     area={area}
                     line={line}
@@ -277,6 +279,7 @@ export function VideoDetectionSection() {
                         setDrawingColors(colors)
                         setIsAreaOpen(false)
                         setDetections([])
+                        setSummaryDetections([])
                         setTrackedDetections(new Map())
                     }}
                 />

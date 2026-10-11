@@ -5,6 +5,7 @@ import type { Area, Detection, Line } from "@/types";
 import { ScanSearch } from "lucide-react";
 import { Tab, TabList, TabPanel, Tabs } from "react-aria-components";
 import { cx } from "@/utils/cx";
+import { memo } from "react";
 
 interface TextDisplayBoxProps {
     type: string;
@@ -35,7 +36,7 @@ const percentage = (value: number) => `${(value * 100).toFixed(1)}%`;
 const tabClassName =
     "cursor-pointer border-b-2 border-transparent px-1 py-3 text-sm font-semibold text-tertiary outline-hidden transition selected:border-brand selected:text-brand-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 
-export function TextResultDisplay({
+export const TextResultDisplay = memo(function TextResultDisplay({
     type,
     detections,
     trackedDetections,
@@ -371,4 +372,4 @@ export function TextResultDisplay({
             </Tabs>
         </section>
     );
-}
+});

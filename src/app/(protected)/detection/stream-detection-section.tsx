@@ -22,6 +22,8 @@ type StreamInputType = "camera" | "url"
 export function StreamDetectionSection() {
     const {
         detections,
+        summaryDetections,
+        setSummaryDetections,
         setDetections,
         trackedDetections,
         setTrackedDetections,
@@ -444,7 +446,7 @@ export function StreamDetectionSection() {
                 <TextResultDisplay
                     layout="expanded"
                     type="Stream"
-                    detections={detections}
+                    detections={summaryDetections}
                     trackedDetections={trackedDetections}
                     area={area}
                     line={line}
@@ -472,6 +474,7 @@ export function StreamDetectionSection() {
                         setIsAreaOpen(false)
                         setAreaImageUrl(null)
                         setDetections([])
+                        setSummaryDetections([])
                         setTrackedDetections(new Map())
                     }}
                 />

@@ -4,7 +4,7 @@ import { Detection, Area, Line, DrawingColors } from "@/types"
 import { DEFAULT_AREA_LINE_COLORS } from "@/config/drawing"
 import { cocoClassesItems } from "@/utils/coco-classes"
 import { useQueryClient } from "@tanstack/react-query"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import type { Selection } from "react-aria-components"
 
 const frames_processed_per_second = 10
@@ -75,9 +75,11 @@ export function useFileDetection() {
     const [line, setLine] = useState<Line | null>(null)
     const [drawingColors, setDrawingColors] = useState<DrawingColors>({ ...DEFAULT_AREA_LINE_COLORS })
     const [detections, setDetections] = useState<Detection[]>([])
+    const [summaryDetections, setSummaryDetections] = useState<Detection[]>([])
     const [trackedDetections, setTrackedDetections] = useState<Map<number, Detection>>(
         new Map()
     )
+    const trackedDetectionList = useMemo(() => Array.from(trackedDetections.values()), [trackedDetections])
     const [loading, setLoading] = useState(false)
     const [detectionError, setDetectionError] = useState<string | null>(null)
 
@@ -91,6 +93,7 @@ export function useFileDetection() {
 
     const recordFrame = (frameDetections: Detection[]) => {
         detectionsRef.current = frameDetections
+        setDetections(frameDetections)
         for (const detection of frameDetections) {
             if (detection.track_id != null && !trackedDetectionsRef.current.has(detection.track_id)) {
                 trackedDetectionsRef.current.set(detection.track_id, detection)
@@ -100,6 +103,7 @@ export function useFileDetection() {
 
     const publishResults = () => {
         setDetections(detectionsRef.current)
+        setSummaryDetections(detectionsRef.current)
         setTrackedDetections(new Map(trackedDetectionsRef.current))
     }
 
@@ -126,6 +130,7 @@ export function useFileDetection() {
         if (!file) return
 
         setDetections([])
+        setSummaryDetections([])
         setTrackedDetections(new Map())
 
         const url = URL.createObjectURL(file)
@@ -199,6 +204,7 @@ export function useFileDetection() {
         setDetectionError(null)
 
         setDetections([]);
+        setSummaryDetections([])
         setTrackedDetections(new Map());
 
         detectionsRef.current = []
@@ -295,6 +301,7 @@ export function useFileDetection() {
         setLoading(true)
         setDetectionError(null)
         setDetections([])
+        setSummaryDetections([])
         setTrackedDetections(new Map())
 
         detectionsRef.current = []
@@ -431,9 +438,11 @@ export function useFileDetection() {
         imageUrl,
         setImageUrl,
         detections,
+        summaryDetections,
+        setSummaryDetections,
         setDetections,
         setTrackedDetections,
-        trackedDetections: Array.from(trackedDetections.values()),
+        trackedDetections: trackedDetectionList,
         detectImage,
         detectVideo,
         detectStream,
