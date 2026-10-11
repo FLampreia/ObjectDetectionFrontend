@@ -8,13 +8,19 @@ import { PaginationPageMinimalCenter } from "@/components/application/pagination
 import { Button } from "@/components/base/buttons/button";
 import { Eraser, ListChecks, Trash2, X } from "lucide-react";
 import { DateRangePicker } from "@/components/application/date-picker/date-range-picker";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Selection } from "react-aria-components";
 import { useDetections } from "@/hooks/use-detections";
 import { getDetectionReportInterval } from "@/services/reports";
 import { DeleteDetectionConfirmationModal } from "@/components/custom/detection/delete-detection-confirmation-modal";
+import { InlineFeedback } from "@/components/custom/layout/inline-feedback";
+import { useNotification } from "@/providers/notification-provider";
 
 export function AllDetectionsSection() {
+    const notify = useNotification();
+    const generatingRef = useRef(false);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [reportError, setReportError] = useState<string | null>(null);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [isSelecting, setIsSelecting] = useState(false);
@@ -57,8 +63,10 @@ export function AllDetectionsSection() {
     }
 
     async function handleGenerateReport() {
-        if (!dateRange) return;
-
+        if (!dateRange || generatingRef.current) return;
+        generatingRef.current = true;
+        setIsGenerating(true);
+        setReportError(null);
         try {
             const blob = await getDetectionReportInterval(
                 dateRange.start.toString(),
@@ -68,16 +76,21 @@ export function AllDetectionsSection() {
             const url = window.URL.createObjectURL(blob);
 
             const link = document.createElement("a");
-            link.href = url;
-            link.download = `detections-report-${dateRange.start}-${dateRange.end}.pdf`;
-
-            document.body.appendChild(link);
-            link.click();
-
-            link.remove();
-            window.URL.revokeObjectURL(url);
+            try {
+                link.href = url;
+                link.download = `detections-report-${dateRange.start}-${dateRange.end}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+            } finally {
+                link.remove();
+                window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+            }
+            notify("Report exported");
         } catch (error) {
-            console.error("Failed to generate detection report:", error);
+            setReportError(error instanceof Error ? error.message : "Unable to export the report. Please try again.");
+        } finally {
+            generatingRef.current = false;
+            setIsGenerating(false);
         }
     }
 
@@ -97,8 +110,10 @@ export function AllDetectionsSection() {
                             <Button
                                 size="md"
                                 color="secondary"
+                                isDisabled={isGenerating}
                                 onClick={() => {
                                     setSelectedIds(new Set());
+                                    setReportError(null);
                                     setDateRange(null);
                                 }}
                                 aria-label="Clear date"
@@ -112,19 +127,26 @@ export function AllDetectionsSection() {
                             aria-label="Date range picker"
                             shouldCloseOnSelect={false}
                             value={dateRange}
+                            isDisabled={isGenerating}
                             onChange={(value) => {
                                 setSelectedIds(new Set());
+                                setReportError(null);
                                 setDateRange(value);
                             }}
                         />
 
-                        <Button
-                            size="md"
-                            isDisabled={!dateRange}
-                            onClick={() => handleGenerateReport()}
-                        >
-                            Extract Report
-                        </Button>
+                        <div className="flex max-w-sm flex-col gap-2" aria-busy={isGenerating}>
+                            {reportError && <InlineFeedback>{reportError}</InlineFeedback>}
+                            <Button
+                                size="md"
+                                isDisabled={!dateRange || isGenerating}
+                                isLoading={isGenerating}
+                                showTextWhileLoading
+                                onClick={() => void handleGenerateReport()}
+                            >
+                                {isGenerating ? "Exporting…" : reportError ? "Try again" : "Extract Report"}
+                            </Button>
+                        </div>
 
                         <Button
                             size="md"

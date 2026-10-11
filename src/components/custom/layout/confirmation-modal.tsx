@@ -102,7 +102,7 @@ export function ConfirmationModal({
                             showTextWhileLoading
                             onPress={confirm}
                         >
-                            {isSubmitting ? "Processing…" : actionLabel}
+                            {isSubmitting ? "Processing…" : error ? "Try again" : actionLabel}
                         </Button>
                     </ModalActions>
                 </Dialog>

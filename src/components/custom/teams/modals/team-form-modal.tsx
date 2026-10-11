@@ -103,7 +103,7 @@ export function TeamFormModal({
                                 Cancel
                             </Button>
                             <Button type="submit" size="md" isDisabled={isSubmitting} isLoading={isSubmitting} showTextWhileLoading>
-                                {isSubmitting ? "Saving…" : actionLabel}
+                                {isSubmitting ? "Saving…" : error ? "Try again" : actionLabel}
                             </Button>
                         </ModalActions>
                     </form>

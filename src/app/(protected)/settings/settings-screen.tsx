@@ -10,12 +10,14 @@ import { PageHeader } from "@/components/custom/layout/page-header";
 import { SectionCard } from "@/components/custom/layout/section-card";
 import { useAuth } from "@/hooks/use-auth";
 import { updateUsername, updateFullName, updatePassword, deletePassword } from "@/services/user";
+import { useNotification } from "@/providers/notification-provider";
 
 type Action = "profile" | "password" | "delete";
-type Feedback = { tone: "error" | "success"; message: string };
+type Feedback = { message: string };
 
 export default function SettingsScreen() {
     const { user, refreshUser, logout } = useAuth();
+    const notify = useNotification();
     const router = useRouter();
     const pendingRef = useRef(false);
     const [pending, setPending] = useState<Action | null>(null);
@@ -27,6 +29,7 @@ export default function SettingsScreen() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [confirmDelete, setConfirmDelete] = useState("");
     const isBusy = pending !== null;
+    const hasProfileChanges = username !== (user?.username ?? "") || fullName !== (user?.full_name ?? "");
 
     async function perform(action: Action, operation: () => Promise<void>, successMessage?: string) {
         if (pendingRef.current || !user?.id) return;
@@ -36,12 +39,12 @@ export default function SettingsScreen() {
         try {
             await operation();
             if (successMessage) {
-                setFeedback((previous) => ({ ...previous, [action]: { tone: "success", message: successMessage } }));
+                notify(successMessage);
             }
         } catch (error: unknown) {
             setFeedback((previous) => ({
                 ...previous,
-                [action]: { tone: "error", message: error instanceof Error ? error.message : "Unable to save changes. Please try again." },
+                [action]: { message: error instanceof Error ? error.message : "Unable to save changes. Please try again." },
             }));
         } finally {
             pendingRef.current = false;
@@ -51,19 +54,19 @@ export default function SettingsScreen() {
 
     function handleProfileSave(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        if (!user?.id) return;
+        if (!user?.id || !hasProfileChanges) return;
         void perform("profile", async () => {
             if (username !== user.username) await updateUsername(user.id, username);
             if (fullName !== user.full_name) await updateFullName(user.id, fullName);
             await refreshUser();
-        }, "Your profile has been updated.");
+        }, "Profile updated");
     }
 
     function handlePasswordChange(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (!user?.id) return;
         if (newPassword !== confirmPassword) {
-            setFeedback((previous) => ({ ...previous, password: { tone: "error", message: "Passwords do not match." } }));
+            setFeedback((previous) => ({ ...previous, password: { message: "Passwords do not match." } }));
             return;
         }
         void perform("password", async () => {
@@ -72,7 +75,7 @@ export default function SettingsScreen() {
             setCurrentPassword("");
             setNewPassword("");
             setConfirmPassword("");
-        }, "Your password has been updated.");
+        }, "Password updated");
     }
 
     function handleDeleteAccount(event: FormEvent<HTMLFormElement>) {
@@ -87,7 +90,7 @@ export default function SettingsScreen() {
 
     function renderFeedback(action: Action) {
         const result = feedback[action];
-        return result ? <InlineFeedback tone={result.tone}>{result.message}</InlineFeedback> : null;
+        return result ? <InlineFeedback>{result.message}</InlineFeedback> : null;
     }
 
     return (
@@ -102,8 +105,8 @@ export default function SettingsScreen() {
                         <Input label="Email address" type="email" value={user?.email ?? ""} hint="Your email address cannot be changed here." isDisabled />
                         {renderFeedback("profile")}
                         <div className="mt-auto flex justify-end border-t border-secondary pt-5">
-                            <Button type="submit" size="md" iconLeading={Save} isDisabled={isBusy} isLoading={pending === "profile"} showTextWhileLoading>
-                                {pending === "profile" ? "Saving…" : "Save changes"}
+                            <Button type="submit" size="md" iconLeading={Save} isDisabled={isBusy || !hasProfileChanges} isLoading={pending === "profile"} showTextWhileLoading>
+                                {pending === "profile" ? "Saving…" : feedback.profile ? "Try again" : "Save changes"}
                             </Button>
                         </div>
                     </form>
@@ -117,7 +120,7 @@ export default function SettingsScreen() {
                         {renderFeedback("password")}
                         <div className="mt-auto flex justify-end border-t border-secondary pt-5">
                             <Button type="submit" size="md" iconLeading={Save} isDisabled={isBusy} isLoading={pending === "password"} showTextWhileLoading>
-                                {pending === "password" ? "Updating…" : "Update password"}
+                                {pending === "password" ? "Updating…" : feedback.password ? "Try again" : "Update password"}
                             </Button>
                         </div>
                     </form>

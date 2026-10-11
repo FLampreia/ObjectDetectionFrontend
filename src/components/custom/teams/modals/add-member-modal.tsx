@@ -5,6 +5,7 @@ import { DialogTrigger } from "@/components/application/modals/modal";
 import { Button } from "@/components/base/buttons/button";
 import { useMembers } from "@/hooks/use-members";
 import { TeamFormModal } from "./team-form-modal";
+import { useNotification } from "@/providers/notification-provider";
 
 type Props = {
     isOpen: boolean;
@@ -14,6 +15,7 @@ type Props = {
 
 export function AddMemberModal({ isOpen, onOpenChange, teamId }: Props) {
     const { addMember } = useMembers(teamId);
+    const notify = useNotification();
 
     return (
         <DialogTrigger isOpen={isOpen} onOpenChange={onOpenChange}>
@@ -30,7 +32,10 @@ export function AddMemberModal({ isOpen, onOpenChange, teamId }: Props) {
                 type="email"
                 placeholder="member@example.com"
                 actionLabel="Add member"
-                onSubmit={addMember}
+                onSubmit={async (email) => {
+                    await addMember(email);
+                    notify("Member added");
+                }}
             />
         </DialogTrigger>
     );

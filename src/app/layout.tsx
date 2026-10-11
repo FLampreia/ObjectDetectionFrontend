@@ -6,6 +6,7 @@ import "@/styles/globals.css";
 import { AuthProvider } from "@/providers/auth-provider";
 import { cx } from "@/utils/cx";
 import { ReactQueryProvider } from "@/providers/query-provider";
+import { NotificationProvider } from "@/providers/notification-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -34,7 +35,7 @@ export default function RootLayout({
           <ThemeProvider>
             <AuthProvider>
               <ReactQueryProvider>
-                {children}
+                <NotificationProvider>{children}</NotificationProvider>
               </ReactQueryProvider>
             </AuthProvider>
           </ThemeProvider>

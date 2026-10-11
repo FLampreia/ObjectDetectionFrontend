@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ConfirmationModal } from "@/components/custom/layout/confirmation-modal";
 import { deleteDetections } from "@/services/detections";
+import { useNotification } from "@/providers/notification-provider";
 
 type Props = {
     isOpen: boolean;
@@ -14,6 +15,7 @@ type Props = {
 
 export function DeleteDetectionConfirmationModal({ isOpen, onOpenChange, detection_id, onDeleted }: Props) {
     const queryClient = useQueryClient();
+    const notify = useNotification();
     const ids = [...new Set(Array.isArray(detection_id) ? detection_id : detection_id ? [detection_id] : [])];
     const count = ids.length;
     const isSingle = count === 1;
@@ -30,6 +32,7 @@ export function DeleteDetectionConfirmationModal({ isOpen, onOpenChange, detecti
             isDisabled={count === 0}
             onConfirm={() => deleteDetections(ids)}
             onConfirmed={() => {
+                notify(isSingle ? "Detection deleted" : `${count} detections deleted`);
                 void queryClient.invalidateQueries({ queryKey: ["detections"] });
                 void queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
                 onDeleted?.();

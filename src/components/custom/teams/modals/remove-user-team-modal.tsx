@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ConfirmationModal } from "@/components/custom/layout/confirmation-modal";
 import { useAuth } from "@/hooks/use-auth";
 import { useMembers } from "@/hooks/use-members";
+import { useNotification } from "@/providers/notification-provider";
 
 type Props = {
     isOpen: boolean;
@@ -19,6 +20,7 @@ export function RemoveUserTeamModal({ isOpen, onOpenChange, teamId, userId, getB
     const { removeMember } = useMembers(teamId!);
     const { user } = useAuth();
     const router = useRouter();
+    const notify = useNotification();
     const isLeaving = userId === user?.id;
 
     return (
@@ -36,6 +38,7 @@ export function RemoveUserTeamModal({ isOpen, onOpenChange, teamId, userId, getB
                 if (teamId) await removeMember(userId);
             }}
             onConfirmed={() => {
+                notify(isLeaving ? "You left the team" : "Member removed");
                 if (getBack && !isOwner) router.push("/team");
             }}
         />

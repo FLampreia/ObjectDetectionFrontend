@@ -5,6 +5,7 @@ import { DialogTrigger } from "@/components/application/modals/modal";
 import { Button } from "@/components/base/buttons/button";
 import { useTeams } from "@/hooks/use-team";
 import { TeamFormModal } from "./team-form-modal";
+import { useNotification } from "@/providers/notification-provider";
 
 type Props = {
     isOpen: boolean;
@@ -13,6 +14,7 @@ type Props = {
 
 export function CreateTeamModal({ isOpen, onOpenChange }: Props) {
     const { createTeam } = useTeams();
+    const notify = useNotification();
 
     return (
         <DialogTrigger isOpen={isOpen} onOpenChange={onOpenChange}>
@@ -28,7 +30,10 @@ export function CreateTeamModal({ isOpen, onOpenChange }: Props) {
                 label="Team name"
                 placeholder="Enter a team name"
                 actionLabel="Create team"
-                onSubmit={createTeam}
+                onSubmit={async (name) => {
+                    await createTeam(name);
+                    notify("Team created");
+                }}
             />
         </DialogTrigger>
     );

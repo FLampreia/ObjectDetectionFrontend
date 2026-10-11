@@ -10,6 +10,7 @@ import { DEFAULT_DRAWING_CONFIG } from "@/config/drawing";
 import { getSingleDetectionReport } from "@/services/reports";
 import type { ReportConfig } from "@/types";
 import { useId, useRef, useState } from "react";
+import { useNotification } from "@/providers/notification-provider";
 
 type Props = {
     isOpen: boolean;
@@ -21,6 +22,7 @@ type ColorKey = "area_color" | "bbox_color" | "dot_color" | "text_color" | "text
 
 export function ExtractSingleReportModal({ isOpen, onOpenChange, detection_id }: Props) {
     const descriptionId = useId();
+    const notify = useNotification();
     const generatingRef = useRef(false);
     const [error, setError] = useState<string | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
@@ -50,6 +52,7 @@ export function ExtractSingleReportModal({ isOpen, onOpenChange, detection_id }:
                 // Give the browser time to start reading the download URL.
                 window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
             }
+            notify("Report exported");
             onOpenChange(false);
         } catch (error: unknown) {
             setError(error instanceof Error ? error.message : "Unable to generate the report. Please try again.");
@@ -166,7 +169,7 @@ export function ExtractSingleReportModal({ isOpen, onOpenChange, detection_id }:
                             <div className="flex gap-2">
                                 <Button type="button" color="secondary" size="md" isDisabled={isGenerating} onPress={() => onOpenChange(false)}>Cancel</Button>
                                 <Button type="submit" size="md" isLoading={isGenerating} isDisabled={isGenerating} showTextWhileLoading>
-                                    {isGenerating ? "Generating…" : "Extract PDF"}
+                                    {isGenerating ? "Generating…" : error ? "Try again" : "Extract PDF"}
                                 </Button>
                             </div>
                         </div>

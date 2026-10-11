@@ -3,6 +3,7 @@
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ConfirmationModal } from "@/components/custom/layout/confirmation-modal";
+import { useNotification } from "@/providers/notification-provider";
 
 type Props = {
     isOpen: boolean;
@@ -14,6 +15,7 @@ type Props = {
 
 export function DeleteTeamModal({ isOpen, onOpenChange, teamId, onDelete, getBack }: Props) {
     const router = useRouter();
+    const notify = useNotification();
 
     return (
         <ConfirmationModal
@@ -29,6 +31,7 @@ export function DeleteTeamModal({ isOpen, onOpenChange, teamId, onDelete, getBac
                 if (teamId) await onDelete(teamId);
             }}
             onConfirmed={() => {
+                notify("Team deleted");
                 if (getBack) router.push("/team");
             }}
         />
