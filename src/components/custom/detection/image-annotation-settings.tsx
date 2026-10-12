@@ -18,10 +18,12 @@ const MODES = [
     { id: "both", label: "Boxes and points" },
 ]
 
-export function ImageAnnotationSettings({ config, onChange, isDisabled }: {
+export function ImageAnnotationSettings({ config, onChange, isDisabled, title = "Image appearance", description = "Changes apply to the image and its download." }: {
     config: ReportConfig
     onChange: (config: ReportConfig) => void
     isDisabled: boolean
+    title?: string
+    description?: string
 }) {
     const [isOpen, setIsOpen] = useState(false)
     const descriptionId = useId()
@@ -59,8 +61,8 @@ export function ImageAnnotationSettings({ config, onChange, isDisabled }: {
                 <Modal className="w-full max-w-2xl">
                     <Dialog className="p-5 sm:p-6" aria-describedby={descriptionId}>
                         <ModalHeader
-                            title="Image appearance"
-                            description="Changes apply to the image and its download."
+                            title={title}
+                            description={description}
                             descriptionId={descriptionId}
                             icon={<SlidersHorizontal />}
                             onClose={() => setIsOpen(false)}

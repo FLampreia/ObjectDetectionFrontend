@@ -107,11 +107,15 @@ export function processFrame(
     });
 }
 
-export function finishProcessing(ws: WebSocket): Promise<void> {
+export function finishProcessing(ws: WebSocket): Promise<{ processing_time_ms: number }> {
     return requestMessage(ws, (message) => {
         if (message.status !== "finished" || message.saved !== true) {
             throw new Error("Processing was not saved successfully");
         }
+        if (typeof message.processing_time_ms !== "number" || !Number.isFinite(message.processing_time_ms) || message.processing_time_ms < 0) {
+            throw new Error("Invalid session processing time");
+        }
+        return { processing_time_ms: message.processing_time_ms };
     }, () => ws.send(JSON.stringify({ type: "finish" })));
 }
 

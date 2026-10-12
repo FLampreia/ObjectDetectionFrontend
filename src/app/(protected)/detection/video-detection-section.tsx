@@ -32,6 +32,7 @@ export function VideoDetectionSection() {
         setTrackedDetections,
         detectVideo,
         loading,
+        processingSeconds,
         detectionError,
         selectedClasses,
         setSelectedClasses,
@@ -65,6 +66,11 @@ export function VideoDetectionSection() {
     const [videoInfo, setVideoInfo] = useState({
         width: 0,
         height: 0
+    })
+
+    const [drawingConfig, setDrawingConfig] = useState<ReportConfig>({
+        ...DEFAULT_DRAWING_CONFIG,
+        dot_label_enable: true,
     })
 
     const [videoDuration, setVideoDuration] = useState(0)
@@ -170,6 +176,19 @@ export function VideoDetectionSection() {
                 </div>
 
                 <div className="flex flex-wrap items-center justify-end gap-3 border-t border-secondary px-5 py-4">
+
+                    <ImageAnnotationSettings
+                        config={drawingConfig}
+                        onChange={(config) => {
+                            setDrawingConfig(config)
+                            setDrawingColors({ ...drawingColors, areaColor: config.area_color })
+                        }}
+                        isDisabled={false}
+                        title="Video appearance"
+                        description="Changes apply to the detection preview."
+                    />
+
+
                     <Button
                         iconLeading={<PenLine />}
                         color="secondary"
@@ -231,6 +250,7 @@ export function VideoDetectionSection() {
                         {file && <p className="min-w-0 break-all text-sm text-tertiary">{file.name}</p>}
                     </div>
                     <VideoDisplayBox
+                        drawingConfig={drawingConfig}
                         colors={drawingColors}
                         videoRef={videoRef}
                         videoUrl={videoUrl}
@@ -250,6 +270,8 @@ export function VideoDetectionSection() {
                 </section>
 
                 <TextResultDisplay
+                    processingSeconds={processingSeconds}
+                    isProcessing={loading}
                     layout="expanded"
                     type="Video"
                     detections={summaryDetections}
@@ -277,6 +299,7 @@ export function VideoDetectionSection() {
                         setArea(newArea)
                         setLine(newLine)
                         setDrawingColors(colors)
+                        setDrawingConfig((config) => ({ ...config, area_color: colors.areaColor }))
                         setIsAreaOpen(false)
                         setDetections([])
                         setSummaryDetections([])

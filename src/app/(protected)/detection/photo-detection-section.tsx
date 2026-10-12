@@ -30,6 +30,7 @@ export function PhotoDetectionSection() {
         setTrackedDetections,
         detectImage,
         loading,
+        processingSeconds,
         detectionError,
         selectedClasses,
         setSelectedClasses,
@@ -176,6 +177,8 @@ export function PhotoDetectionSection() {
                 </section>
 
                 <TextResultDisplay
+                    processingSeconds={processingSeconds}
+                    isProcessing={loading}
                     layout="expanded"
                     type="Image"
                     detections={detections}

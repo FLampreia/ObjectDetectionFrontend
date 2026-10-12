@@ -16,6 +16,9 @@ import { Input } from "@/components/base/input/input"
 import { StreamDisplayBox } from "./stream-display-box"
 import { Key } from "react-aria-components"
 import { InlineFeedback } from "@/components/custom/layout/inline-feedback"
+import { ImageAnnotationSettings } from "@/components/custom/detection/image-annotation-settings"
+import { DEFAULT_DRAWING_CONFIG } from "@/config/drawing"
+import { ReportConfig } from "@/types"
 
 type StreamInputType = "camera" | "url"
 
@@ -30,6 +33,7 @@ export function StreamDetectionSection() {
         detectStream,
         stopStreamDetection,
         loading,
+        processingSeconds,
         detectionError,
         selectedClasses,
         setSelectedClasses,
@@ -52,7 +56,6 @@ export function StreamDetectionSection() {
     } = useAlgorithms()
 
     const [isAreaOpen, setIsAreaOpen] = useState(false)
-    const [areaImageUrl, setAreaImageUrl] = useState<string | null>(null)
 
     const [inputType, setInputType] =
         useState<StreamInputType>("url")
@@ -74,6 +77,11 @@ export function StreamDetectionSection() {
     const [videoInfo, setVideoInfo] = useState({
         width: 0,
         height: 0,
+    })
+
+    const [drawingConfig, setDrawingConfig] = useState<ReportConfig>({
+        ...DEFAULT_DRAWING_CONFIG,
+        dot_label_enable: true,
     })
 
     // Get available cameras
@@ -102,35 +110,6 @@ export function StreamDetectionSection() {
 
         getCameras()
     }, [inputType])
-
-    const captureCurrentFrame = () => {
-        const video = videoRef.current
-
-        if (!video || video.videoWidth === 0 || video.videoHeight === 0) {
-            return null
-        }
-
-        const canvas = document.createElement("canvas")
-
-        canvas.width = video.videoWidth
-        canvas.height = video.videoHeight
-
-        const ctx = canvas.getContext("2d")
-
-        if (!ctx) {
-            return null
-        }
-
-        ctx.drawImage(
-            video,
-            0,
-            0,
-            video.videoWidth,
-            video.videoHeight
-        )
-
-        return canvas.toDataURL("image/jpeg", 0.95)
-    }
 
     const startCamera = async (deviceId: string) => {
         try {
@@ -376,19 +355,22 @@ export function StreamDetectionSection() {
 
                 <div className="flex flex-wrap items-center justify-end gap-3 border-t border-secondary px-5 py-4">
 
+                    <ImageAnnotationSettings
+                        config={drawingConfig}
+                        onChange={(config) => {
+                            setDrawingConfig(config)
+                            setDrawingColors({ ...drawingColors, areaColor: config.area_color })
+                        }}
+                        isDisabled={false}
+                        title="Stream appearance"
+                        description="Changes apply to the detection preview."
+                    />
+
+
                     <Button
                         iconLeading={<PenLine />}
                         color="secondary"
-                        onClick={() => {
-                            const frame = captureCurrentFrame()
-
-                            if (!frame) {
-                                return
-                            }
-
-                            setAreaImageUrl(frame)
-                            setIsAreaOpen(true)
-                        }}
+                        onClick={() => setIsAreaOpen(true)}
                         isDisabled={loading || !videoReady}
                     >
                         Define Area
@@ -425,6 +407,7 @@ export function StreamDetectionSection() {
                         </p>
                     </div>
                     <StreamDisplayBox
+                        drawingConfig={drawingConfig}
                         colors={drawingColors}
                         videoRef={videoRef}
                         videoStream={cameraStream}
@@ -444,6 +427,8 @@ export function StreamDetectionSection() {
                 </section>
 
                 <TextResultDisplay
+                    processingSeconds={processingSeconds}
+                    isProcessing={loading}
                     layout="expanded"
                     type="Stream"
                     detections={summaryDetections}
@@ -459,20 +444,21 @@ export function StreamDetectionSection() {
                 isOpen={isAreaOpen}
                 onClose={() => {
                     setIsAreaOpen(false)
-                    setAreaImageUrl(null)
                 }}
             >
                 <DrawAreaModal
                     colors={drawingColors}
-                    imageUrl={areaImageUrl}
+                    imageUrl={null}
+                    videoStream={inputType === "camera" ? cameraStream : null}
+                    streamUrl={inputType === "url" ? connectedUrl : ""}
                     area={area}
                     line={line}
                     onSave={(newArea, newLine, colors) => {
                         setArea(newArea)
                         setLine(newLine)
                         setDrawingColors(colors)
+                        setDrawingConfig((config) => ({ ...config, area_color: colors.areaColor }))
                         setIsAreaOpen(false)
-                        setAreaImageUrl(null)
                         setDetections([])
                         setSummaryDetections([])
                         setTrackedDetections(new Map())

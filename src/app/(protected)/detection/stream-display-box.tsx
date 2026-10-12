@@ -4,7 +4,7 @@ import { EmptyFile } from "./empty-file"
 
 import { RefObject, useEffect, useRef } from "react"
 
-import { Area, Detection, DrawingColors, Line } from "@/types"
+import { Area, Detection, DrawingColors, Line, ReportConfig } from "@/types"
 
 import { drawNotations } from "@/utils/draw-notations"
 import { drawArea } from "@/utils/draw-area"
@@ -16,6 +16,7 @@ interface StreamDisplayBoxProps {
     area: Area | null
     line: Line | null
     colors: DrawingColors
+    drawingConfig: ReportConfig
     detections: Detection[]
     videoRef: RefObject<HTMLVideoElement | null>
     loading: boolean
@@ -29,6 +30,7 @@ export function StreamDisplayBox({
     area,
     line,
     colors,
+    drawingConfig,
     videoRef,
     detections,
     loading,
@@ -74,7 +76,7 @@ export function StreamDisplayBox({
             canvas,
             source: video,
             area,
-            areaColor: colors.areaColor,
+            areaColor: drawingConfig.area_color,
         })
 
         // Line always draw
@@ -90,7 +92,8 @@ export function StreamDisplayBox({
             drawNotations({
                 canvas,
                 source: video,
-                detections: loading ? detections : [],
+                detections,
+                drawingConfig,
                 area
             })
         }
@@ -133,7 +136,7 @@ export function StreamDisplayBox({
     // Redraw whenever the area, detections, or loading state changes.
     useEffect(() => {
         draw(videoRef.current, canvasRef.current)
-    }, [detections, area, line, loading, colors])
+    }, [detections, area, line, loading, colors, drawingConfig])
 
     return (
         <div className="w-full h-64 lg:h-112 rounded-lg overflow-hidden flex items-center justify-center bg-secondary ring-secondary ring-inset lg:rounded-xl lg:ring-1">

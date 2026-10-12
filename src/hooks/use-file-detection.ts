@@ -81,6 +81,32 @@ export function useFileDetection() {
     )
     const trackedDetectionList = useMemo(() => Array.from(trackedDetections.values()), [trackedDetections])
     const [loading, setLoading] = useState(false)
+    const [processingSeconds, setProcessingSeconds] = useState<number | null>(null)
+    const processingStartedRef = useRef<number | null>(null)
+
+    const startProcessing = () => {
+        processingStartedRef.current = performance.now()
+        setProcessingSeconds(0)
+        setLoading(true)
+    }
+
+    const completeProcessing = (processingTimeMs?: number) => {
+        if (processingStartedRef.current === null) return
+        setProcessingSeconds(processingTimeMs === undefined
+            ? (performance.now() - processingStartedRef.current) / 1000
+            : processingTimeMs / 1000)
+        processingStartedRef.current = null
+    }
+
+    useEffect(() => {
+        if (!loading) return
+        const timer = setInterval(() => {
+            if (processingStartedRef.current !== null) {
+                setProcessingSeconds((performance.now() - processingStartedRef.current) / 1000)
+            }
+        }, 1000)
+        return () => clearInterval(timer)
+    }, [loading])
     const [detectionError, setDetectionError] = useState<string | null>(null)
 
     const [minConfidence, setMinConfidence] = useState<number>(80)
@@ -127,6 +153,7 @@ export function useFileDetection() {
     const queryClient = useQueryClient();
 
     useEffect(() => {
+        setProcessingSeconds(null)
         if (!file) return
 
         setDetections([])
@@ -145,7 +172,7 @@ export function useFileDetection() {
     const detectImage = async () => {
         if (!file) return
 
-        setLoading(true)
+        startProcessing()
         setDetectionError(null)
 
         try {
@@ -182,6 +209,7 @@ export function useFileDetection() {
             const data = await processImage(formData)
 
             setDetections(data?.detections_per_frame ?? [])
+            completeProcessing()
 
             await queryClient.invalidateQueries({
                 queryKey: ["dashboard-stats"],
@@ -193,6 +221,7 @@ export function useFileDetection() {
         } catch (error) {
             setDetectionError(error instanceof Error ? error.message : "Failed to detect image")
         } finally {
+            completeProcessing()
             setLoading(false)
         }
     }
@@ -200,7 +229,7 @@ export function useFileDetection() {
     const detectVideo = async (video: HTMLVideoElement) => {
         if (!file || !selectedAlgorithm) return
 
-        setLoading(true)
+        startProcessing()
         setDetectionError(null)
 
         setDetections([]);
@@ -272,7 +301,8 @@ export function useFileDetection() {
             }
 
             publishResults()
-            await finishProcessing(ws);
+            const result = await finishProcessing(ws);
+            completeProcessing(result.processing_time_ms)
 
             await queryClient.invalidateQueries({
                 queryKey: ["dashboard-stats"],
@@ -285,6 +315,7 @@ export function useFileDetection() {
         } catch (error) {
             setDetectionError(error instanceof Error ? error.message : "Video detection failed")
         } finally {
+            completeProcessing()
             ws?.close()
             activeSocketRef.current = null
 
@@ -298,7 +329,7 @@ export function useFileDetection() {
 
         stopStreamRef.current = false
 
-        setLoading(true)
+        startProcessing()
         setDetectionError(null)
         setDetections([])
         setSummaryDetections([])
@@ -397,7 +428,8 @@ export function useFileDetection() {
             }
 
             publishResults()
-            await finishProcessing(ws)
+            const result = await finishProcessing(ws)
+            completeProcessing(result.processing_time_ms)
 
             await queryClient.invalidateQueries({
                 queryKey: ["dashboard-stats"],
@@ -414,6 +446,7 @@ export function useFileDetection() {
                 error
             )
         } finally {
+            completeProcessing()
             publishResults()
 
             if (ws) {
@@ -448,6 +481,7 @@ export function useFileDetection() {
         detectStream,
         stopStreamDetection,
         loading,
+        processingSeconds,
         detectionError,
 
         selectedClasses,

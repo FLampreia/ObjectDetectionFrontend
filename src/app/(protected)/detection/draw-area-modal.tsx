@@ -22,6 +22,8 @@ type Drag = { pointerId: number; type: DrawType; start: Point; current: Point };
 
 interface Props {
     imageUrl: string | null;
+    videoStream?: MediaStream | null;
+    streamUrl?: string;
     area: Area | null;
     line?: Line | null;
     allowLine?: boolean;
@@ -49,6 +51,8 @@ function getDrawing(type: DrawType, start: Point, end: Point): Area | Line {
 
 export function DrawAreaModal({
     imageUrl,
+    videoStream = null,
+    streamUrl = "",
     area,
     line = null,
     allowLine = true,
@@ -64,7 +68,26 @@ export function DrawAreaModal({
     const [isDragging, setIsDragging] = useState(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const imageRef = useRef<HTMLImageElement>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
     const dragRef = useRef<Drag | null>(null);
+    const isLive = !!videoStream || !!streamUrl;
+    const [videoReady, setVideoReady] = useState(false);
+    const sourceReady = isLive ? videoReady : !!imageUrl;
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!isLive || !video) return;
+        setVideoReady(false);
+        if (videoStream) video.srcObject = videoStream;
+        else video.src = streamUrl;
+        video.play().catch((error) => console.error("Failed to play drawing preview:", error));
+        return () => {
+            video.pause();
+            video.srcObject = null;
+            video.removeAttribute("src");
+            video.load();
+        };
+    }, [isLive, videoStream, streamUrl]);
 
     const redraw = useCallback(
         (preview: Drag | null = null) => {
@@ -100,38 +123,44 @@ export function DrawAreaModal({
     );
 
     useEffect(() => {
-        const img = imageRef.current;
+        const source = isLive ? videoRef.current : imageRef.current;
         const canvas = canvasRef.current;
-        if (!imageUrl || !img || !canvas) return;
+        if (!source || !canvas) return;
 
         const handleLoad = () => {
-            if (!img.naturalWidth || !img.naturalHeight) return;
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            const bounds = img.getBoundingClientRect();
+            const width = source instanceof HTMLVideoElement ? source.videoWidth : source.naturalWidth;
+            const height = source instanceof HTMLVideoElement ? source.videoHeight : source.naturalHeight;
+            if (!width || !height) return;
+            canvas.width = width;
+            canvas.height = height;
+            const bounds = source.getBoundingClientRect();
             const scale = Math.min(
-                bounds.width / img.naturalWidth,
-                bounds.height / img.naturalHeight,
+                bounds.width / width,
+                bounds.height / height,
             );
-            canvas.style.width = `${img.naturalWidth * scale}px`;
-            canvas.style.height = `${img.naturalHeight * scale}px`;
+            canvas.style.width = `${width * scale}px`;
+            canvas.style.height = `${height * scale}px`;
             redraw(dragRef.current);
         };
 
         const observer = new ResizeObserver(handleLoad);
-        observer.observe(img);
-        img.addEventListener("load", handleLoad);
-        if (img.complete && img.naturalWidth > 0) handleLoad();
+        observer.observe(source);
+        source.addEventListener("load", handleLoad);
+        source.addEventListener("loadedmetadata", handleLoad);
+        source.addEventListener("resize", handleLoad);
+        handleLoad();
         return () => {
             observer.disconnect();
-            img.removeEventListener("load", handleLoad);
+            source.removeEventListener("load", handleLoad);
+            source.removeEventListener("loadedmetadata", handleLoad);
+            source.removeEventListener("resize", handleLoad);
         };
-    }, [imageUrl, redraw]);
+    }, [imageUrl, isLive, videoStream, streamUrl, redraw]);
 
     function getPoint(e: PointerEvent<HTMLCanvasElement>): Point | null {
         const canvas = e.currentTarget;
         const rect = canvas.getBoundingClientRect();
-        if (!rect.width || !rect.height || !imageRef.current?.naturalWidth)
+        if (!rect.width || !rect.height || !sourceReady)
             return null;
 
         return {
@@ -233,17 +262,31 @@ export function DrawAreaModal({
             onClick={(e) => e.stopPropagation()}
         >
             <div className="relative flex h-full w-full items-center justify-center overflow-hidden">
-                <img
-                    ref={imageRef}
-                    src={imageUrl ?? undefined}
-                    className="block h-full w-full object-contain"
-                    alt={
-                        allowLine
-                            ? "Image for drawing an area or line"
-                            : "Image for drawing an area"
-                    }
-                    draggable={false}
-                />
+                {isLive ? (
+                    <video
+                        ref={videoRef}
+                        autoPlay
+                        muted
+                        playsInline
+                        aria-label="Live stream for drawing an area or line"
+                        className="block h-full w-full object-contain"
+                        onLoadedMetadata={() => setVideoReady(true)}
+                        onEmptied={() => setVideoReady(false)}
+                        onError={() => setVideoReady(false)}
+                    />
+                ) : (
+                    <img
+                        ref={imageRef}
+                        src={imageUrl ?? undefined}
+                        className="block h-full w-full object-contain"
+                        alt={
+                            allowLine
+                                ? "Image for drawing an area or line"
+                                : "Image for drawing an area"
+                        }
+                        draggable={false}
+                    />
+                )}
                 <canvas
                     ref={canvasRef}
                     onPointerDown={handlePointerDown}
@@ -300,7 +343,7 @@ export function DrawAreaModal({
                         onClick={() => onSave(finalRect, allowLine ? finalLine : null, { areaColor, lineColor })}
                         iconLeading={Save}
                         size="md"
-                        isDisabled={!imageUrl}
+                        isDisabled={!sourceReady}
                     >
                         {allowLine ? "Save" : "Save Area"}
                     </Button>
@@ -308,7 +351,7 @@ export function DrawAreaModal({
                         color="secondary-destructive"
                         onClick={clear}
                         iconLeading={Eraser}
-                        isDisabled={!imageUrl}
+                        isDisabled={!sourceReady}
                         size="md"
                     >
                         Clear All

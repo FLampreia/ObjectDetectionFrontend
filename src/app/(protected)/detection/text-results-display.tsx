@@ -5,7 +5,9 @@ import type { Area, Detection, Line } from "@/types";
 import { ScanSearch } from "lucide-react";
 import { Tab, TabList, TabPanel, Tabs } from "react-aria-components";
 import { cx } from "@/utils/cx";
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
+import { PaginationPageMinimalCenter } from "@/components/application/pagination/pagination";
+import { useBreakpoint } from "@/hooks/use-breakpoint";
 
 interface TextDisplayBoxProps {
     type: string;
@@ -17,6 +19,8 @@ interface TextDisplayBoxProps {
     imageHeight: number;
     videoDuration?: number;
     videoCurrentTime?: number;
+    processingSeconds?: number | null;
+    isProcessing?: boolean;
     layout?: "compact" | "expanded";
 }
 
@@ -33,6 +37,11 @@ function formatTime(seconds: number) {
 
 const percentage = (value: number) => `${(value * 100).toFixed(1)}%`;
 
+function formatProcessingTime(seconds: number | null | undefined) {
+    if (seconds == null) return "—";
+    return seconds < 60 ? `${seconds.toFixed(1)} s` : formatTime(seconds);
+}
+
 const tabClassName =
     "cursor-pointer border-b-2 border-transparent px-1 py-3 text-sm font-semibold text-tertiary outline-hidden transition selected:border-brand selected:text-brand-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 
@@ -46,9 +55,17 @@ export const TextResultDisplay = memo(function TextResultDisplay({
     imageHeight,
     videoDuration,
     videoCurrentTime,
+    processingSeconds,
+    isProcessing = false,
     layout = "compact",
 }: TextDisplayBoxProps) {
     const expanded = layout === "expanded";
+    const wide = useBreakpoint("xl");
+    const [selectedTab, setSelectedTab] = useState("overview");
+    const [requestedPage, setRequestedPage] = useState(1);
+    const objectsPerPage = expanded && wide ? 10 : 5;
+    const isImage = type.toLowerCase() === "image";
+    const summaryDetections = isImage ? detections : (trackedDetections ?? []);
     const classes = new Map<
         number,
         { id: number; name: string; count: number; confidenceTotal: number }
@@ -57,7 +74,7 @@ export const TextResultDisplay = memo(function TextResultDisplay({
     let highest = 0;
     let lowest = 1;
 
-    for (const detection of detections) {
+    for (const detection of summaryDetections) {
         confidenceTotal += detection.confidence;
         highest = Math.max(highest, detection.confidence);
         lowest = Math.min(lowest, detection.confidence);
@@ -75,7 +92,22 @@ export const TextResultDisplay = memo(function TextResultDisplay({
     const classSummary = [...classes.values()].sort(
         (a, b) => b.count - a.count || a.id - b.id,
     );
+    const pageSize = selectedTab === "overview" ? 5 : objectsPerPage;
+    const totalItems = selectedTab === "overview"
+        ? classSummary.length
+        : selectedTab === "objects" ? detections.length : (trackedDetections?.length ?? 0);
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+    const page = Math.min(requestedPage, totalPages);
+    const offset = (page - 1) * pageSize;
+    const visibleClasses = selectedTab === "overview" ? classSummary.slice(offset, offset + pageSize) : [];
+    const visibleObjects = selectedTab === "objects" ? detections.slice(offset, offset + pageSize) : [];
+    const visibleTracks = selectedTab === "tracked" ? (trackedDetections ?? []).slice(offset, offset + pageSize) : [];
+
+    useEffect(() => {
+        setRequestedPage((previous) => Math.min(previous, totalPages));
+    }, [totalPages]);
     const hasDetections = detections.length > 0;
+    const hasSummaryDetections = summaryDetections.length > 0;
     const hasDimensions = imageWidth > 0 && imageHeight > 0;
     const areaWidth = area ? Math.abs(area.x2 - area.x1) : 0;
     const areaHeight = area ? Math.abs(area.y2 - area.y1) : 0;
@@ -83,15 +115,16 @@ export const TextResultDisplay = memo(function TextResultDisplay({
         hasDimensions && area
             ? Math.min(1, (areaWidth * areaHeight) / (imageWidth * imageHeight))
             : null;
-    const isImage = type.toLowerCase() === "image";
 
-    const emptyState = (
+    const emptyState = () => (
         <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
             <div className="rounded-lg border border-secondary bg-primary p-2.5 text-tertiary">
                 <ScanSearch size={20} aria-hidden="true" />
             </div>
 
-            <p className="text-sm font-semibold text-primary">No detections yet</p>
+            <p className="text-sm font-semibold text-primary">
+                No detections yet
+            </p>
 
             <p className="max-w-64 text-sm text-tertiary">
                 Detected objects and confidence scores will appear here.
@@ -102,7 +135,7 @@ export const TextResultDisplay = memo(function TextResultDisplay({
     return (
         <section
             aria-label={`${type} detection results`}
-            className={cx("flex min-w-0 flex-col overflow-hidden rounded-xl border border-secondary bg-primary", !expanded && "h-112")}
+            className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-secondary bg-primary"
         >
             <div className={cx("shrink-0", expanded ? "px-5 pt-5 sm:px-6 sm:pt-6" : "px-4 pt-4")}>
                 <div className="flex items-center justify-between gap-3">
@@ -117,18 +150,22 @@ export const TextResultDisplay = memo(function TextResultDisplay({
                 <p className={cx("mt-1 text-tertiary", expanded ? "text-sm" : "text-xs")}>
                     {isImage
                         ? "Summary of the detected objects"
-                        : "Results for the current frame"}
+                        : "Session totals count each tracking ID once."}
                 </p>
 
-                <dl className="mt-4 grid grid-cols-3 divide-x divide-secondary rounded-lg border border-secondary bg-secondary py-3">
+                <dl className="mt-4 grid grid-cols-2 gap-y-3 rounded-lg border border-secondary bg-secondary py-3 sm:grid-cols-4">
                     {[
-                        { label: isImage ? "Objects" : "Frame objects", value: String(detections.length) },
-                        { label: "Classes", value: String(classes.size) },
+                        { label: isImage ? "Objects" : "Total unique objects", value: String(summaryDetections.length) },
+                        { label: isImage ? "Classes" : "Session classes", value: String(classes.size) },
                         {
                             label: "Avg. confidence",
-                            value: hasDetections
-                                ? percentage(confidenceTotal / detections.length)
+                            value: hasSummaryDetections
+                                ? percentage(confidenceTotal / summaryDetections.length)
                                 : "—",
+                        },
+                        {
+                            label: isProcessing ? "Processing time · running" : "Total processing time",
+                            value: formatProcessingTime(processingSeconds),
                         },
                     ].map((stat) => (
                         <div key={stat.label} className="min-w-0 px-3">
@@ -139,54 +176,54 @@ export const TextResultDisplay = memo(function TextResultDisplay({
                         </div>
                     ))}
                 </dl>
-                {trackedDetections !== undefined && (
-                    <dl className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-secondary bg-secondary px-3 py-2">
-                        <dt className={cx("text-tertiary", expanded ? "text-sm" : "text-xs")}>
-                            Total new objects
-                        </dt>
-                        <dd className="text-lg font-semibold tabular-nums text-primary">
-                            {trackedDetections.length}
-                        </dd>
-                    </dl>
-                )}
+                <p className="mt-3 text-xs text-tertiary">
+                    Processing time includes connection, detection and saving results.
+                    {!isImage && " Session confidence scores use each object's first detection."}
+                </p>
             </div>
 
             <Tabs
-                defaultSelectedKey="overview"
+                selectedKey={selectedTab}
+                onSelectionChange={(key) => {
+                    setSelectedTab(String(key));
+                    setRequestedPage(1);
+                }}
                 className="mt-2 flex min-h-0 flex-1 flex-col"
             >
                 <TabList
                     aria-label="Result views"
-                    className={cx("flex shrink-0 gap-5 border-b border-secondary", expanded ? "mx-5 sm:mx-6" : "mx-4")}
+                    className={cx("flex shrink-0 gap-5 overflow-x-auto whitespace-nowrap border-b border-secondary", expanded ? "mx-5 sm:mx-6" : "mx-4")}
                 >
                     <Tab id="overview" className={tabClassName}>
-                        Overview
+                        {isImage ? "Overview" : "Session summary"}
                     </Tab>
-                    <Tab id="objects" className={tabClassName}>
-                        Objects
-                    </Tab>
+                    {isImage && (
+                        <Tab id="objects" className={tabClassName}>
+                            Objects
+                        </Tab>
+                    )}
                     {trackedDetections !== undefined && (
                         <Tab id="tracked" className={tabClassName}>
-                            Tracked
+                            Unique objects
                         </Tab>
                     )}
                 </TabList>
 
                 <TabPanel
                     id="overview"
-                    className={cx("outline-hidden", expanded ? "grid items-start gap-6 p-5 sm:p-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]" : "min-h-0 flex-1 space-y-5 overflow-y-auto p-4")}
+                    className={cx("h-[36rem] shrink-0 overflow-y-auto outline-hidden", expanded ? "grid items-start gap-6 p-5 sm:p-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]" : "space-y-5 p-4")}
                 >
                     <div className="min-w-0 space-y-5">
                         <div>
                             <h3 className="text-sm font-semibold text-primary">
-                                Objects by class
+                                {isImage ? "Objects by class" : "Unique objects by class"}
                             </h3>
-                            {hasDetections ? (
+                            {hasSummaryDetections ? (
                                 <ul className="mt-2 divide-y divide-secondary">
-                                    {classSummary.map((item) => (
+                                    {visibleClasses.map((item) => (
                                         <li
                                             key={item.id}
-                                            className="flex items-center justify-between gap-3 py-2.5"
+                                            className="flex h-20 items-center justify-between gap-3 py-2.5"
                                         >
                                             <div className="min-w-0">
                                                 <p className={cx("text-sm font-medium text-secondary", expanded ? "break-words" : "truncate")}>
@@ -204,11 +241,11 @@ export const TextResultDisplay = memo(function TextResultDisplay({
                                     ))}
                                 </ul>
                             ) : (
-                                emptyState
+                                emptyState()
                             )}
                         </div>
 
-                        {hasDetections && (
+                        {hasSummaryDetections && (
                             <dl className={cx("flex flex-wrap justify-between gap-3 border-t border-secondary pt-3", expanded ? "text-sm" : "text-xs")}>
                                 <div>
                                     <dt className="text-tertiary">Lowest confidence</dt>
@@ -241,7 +278,7 @@ export const TextResultDisplay = memo(function TextResultDisplay({
 
                             {videoDuration !== undefined && (
                                 <div className="flex justify-between gap-3">
-                                    <dt className="text-tertiary">Playback</dt>
+                                    <dt className="text-tertiary">Video position / duration</dt>
                                     <dd className="font-medium tabular-nums text-secondary">
                                         {formatTime(videoCurrentTime ?? 0)} /{" "}
                                         {formatTime(videoDuration)}
@@ -286,9 +323,10 @@ export const TextResultDisplay = memo(function TextResultDisplay({
                     </div>
                 </TabPanel>
 
+                {isImage && (
                 <TabPanel
                     id="objects"
-                    className={cx("outline-hidden", expanded ? "p-5 sm:p-6" : "min-h-0 flex-1 overflow-y-auto p-4")}
+                    className={cx("h-[36rem] shrink-0 overflow-y-auto outline-hidden", expanded ? "p-5 sm:p-6" : "p-4")}
                 >
                     {hasDetections ? (
                         <>
@@ -296,22 +334,22 @@ export const TextResultDisplay = memo(function TextResultDisplay({
                                 Numbers match the labels drawn on the image.
                             </p>
 
-                            <ol className={expanded ? "grid gap-3 xl:grid-cols-2" : "divide-y divide-secondary"}>
-                                {detections.map((detection, index) => (
-                                    <li key={index} className={cx("flex items-start gap-3", expanded ? "min-w-0 rounded-lg border border-secondary p-4" : "py-3")}>
+                            <ol start={offset + 1} className={expanded ? "grid gap-3 xl:grid-cols-2" : "space-y-3"}>
+                                {visibleObjects.map((detection, index) => (
+                                    <li key={offset + index} className={cx("flex h-20 items-center gap-3", expanded ? "min-w-0 rounded-lg border border-secondary px-4" : "py-3")}>
                                         <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-secondary text-xs font-semibold tabular-nums text-secondary">
-                                            {index + 1}
+                                            {offset + index + 1}
                                         </span>
                                         <div className="min-w-0 flex-1">
                                             <div className="flex items-center justify-between gap-2">
-                                                <p className={cx("text-sm font-medium text-primary", expanded ? "break-words" : "truncate")}>
+                                                <p className="truncate text-sm font-medium text-primary" title={detection.class_name}>
                                                     {detection.class_name}
                                                 </p>
                                                 <Badge color="gray" size="sm">
                                                     {percentage(detection.confidence)}
                                                 </Badge>
                                             </div>
-                                            <p className={cx("mt-1 tabular-nums text-tertiary", expanded ? "text-sm" : "text-xs")}>
+                                            <p className={cx("mt-1 truncate tabular-nums text-tertiary", expanded ? "text-sm" : "text-xs")}>
                                                 Box{" "}
                                                 {Math.round(
                                                     Math.abs(detection.bbox[2] - detection.bbox[0]),
@@ -328,32 +366,34 @@ export const TextResultDisplay = memo(function TextResultDisplay({
                             </ol>
                         </>
                     ) : (
-                        emptyState
+                        emptyState()
                     )}
                 </TabPanel>
+                )}
 
                 {trackedDetections !== undefined && (
                     <TabPanel
                         id="tracked"
-                        className={cx("outline-hidden", expanded ? "p-5 sm:p-6" : "min-h-0 flex-1 overflow-y-auto p-4")}
+                        className={cx("h-[36rem] shrink-0 overflow-y-auto outline-hidden", expanded ? "p-5 sm:p-6" : "p-4")}
                     >
                         <p className={cx("mb-3 text-tertiary", expanded ? "text-sm" : "text-xs")}>
-                            {trackedDetections.length} tracked objects across processed
-                            frames.
+                            {trackedDetections.length} unique objects detected during this session.
+                            Each tracking ID appears once, even when visible in multiple frames.
+                            Confidence scores and boxes are from the first detection.
                         </p>
                         {trackedDetections.length > 0 ? (
-                            <ul className={expanded ? "grid gap-3 xl:grid-cols-2" : "divide-y divide-secondary"}>
-                                {trackedDetections.map((detection, index) => (
+                            <ul className={expanded ? "grid gap-3 xl:grid-cols-2" : "space-y-3"}>
+                                {visibleTracks.map((detection, index) => (
                                     <li
-                                        key={detection.track_id ?? index}
-                                        className={cx("flex items-center justify-between gap-3", expanded ? "min-w-0 rounded-lg border border-secondary p-4" : "py-3")}
+                                        key={detection.track_id ?? offset + index}
+                                        className={cx("flex h-20 items-center justify-between gap-3", expanded ? "min-w-0 rounded-lg border border-secondary px-4" : "py-3")}
                                     >
                                         <div className="min-w-0">
-                                            <p className={cx("text-sm font-medium text-primary", expanded ? "break-words" : "truncate")}>
+                                            <p className="truncate text-sm font-medium text-primary" title={detection.class_name}>
                                                 {detection.class_name}
                                             </p>
                                             <p className={cx("mt-1 tabular-nums text-tertiary", expanded ? "text-sm" : "text-xs")}>
-                                                Track #{detection.track_id ?? "—"}
+                                                Tracking ID #{detection.track_id ?? "—"}
                                             </p>
                                         </div>
                                         <Badge color="gray" size="sm">
@@ -364,11 +404,22 @@ export const TextResultDisplay = memo(function TextResultDisplay({
                             </ul>
                         ) : (
                             <p className="py-6 text-center text-sm text-tertiary">
-                                No tracked objects yet
+                                No unique objects detected yet
                             </p>
                         )}
                     </TabPanel>
                 )}
+                <div className="shrink-0">
+                    <p className="px-5 pb-2 text-xs tabular-nums text-tertiary sm:px-6" aria-live="polite">
+                        {totalItems === 0 ? "0 results" : `${offset + 1}–${Math.min(offset + pageSize, totalItems)} of ${totalItems} ${selectedTab === "overview" ? "classes" : "objects"}`}
+                    </p>
+                    <PaginationPageMinimalCenter
+                        page={page}
+                        total={totalPages}
+                        onPageChange={setRequestedPage}
+                        className="px-5 py-3 md:px-6 md:pt-3 md:pb-4"
+                    />
+                </div>
             </Tabs>
         </section>
     );
