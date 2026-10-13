@@ -116,14 +116,27 @@ export function useFileDetection() {
 
     const detectionsRef = useRef<Detection[]>([]);
     const trackedDetectionsRef = useRef(new Map<number, Detection>());
+    const confidenceTotalsRef = useRef(new Map<number, { total: number; count: number }>());
 
     const recordFrame = (frameDetections: Detection[]) => {
         detectionsRef.current = frameDetections
         setDetections(frameDetections)
+        const frameTracks = new Set<number>()
         for (const detection of frameDetections) {
-            if (detection.track_id != null && !trackedDetectionsRef.current.has(detection.track_id)) {
-                trackedDetectionsRef.current.set(detection.track_id, detection)
-            }
+            const trackId = detection.track_id
+            if (trackId == null || frameTracks.has(trackId)) continue
+            frameTracks.add(trackId)
+            const previous = confidenceTotalsRef.current.get(trackId) ?? { total: 0, count: 0 }
+            const total = previous.total + detection.confidence
+            const count = previous.count + 1
+            confidenceTotalsRef.current.set(trackId, { total, count })
+            const first = trackedDetectionsRef.current.get(trackId) ?? detection
+            trackedDetectionsRef.current.set(trackId, {
+                ...first,
+                confidence: total / count,
+                mean_confidence: total / count,
+                confidence_samples: count,
+            })
         }
     }
 
@@ -238,6 +251,7 @@ export function useFileDetection() {
 
         detectionsRef.current = []
         trackedDetectionsRef.current = new Map()
+        confidenceTotalsRef.current = new Map()
 
         let ws: WebSocket | null = null
 
@@ -337,6 +351,7 @@ export function useFileDetection() {
 
         detectionsRef.current = []
         trackedDetectionsRef.current = new Map()
+        confidenceTotalsRef.current = new Map()
 
         let ws: WebSocket | null = null
 

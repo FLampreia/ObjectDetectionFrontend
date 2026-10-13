@@ -178,7 +178,7 @@ export const TextResultDisplay = memo(function TextResultDisplay({
                 </dl>
                 <p className="mt-3 text-xs text-tertiary">
                     Processing time includes connection, detection and saving results.
-                    {!isImage && " Session confidence scores use each object's first detection."}
+                    {!isImage && " Each object's confidence is averaged over the frames where it was detected."}
                 </p>
             </div>
 
@@ -379,7 +379,7 @@ export const TextResultDisplay = memo(function TextResultDisplay({
                         <p className={cx("mb-3 text-tertiary", expanded ? "text-sm" : "text-xs")}>
                             {trackedDetections.length} unique objects detected during this session.
                             Each tracking ID appears once, even when visible in multiple frames.
-                            Confidence scores and boxes are from the first detection.
+                            Confidence scores are session averages. Saved frames retain their original scores.
                         </p>
                         {trackedDetections.length > 0 ? (
                             <ul className={expanded ? "grid gap-3 xl:grid-cols-2" : "space-y-3"}>
@@ -394,6 +394,7 @@ export const TextResultDisplay = memo(function TextResultDisplay({
                                             </p>
                                             <p className={cx("mt-1 tabular-nums text-tertiary", expanded ? "text-sm" : "text-xs")}>
                                                 Tracking ID #{detection.track_id ?? "—"}
+                                                {detection.confidence_samples != null && ` · ${detection.confidence_samples} detections`}
                                             </p>
                                         </div>
                                         <Badge color="gray" size="sm">

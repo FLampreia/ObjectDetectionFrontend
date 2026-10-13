@@ -3,6 +3,8 @@ export type Detection = {
     class_id: number
     class_name: string
     confidence: number
+    mean_confidence?: number | null
+    confidence_samples?: number | null
     bbox: [number, number, number, number]
 }
 
@@ -54,4 +56,7 @@ export type ListObjects = {
     obj_name: string;
     obj_class_id: number;
     confidence: number
+    frame_confidence?: number | null
+    mean_confidence?: number | null
+    confidence_samples?: number | null
 }
