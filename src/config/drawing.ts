@@ -11,6 +11,7 @@ export const DEFAULT_DRAWING_CONFIG: Readonly<ReportConfig> = {
     dot_enable: false,
     dot_label_enable: false,
     area_color: "#0000FF",
+    line_color: "#A78BFA",
     bbox_color: "#FF0000",
     dot_color: "#FFFF00",
     text_color: "#FFFF00",

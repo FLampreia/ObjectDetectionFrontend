@@ -18,7 +18,7 @@ type Props = {
     detection_id: string;
 };
 
-type ColorKey = "area_color" | "bbox_color" | "dot_color" | "text_color" | "text_background_color";
+type ColorKey = "area_color" | "line_color" | "bbox_color" | "dot_color" | "text_color" | "text_background_color";
 
 export function ExtractSingleReportModal({ isOpen, onOpenChange, detection_id }: Props) {
     const descriptionId = useId();
@@ -92,8 +92,9 @@ export function ExtractSingleReportModal({ isOpen, onOpenChange, detection_id }:
             isDismissable={!isGenerating}
             isKeyboardDismissDisabled={isGenerating}
         >
-            <Modal className="w-full max-w-2xl">
-                <Dialog className="p-5 sm:p-6" aria-describedby={descriptionId}>
+            <Modal className="flex w-full max-w-2xl flex-col overflow-hidden max-sm:overflow-hidden">
+                <Dialog className="flex min-h-0 flex-col overflow-hidden" aria-describedby={descriptionId}>
+                    <div className="shrink-0 px-5 pt-5 sm:px-6 sm:pt-6">
                     <ModalHeader
                         title="Extract report"
                         description="Customize the image annotations included in your PDF report."
@@ -102,14 +103,16 @@ export function ExtractSingleReportModal({ isOpen, onOpenChange, detection_id }:
                         onClose={() => onOpenChange(false)}
                         isDisabled={isGenerating}
                     />
+                    </div>
                     <form
-                        className="mt-6 space-y-4"
+                        className="flex min-h-0 flex-1 flex-col overflow-hidden"
                         aria-busy={isGenerating}
                         onSubmit={(event) => {
                             event.preventDefault();
                             void handleGenerateReport();
                         }}
                     >
+                        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-5 py-6 sm:px-6">
                         <fieldset disabled={isGenerating} className="space-y-3 rounded-lg border border-secondary p-4">
                             <legend className="px-1 text-sm font-semibold text-primary">Bounding boxes</legend>
                             <Toggle
@@ -149,14 +152,17 @@ export function ExtractSingleReportModal({ isOpen, onOpenChange, detection_id }:
                             {renderColorInput("dot_color", "Point color", !drawingConfig.dot_enable)}
                         </fieldset>
                         <fieldset disabled={isGenerating} className="space-y-3 rounded-lg border border-secondary p-4">
-                            <legend className="px-1 text-sm font-semibold text-primary">Labels and area</legend>
+                            <legend className="px-1 text-sm font-semibold text-primary">Labels, area and line</legend>
                             {renderColorInput("text_color", "Text color", !labelsEnabled)}
                             {renderColorInput("text_background_color", "Text background", !labelsEnabled)}
                             {renderColorInput("area_color", "Area color")}
+                            {renderColorInput("line_color", "Counting line color")}
                         </fieldset>
-                        {error && <InlineFeedback>{error}</InlineFeedback>}
+                        </div>
                         <p role="status" className="sr-only">{isGenerating ? "Generating PDF report. Please wait." : ""}</p>
-                        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-secondary pt-4">
+                        <div className="shrink-0 border-t border-secondary bg-primary px-5 py-4 sm:px-6 sm:pb-6">
+                            {error && <div className="mb-3"><InlineFeedback>{error}</InlineFeedback></div>}
+                            <div className="flex flex-wrap items-center justify-between gap-3">
                             <Button
                                 type="button"
                                 color="link-gray"
@@ -171,6 +177,7 @@ export function ExtractSingleReportModal({ isOpen, onOpenChange, detection_id }:
                                 <Button type="submit" size="md" isLoading={isGenerating} isDisabled={isGenerating} showTextWhileLoading>
                                     {isGenerating ? "Generating…" : error ? "Try again" : "Extract PDF"}
                                 </Button>
+                            </div>
                             </div>
                         </div>
                     </form>

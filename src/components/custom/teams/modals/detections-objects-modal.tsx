@@ -7,6 +7,7 @@ import { Button } from "@/components/base/buttons/button"
 
 import { useDetectionObjects } from "@/hooks/use-detections-objects"
 import { useDetectionImages } from "@/hooks/use-detection-images"
+import { useResponsiveTablePageSize } from "@/hooks/use-responsive-table-page-size"
 import { HistoryImagePreview } from "../../detection/history-image-preview"
 import { selectDetectionImage } from "@/utils/select-detection-image"
 import { createObjectNumbers } from "@/utils/object-numbers"
@@ -15,7 +16,7 @@ import { ChevronLeft, ChevronRight, Trash, X } from "lucide-react"
 import { NotFoundTable } from "../../not-found-table"
 import { MultiSelect } from "@/components/base/select/multi-select"
 import { ExtractSingleReportModal } from "../../detection/extract-single-report-modal"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { ObjectsTable } from "../../detection/tables/objects-table"
 import { DeleteDetectionConfirmationModal } from "../../detection/delete-detection-confirmation-modal"
 
@@ -39,6 +40,8 @@ export function DetectionObjectsModal({
     const imagesQuery = useDetectionImages(detection.id, isOpen)
     const [tableMode, setTableMode] = useState<"objects" | "crossings">("objects")
     const [selectedCrossingId, setSelectedCrossingId] = useState<string | null>(null)
+    const { tableContainerRef, itemsPerPage } = useResponsiveTablePageSize()
+    const previousPageSize = useRef(itemsPerPage)
 
     useEffect(() => {
         if (!isOpen) {
@@ -53,7 +56,6 @@ export function DetectionObjectsModal({
         paginatedObjects,
         filteredObjects,
         sortedObjects,
-        itemsPerPage,
 
         classes,
         selectedClasses,
@@ -68,7 +70,7 @@ export function DetectionObjectsModal({
 
         isLoading,
         error,
-    } = useDetectionObjects(detection.id, isOpen)
+    } = useDetectionObjects(detection.id, isOpen, itemsPerPage)
 
     // Only highlight objects that are present on the visible table page.
     const allCrossings = (imagesQuery.data ?? []).flatMap(image => image.crossings ?? [])
@@ -87,6 +89,18 @@ export function DetectionObjectsModal({
         : selectedObject ? sortedObjects.findIndex(object => object.id === selectedObject.id) : -1
     const tablePages = tableMode === "crossings" ? Math.ceil(crossings.length / itemsPerPage) : totalPages
     const displayPage = Math.min(currentPage, Math.max(1, tablePages))
+    useEffect(() => {
+        const oldPageSize = previousPageSize.current
+        previousPageSize.current = itemsPerPage
+        if (oldPageSize === itemsPerPage) return
+        const selectedIndex = tableMode === "crossings"
+            ? crossings.findIndex(event => event.id === selectedCrossingId)
+            : sortedObjects.findIndex(object => selection?.detectionId === detection.id && object.id === selection.objectId)
+        const oldPageStart = (currentPage - 1) * oldPageSize
+        const selectionIsVisible = selectedIndex >= oldPageStart && selectedIndex < oldPageStart + oldPageSize
+        const firstVisibleIndex = selectionIsVisible ? selectedIndex : oldPageStart
+        setCurrentPage(Math.min(Math.floor(firstVisibleIndex / itemsPerPage) + 1, Math.max(1, tablePages)))
+    }, [itemsPerPage, currentPage, tablePages, tableMode, crossings, sortedObjects, selectedCrossingId, selection, detection.id, setCurrentPage])
     const navigateObject = (direction: -1 | 1) => {
         const nextIndex = selectedObjectIndex + direction
         if (tableMode === "crossings") {
@@ -402,7 +416,7 @@ export function DetectionObjectsModal({
                                         </MultiSelect>
                                 </div>
 
-                                <div className="min-h-0 flex-1 overflow-auto">
+                                <div ref={tableContainerRef} className="min-h-0 flex-1 overflow-auto">
                                     <div className="min-w-0">
                                         {tableMode === "crossings" ? <table className="w-full table-fixed text-sm">
                                             <thead className="bg-secondary text-xs text-tertiary"><tr>

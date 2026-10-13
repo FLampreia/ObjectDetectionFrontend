@@ -8,9 +8,9 @@ import { getObjects } from "@/services/detections"
 
 export function useDetectionObjects(
     detectionId: string,
-    isOpen: boolean
+    isOpen: boolean,
+    itemsPerPage = 5,
 ) {
-    const ITEMS_PER_PAGE = 10
 
     const [currentPage, setCurrentPage] = useState(1)
     const [selectedClasses, setSelectedClasses] = useState<Set<number> | null>(null)
@@ -106,17 +106,17 @@ export function useDetectionObjects(
     }, [filteredObjects, sortDescriptor])
 
     const totalPages = Math.ceil(
-        sortedObjects.length / ITEMS_PER_PAGE
+        sortedObjects.length / itemsPerPage
     )
 
     const paginatedObjects = useMemo(() => {
-        const start = (currentPage - 1) * ITEMS_PER_PAGE
+        const start = (currentPage - 1) * itemsPerPage
 
         return sortedObjects.slice(
             start,
-            start + ITEMS_PER_PAGE
+            start + itemsPerPage
         )
-    }, [sortedObjects, currentPage])
+    }, [sortedObjects, currentPage, itemsPerPage])
 
     const onClassesChange = (values: Set<number> | null) => {
         setSelectedClasses(values)
@@ -127,7 +127,7 @@ export function useDetectionObjects(
         paginatedObjects,
         filteredObjects,
         sortedObjects,
-        itemsPerPage: ITEMS_PER_PAGE,
+        itemsPerPage,
 
         classes,
 
