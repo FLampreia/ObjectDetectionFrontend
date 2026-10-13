@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useCallback, useEffect, useState } from "react";
-import { clearSession, getAccessToken, getCurrentUser, getTokenExpiration, SESSION_EXPIRED_EVENT, login as loginApi, logout as logoutApi } from "@/services/auth";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
+import { getAccessToken, getSessionId, getCurrentUser, getTokenExpiration, refreshAccessToken, SESSION_EXPIRED_EVENT, TOKENS_UPDATED_EVENT, login as loginApi, logout as logoutApi } from "@/services/auth";
 import { User } from "@/types/user";
 import { AuthContextType } from "@/types";
 import { queryClient } from "./query-provider";
@@ -11,23 +11,27 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const userRequest = useRef(0);
 
   const refreshUser = useCallback(async () => {
     setLoading(true);
-    const token = getAccessToken();
+    const session = getSessionId();
+    const request = ++userRequest.current;
 
     try {
       const data = await getCurrentUser();
-      if (token === getAccessToken()) setUser(data);
+      if (request === userRequest.current && session === getSessionId()) setUser(data);
     } catch {
-      setUser(null);
+      // Keep an existing user and tokens when the server or network is unavailable.
     } finally {
-      setLoading(false);
+      if (request === userRequest.current) setLoading(false);
     }
   }, []);
 
   async function login(email: string, password: string) {
     await loginApi(email, password);
+    queryClient.clear();
+    setUser(null);
     await refreshUser();
   }
 
@@ -40,45 +44,77 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
+    let session = getSessionId();
     const handleSessionExpired = () => {
+      session = getSessionId();
+      userRequest.current += 1;
       setUser(null);
       setLoading(false);
       queryClient.clear();
     };
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== "access_token" && event.key !== null) return;
+      const nextSession = getSessionId();
+      if (nextSession === session) return;
+      session = nextSession;
+      handleSessionExpired();
+      if (nextSession) void refreshUser();
+    };
+    const trackLocalSession = () => { session = getSessionId(); };
     window.addEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener(TOKENS_UPDATED_EVENT, trackLocalSession);
     void refreshUser();
-    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
+    return () => {
+      window.removeEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener(TOKENS_UPDATED_EVENT, trackLocalSession);
+    };
   }, [refreshUser]);
 
   useEffect(() => {
     if (!user) return;
     let timer: ReturnType<typeof setTimeout>;
+    let stopped = false;
+    let checking = false;
 
-    const checkExpiration = () => {
+    const checkExpiration = async () => {
+      if (stopped || checking) return;
+      checking = true;
       clearTimeout(timer);
-      const expiration = getTokenExpiration();
-      const remaining = expiration === null ? 0 : expiration - Date.now();
-      if (remaining <= 0) {
-        clearSession();
-      } else {
-        timer = setTimeout(checkExpiration, Math.min(remaining, 2_147_483_647));
+      try {
+        const remaining = (getTokenExpiration() ?? 0) - Date.now();
+        if (remaining <= 30_000) await refreshAccessToken(getAccessToken() ?? undefined);
+        if (!stopped) {
+          const nextCheck = (getTokenExpiration() ?? Date.now()) - Date.now() - 30_000;
+          timer = setTimeout(() => void checkExpiration(), Math.min(Math.max(1000, nextCheck), 2_147_483_647));
+        }
+      } catch {
+        // Invalid refresh tokens clear the session; temporary failures can be retried.
+        if (!stopped && getSessionId()) timer = setTimeout(() => void checkExpiration(), 30_000);
+      } finally {
+        checking = false;
       }
     };
+    const scheduleCheck = () => { void checkExpiration(); };
     // Recheck when returning to a tab whose timers may have been suspended.
     const handleVisibility = () => {
-      if (document.visibilityState === "visible") checkExpiration();
+      if (document.visibilityState === "visible") scheduleCheck();
     };
     const handleStorage = (event: StorageEvent) => {
-      if (event.key === "access_token" || event.key === null) checkExpiration();
+      if (event.key === "access_token" || event.key === null) scheduleCheck();
     };
 
-    checkExpiration();
-    window.addEventListener("focus", checkExpiration);
+    scheduleCheck();
+    window.addEventListener("focus", scheduleCheck);
+    window.addEventListener(TOKENS_UPDATED_EVENT, scheduleCheck);
     window.addEventListener("storage", handleStorage);
     document.addEventListener("visibilitychange", handleVisibility);
     return () => {
+      stopped = true;
       clearTimeout(timer);
-      window.removeEventListener("focus", checkExpiration);
+      window.removeEventListener("focus", scheduleCheck);
+      window.removeEventListener(TOKENS_UPDATED_EVENT, scheduleCheck);
       window.removeEventListener("storage", handleStorage);
       document.removeEventListener("visibilitychange", handleVisibility);
     };

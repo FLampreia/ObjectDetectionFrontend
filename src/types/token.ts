@@ -1,10 +1,7 @@
 export type TokenPayload = {
-    user: {
-        email: string;
-        user_id: string;
-        role: string;
-    };
+    sub: string;
+    session_id: string;
     exp: number;
     jti: string;
-    refresh: boolean;
+    type: "access" | "refresh";
 };
