@@ -49,6 +49,7 @@ export type ListDetection = {
 }
 
 export type ListObjects = {
+    bbox?: Area;
     track_id?: number | null;
     image_id?: string | null;
     frame_number?: number | null;
@@ -59,4 +60,13 @@ export type ListObjects = {
     frame_confidence?: number | null
     mean_confidence?: number | null
     confidence_samples?: number | null
+}
+
+export type DetectionImage = {
+    area?: Area | null;
+    id: string;
+    frame_number: number | null;
+    timestamp_ms: number | null;
+    image_url: string;
+    objects: ListObjects[];
 }

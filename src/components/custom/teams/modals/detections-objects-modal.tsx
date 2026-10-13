@@ -1,18 +1,21 @@
 "use client"
 
 import { Dialog, Modal, ModalOverlay } from "@/components/application/modals/modal"
-import { PaginationPageMinimalCenter } from "@/components/application/pagination/pagination"
 import { TableCard } from "@/components/application/table/table"
 import { Badge } from "@/components/base/badges/badges"
 import { Button } from "@/components/base/buttons/button"
 
 import { useDetectionObjects } from "@/hooks/use-detections-objects"
+import { useDetectionImages } from "@/hooks/use-detection-images"
+import { HistoryImagePreview } from "../../detection/history-image-preview"
+import { selectDetectionImage } from "@/utils/select-detection-image"
+import { createObjectNumbers } from "@/utils/object-numbers"
 import { ListDetection } from "@/types"
-import { Trash, X } from "lucide-react"
+import { ChevronLeft, ChevronRight, Trash, X } from "lucide-react"
 import { NotFoundTable } from "../../not-found-table"
 import { MultiSelect } from "@/components/base/select/multi-select"
 import { ExtractSingleReportModal } from "../../detection/extract-single-report-modal"
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { ObjectsTable } from "../../detection/tables/objects-table"
 import { DeleteDetectionConfirmationModal } from "../../detection/delete-detection-confirmation-modal"
 
@@ -32,11 +35,19 @@ export function DetectionObjectsModal({
 
     const [isExtractOpen, setIsExtractOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+    const [selection, setSelection] = useState<{ detectionId: string; objectId: string } | null>(null)
+    const imagesQuery = useDetectionImages(detection.id, isOpen)
+
+    useEffect(() => {
+        if (!isOpen) setSelection(null)
+    }, [isOpen])
 
     const {
         objects,
         paginatedObjects,
         filteredObjects,
+        sortedObjects,
+        itemsPerPage,
 
         classes,
         selectedClasses,
@@ -53,9 +64,24 @@ export function DetectionObjectsModal({
         error,
     } = useDetectionObjects(detection.id, isOpen)
 
+    // Only highlight objects that are present on the visible table page.
+    const selectedObject = selection?.detectionId === detection.id
+        ? paginatedObjects.find(object => object.id === selection.objectId) ?? null : null
+    const selectedImage = selectDetectionImage(imagesQuery.data ?? [], selectedObject)
+    const objectNumbers = useMemo(() => createObjectNumbers(objects), [objects])
+    const selectedObjectIndex = selectedObject ? sortedObjects.findIndex(object => object.id === selectedObject.id) : -1
+    const navigateObject = (direction: -1 | 1) => {
+        const nextIndex = selectedObjectIndex + direction
+        const nextObject = sortedObjects[nextIndex]
+        if (!nextObject) return
+        setSelection({ detectionId: detection.id, objectId: nextObject.id })
+        // Keep the selected table row visible when navigation crosses a page boundary.
+        setCurrentPage(Math.floor(nextIndex / itemsPerPage) + 1)
+    }
+
     const averageConfidence =
         objects.length > 0
-            ? objects.reduce((sum, object) => sum + object.confidence, 0) / detection.count
+            ? objects.reduce((sum, object) => sum + object.confidence, 0) / objects.length
             : 0
 
     const classSummary = Object.values(
@@ -180,11 +206,22 @@ export function DetectionObjectsModal({
                             </div>
                         </div>
 
-                        <div className="grid flex-none grid-cols-1 gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-[1fr_1.5fr] lg:grid-rows-[minmax(0,1fr)] lg:gap-6 lg:overflow-hidden">
-                            {/* SUMMARY - 1/3 */}
+                        <div className="grid flex-none grid-cols-1 gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:grid-rows-[minmax(0,1fr)] lg:gap-6 lg:overflow-hidden">
+                            {/* Image preview and summary */}
                             <div className="min-w-0 rounded-lg border border-secondary bg-primary p-4 lg:min-h-0 lg:overflow-y-auto">
-
-
+                                <HistoryImagePreview
+                                    key={detection.id}
+                                    image={selectedImage}
+                                    selectedObject={selectedObject}
+                                    objectNumbers={objectNumbers}
+                                    type={detection.type}
+                                    isLoading={imagesQuery.isLoading}
+                                    error={imagesQuery.isError}
+                                    onClearSelection={() => setSelection(null)}
+                                    selectedObjectIndex={selectedObjectIndex}
+                                    objectCount={sortedObjects.length}
+                                    onNavigateObject={navigateObject}
+                                />
                                 <h3 className="text-sm font-semibold text-primary">
                                     Detection Summary
                                 </h3>
@@ -283,7 +320,7 @@ export function DetectionObjectsModal({
                                 </div>
                             </div>
 
-                            {/* TABLE - 2/3 */}
+                            {/* Object selection table */}
                             <TableCard.Root
                                 size="sm"
                                 className="flex min-w-0 flex-col overflow-hidden lg:h-full lg:min-h-0"
@@ -292,13 +329,13 @@ export function DetectionObjectsModal({
                                     className="shrink-0"
                                     title="Objects Detected"
                                     badge={filteredObjects.length}
-                                    description="All objects detected in the selected detection"
-
-                                    contentTrailing={
+                                    description="Select an object to highlight it in the image."
+                                />
+                                <div className="shrink-0 border-b border-secondary px-4 py-3">
                                         <MultiSelect
                                             size="sm"
                                             placeholder="Select classes"
-                                            className="w-full md:w-48"
+                                            className="w-full"
                                             items={detectedClasses}
                                             selectedKeys={
                                                 selectedClasses === null
@@ -331,8 +368,7 @@ export function DetectionObjectsModal({
                                                 </MultiSelect.Item>
                                             )}
                                         </MultiSelect>
-                                    }
-                                />
+                                </div>
 
                                 <div className="min-h-0 flex-1 overflow-auto">
                                     <div className="min-w-0">
@@ -347,8 +383,11 @@ export function DetectionObjectsModal({
                                         ) : paginatedObjects.length !== 0 ? (
                                             <ObjectsTable
                                                 objects={paginatedObjects}
+                                                objectNumbers={objectNumbers}
                                                 sortDescriptor={sortDescriptor}
                                                 setSortChange={setSortDescriptor}
+                                                selectedObjectId={selectedObject?.id ?? null}
+                                                onSelectObject={objectId => setSelection(objectId ? { detectionId: detection.id, objectId } : null)}
                                             />
 
                                         ) : (
@@ -356,18 +395,14 @@ export function DetectionObjectsModal({
                                         )}
                                     </div>
                                 </div>
+                                <div className="flex shrink-0 items-center justify-between gap-2 border-t border-secondary bg-primary px-4 py-3">
+                                    <Button color="secondary" size="sm" iconLeading={<ChevronLeft size={18} />}
+                                        aria-label="Previous objects page" isDisabled={currentPage <= 1} onClick={() => setCurrentPage(currentPage - 1)} />
+                                    <span className="text-sm tabular-nums text-secondary">Page {currentPage} of {Math.max(1, totalPages)}</span>
+                                    <Button color="secondary" size="sm" iconLeading={<ChevronRight size={18} />}
+                                        aria-label="Next objects page" isDisabled={currentPage >= totalPages} onClick={() => setCurrentPage(currentPage + 1)} />
+                                </div>
                             </TableCard.Root>
-
-
-                        </div>
-
-                        <div className="shrink-0 border-t border-secondary bg-primary">
-                            <PaginationPageMinimalCenter
-                                page={currentPage}
-                                total={Math.max(1, totalPages)}
-                                onPageChange={setCurrentPage}
-                                className="border-t-0 pt-3"
-                            />
                         </div>
                     </Dialog>
                 </Modal>

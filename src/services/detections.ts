@@ -1,5 +1,17 @@
 import config from "@/config/api";
 import { authFetch, getAccessToken } from "./auth";
+import type { DetectionImage } from "@/types";
+
+export async function getDetectionImages(detectionId: string): Promise<DetectionImage[]> {
+    const response = await authFetch(`${config.API_URL}/detections/${encodeURIComponent(detectionId)}/images`, {
+        headers: { Authorization: `Bearer ${getAccessToken()}` },
+    });
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(typeof data?.detail === "string" ? data.detail : "Failed to load detection images");
+    }
+    return data;
+}
 
 
 export async function getObjects(detectionId: string) {

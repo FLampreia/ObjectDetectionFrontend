@@ -126,6 +126,8 @@ export function useDetectionObjects(
         objects,
         paginatedObjects,
         filteredObjects,
+        sortedObjects,
+        itemsPerPage: ITEMS_PER_PAGE,
 
         classes,
 
