@@ -94,17 +94,31 @@ function requestMessage<T>(
     });
 }
 
-export function processFrame(
+export function processFrameWithTiming(
     ws: WebSocket, frame: Blob,
     metadata: { frame_number: number; timestamp_ms: number },
-): Promise<Detection[]> {
+): Promise<{ detections: Detection[]; inferenceTimeMs: number }> {
     return requestMessage(ws, (message) => {
         if (!Array.isArray(message.detections_per_frame)) throw new Error("Invalid frame response");
-        return message.detections_per_frame as Detection[];
+        if (message.frame_number !== metadata.frame_number) throw new Error("Frame response does not match the submitted frame");
+        if (typeof message.processing_time_per_frame !== "number" || !Number.isFinite(message.processing_time_per_frame) || message.processing_time_per_frame < 0) {
+            throw new Error("Invalid frame processing time");
+        }
+        return {
+            detections: message.detections_per_frame as Detection[],
+            inferenceTimeMs: message.processing_time_per_frame,
+        };
     }, () => {
         ws.send(JSON.stringify({ type: "frame", ...metadata }));
         ws.send(frame);
     });
+}
+
+export async function processFrame(
+    ws: WebSocket, frame: Blob,
+    metadata: { frame_number: number; timestamp_ms: number },
+): Promise<Detection[]> {
+    return (await processFrameWithTiming(ws, frame, metadata)).detections;
 }
 
 export function finishProcessing(ws: WebSocket): Promise<{ processing_time_ms: number }> {

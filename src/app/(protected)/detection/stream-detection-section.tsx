@@ -19,12 +19,12 @@ import { InlineFeedback } from "@/components/custom/layout/inline-feedback"
 import { ImageAnnotationSettings } from "@/components/custom/detection/image-annotation-settings"
 import { DEFAULT_DRAWING_CONFIG } from "@/config/drawing"
 import { ReportConfig } from "@/types"
+import { DetectionPerformanceInfo } from "@/components/custom/detection/detection-performance-info"
 
 type StreamInputType = "camera" | "url"
 
 export function StreamDetectionSection() {
     const {
-        detections,
         summaryDetections,
         setSummaryDetections,
         setDetections,
@@ -33,6 +33,8 @@ export function StreamDetectionSection() {
         detectStream,
         stopStreamDetection,
         loading,
+        streamFrameRendererRef,
+        detectionPerformance,
         processingSeconds,
         detectionError,
         selectedClasses,
@@ -414,7 +416,7 @@ export function StreamDetectionSection() {
                         streamUrl={inputType === "url" ? connectedUrl : ""}
                         area={area}
                         line={line}
-                        detections={detections}
+                        streamFrameRendererRef={streamFrameRendererRef}
                         loading={loading}
                         onVideoReady={setVideoReady}
                         onImageLoad={(width, height) =>
@@ -424,6 +426,7 @@ export function StreamDetectionSection() {
                             })
                         }
                     />
+                    <DetectionPerformanceInfo performance={detectionPerformance} type="stream" />
                 </section>
 
                 <TextResultDisplay

@@ -19,6 +19,7 @@ import { ImageAnnotationSettings } from "@/components/custom/detection/image-ann
 import { DEFAULT_DRAWING_CONFIG } from "@/config/drawing"
 import type { ReportConfig } from "@/types"
 import { InlineFeedback } from "@/components/custom/layout/inline-feedback"
+import { DetectionPerformanceInfo } from "@/components/custom/detection/detection-performance-info"
 
 export function PhotoDetectionSection() {
     const {
@@ -31,6 +32,7 @@ export function PhotoDetectionSection() {
         detectImage,
         loading,
         processingSeconds,
+        detectionPerformance,
         detectionError,
         selectedClasses,
         setSelectedClasses,
@@ -174,6 +176,7 @@ export function PhotoDetectionSection() {
                             })
                         }
                     />
+                    <DetectionPerformanceInfo performance={detectionPerformance} type="photo" />
                 </section>
 
                 <TextResultDisplay

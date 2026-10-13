@@ -17,6 +17,7 @@ import { ImageAnnotationSettings } from "@/components/custom/detection/image-ann
 import { DEFAULT_DRAWING_CONFIG } from "@/config/drawing"
 import { ReportConfig } from "@/types"
 import { InlineFeedback } from "@/components/custom/layout/inline-feedback"
+import { DetectionPerformanceInfo } from "@/components/custom/detection/detection-performance-info"
 
 export function VideoDetectionSection() {
     const {
@@ -33,6 +34,8 @@ export function VideoDetectionSection() {
         detectVideo,
         loading,
         processingSeconds,
+        detectionPerformance,
+        videoFrameRendererRef,
         detectionError,
         selectedClasses,
         setSelectedClasses,
@@ -250,6 +253,7 @@ export function VideoDetectionSection() {
                         {file && <p className="min-w-0 break-all text-sm text-tertiary">{file.name}</p>}
                     </div>
                     <VideoDisplayBox
+                        videoFrameRendererRef={videoFrameRendererRef}
                         drawingConfig={drawingConfig}
                         colors={drawingColors}
                         videoRef={videoRef}
@@ -267,6 +271,7 @@ export function VideoDetectionSection() {
                         onCurrentTimeChange={setVideoCurrentTime}
                         loading={loading}
                     />
+                    <DetectionPerformanceInfo performance={detectionPerformance} type="video" />
                 </section>
 
                 <TextResultDisplay

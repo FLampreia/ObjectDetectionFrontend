@@ -1,5 +1,9 @@
 import { processImage } from "@/services/detect"
-import { askSocketSessionId, connectWebSocket, processFrame, finishProcessing } from "@/services/socket"
+import { askSocketSessionId, connectWebSocket, processFrameWithTiming, finishProcessing } from "@/services/socket"
+import type { StreamFrameRenderer } from "@/types/stream-performance"
+import type { DetectionPerformance } from "@/types/detection-performance"
+import { summarizePerformance, type PerformanceSample } from "@/utils/detection-performance"
+import { processVideoFrames } from "@/utils/video-frame-pipeline"
 import { Detection, Area, Line, DrawingColors } from "@/types"
 import { DEFAULT_AREA_LINE_COLORS } from "@/config/drawing"
 import { cocoClassesItems } from "@/utils/coco-classes"
@@ -9,14 +13,33 @@ import type { Selection } from "react-aria-components"
 
 const frames_processed_per_second = 10
 
+function createPerformanceTracker(publish: (value: DetectionPerformance | null) => void, setupMs: number) {
+    const samples: PerformanceSample[] = []
+    let lastUpdate = 0
+    return {
+        record(sample: PerformanceSample) {
+            samples.push(sample)
+            if (samples.length > 20) samples.shift()
+            if (sample.completedAt - lastUpdate >= 1000) {
+                publish(summarizePerformance(samples, setupMs))
+                lastUpdate = sample.completedAt
+            }
+        },
+        publish(finalizationMs: number | null = null) {
+            publish(summarizePerformance(samples, setupMs, finalizationMs))
+        },
+    }
+}
+
 async function captureFrame(
     video: HTMLVideoElement,
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
+    quality?: number,
 ): Promise<Blob> {
 
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
+    if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth
+    if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight
     ctx.drawImage(video, 0, 0)
 
     return new Promise((resolve, reject) => {
@@ -27,7 +50,7 @@ async function captureFrame(
             }
 
             resolve(blob)
-        }, "image/jpeg")
+        }, "image/jpeg", quality)
     })
 }
 
@@ -46,10 +69,6 @@ async function seekVideo(video: HTMLVideoElement, time: number): Promise<void> {
         video.addEventListener("error", onError);
         video.currentTime = time;
     });
-}
-
-async function advanceToNextFrame(video: HTMLVideoElement) {
-    await seekVideo(video, Math.min(video.duration, video.currentTime + 1 / frames_processed_per_second));
 }
 
 async function waitForVideoData(video: HTMLVideoElement): Promise<void> {
@@ -85,6 +104,7 @@ export function useFileDetection() {
     const processingStartedRef = useRef<number | null>(null)
 
     const startProcessing = () => {
+        setDetectionPerformance(null)
         processingStartedRef.current = performance.now()
         setProcessingSeconds(0)
         setLoading(true)
@@ -117,10 +137,13 @@ export function useFileDetection() {
     const detectionsRef = useRef<Detection[]>([]);
     const trackedDetectionsRef = useRef(new Map<number, Detection>());
     const confidenceTotalsRef = useRef(new Map<number, { total: number; count: number }>());
+    const streamFrameRendererRef = useRef<StreamFrameRenderer | null>(null)
+    const videoFrameRendererRef = useRef<((canvas: HTMLCanvasElement, detections: Detection[]) => void) | null>(null)
+    const [detectionPerformance, setDetectionPerformance] = useState<DetectionPerformance | null>(null)
 
-    const recordFrame = (frameDetections: Detection[]) => {
+    const recordFrame = (frameDetections: Detection[], updatePreview = true) => {
         detectionsRef.current = frameDetections
-        setDetections(frameDetections)
+        if (updatePreview) setDetections(frameDetections)
         const frameTracks = new Set<number>()
         for (const detection of frameDetections) {
             const trackId = detection.track_id
@@ -147,12 +170,12 @@ export function useFileDetection() {
     }
 
     const captureCanvas = useRef<HTMLCanvasElement | null>(null);
-    const capture = (video: HTMLVideoElement) => {
+    const capture = (video: HTMLVideoElement, quality?: number) => {
         const canvas = captureCanvas.current ?? document.createElement("canvas");
         captureCanvas.current = canvas;
         const context = canvas.getContext("2d");
         if (!context) throw new Error("Unable to create capture canvas");
-        return captureFrame(video, canvas, context);
+        return captureFrame(video, canvas, context, quality);
     };
 
     const stopStreamRef = useRef(false)
@@ -167,6 +190,7 @@ export function useFileDetection() {
 
     useEffect(() => {
         setProcessingSeconds(null)
+        setDetectionPerformance(null)
         if (!file) return
 
         setDetections([])
@@ -185,6 +209,7 @@ export function useFileDetection() {
     const detectImage = async () => {
         if (!file) return
 
+        const preparationStartedAt = performance.now()
         startProcessing()
         setDetectionError(null)
 
@@ -219,7 +244,18 @@ export function useFileDetection() {
                 formData.append("conf_threshold", String(minConfidence / 100))
             }
 
+            const requestStartedAt = performance.now()
             const data = await processImage(formData)
+            const responseAt = performance.now()
+            setDetectionPerformance(summarizePerformance([{
+                completedAt: responseAt,
+                captureMs: requestStartedAt - preparationStartedAt,
+                roundTripMs: responseAt - requestStartedAt,
+                inferenceMs: typeof data.processing_time_per_frame === "number" && Number.isFinite(data.processing_time_per_frame) && data.processing_time_per_frame >= 0
+                    ? data.processing_time_per_frame : null,
+                drawingMs: null, seekMs: null,
+                detectionDelayMs: responseAt - preparationStartedAt, frameBytes: file.size,
+            }], 0))
 
             setDetections(data?.detections_per_frame ?? [])
             completeProcessing()
@@ -242,6 +278,7 @@ export function useFileDetection() {
     const detectVideo = async (video: HTMLVideoElement) => {
         if (!file || !selectedAlgorithm) return
 
+        const setupStartedAt = performance.now()
         startProcessing()
         setDetectionError(null)
 
@@ -287,35 +324,56 @@ export function useFileDetection() {
             video.pause();
             await waitForVideoData(video);
             await seekVideo(video, 0);
+            const performanceTracker = createPerformanceTracker(setDetectionPerformance, performance.now() - setupStartedAt)
 
             let lastUiUpdate = 0
-            let frameNumber = 0
-
-            // Loop until the end of the video
-            while (video.currentTime < video.duration) {
-
-                const frame = await capture(video);
-
-                const detections = await processFrame(ws, frame, {
-                    frame_number: ++frameNumber, timestamp_ms: video.currentTime * 1000,
-                });
-
-                // Accumulate new tracks before publishing the current frame.
-                recordFrame(detections)
-
-                const now = performance.now();
-
-                if (now - lastUiUpdate > 200) {
-                    publishResults();
-                    lastUiUpdate = now;
-                }
-
-                // Move to next frame
-                await advanceToNextFrame(video);
+            if (!Number.isFinite(video.duration) || video.duration <= 0) {
+                throw new Error("Video duration is unavailable")
             }
+            // Two reusable canvases bound memory and preserve each submitted frame.
+            const canvases = [document.createElement("canvas"), document.createElement("canvas")]
+            const socket = ws
+            await processVideoFrames(Math.ceil(video.duration * frames_processed_per_second), async (index) => {
+                // Derive timestamps from the index to avoid accumulated seek rounding.
+                const timestamp = index / frames_processed_per_second
+                const seekStartedAt = performance.now()
+                await seekVideo(video, timestamp)
+                const frameStart = performance.now()
+                const canvas = canvases[index % 2]
+                const context = canvas.getContext("2d")
+                if (!context) throw new Error("Unable to create capture canvas")
+                // Preserve the original JPEG quality used before video pipelining.
+                const frame = await captureFrame(video, canvas, context)
+                return { frame, canvas, timestamp, frameStart,
+                    captureMs: performance.now() - frameStart,
+                    seekMs: frameStart - seekStartedAt }
+            }, async (prepared, index) => {
+                const requestStartedAt = performance.now()
+                const response = await processFrameWithTiming(socket, prepared.frame, {
+                    frame_number: index + 1, timestamp_ms: prepared.timestamp * 1000,
+                })
+                const responseAt = performance.now()
+                // Show the submitted pixels, even while the video seeks ahead.
+                videoFrameRendererRef.current?.(prepared.canvas, response.detections)
+                recordFrame(response.detections)
+                if (responseAt - lastUiUpdate > 200) {
+                    publishResults()
+                    lastUiUpdate = responseAt
+                }
+                performanceTracker.record({
+                    completedAt: responseAt, captureMs: prepared.captureMs,
+                    roundTripMs: responseAt - requestStartedAt,
+                    inferenceMs: response.inferenceTimeMs, drawingMs: null,
+                    detectionDelayMs: responseAt - prepared.frameStart,
+                    frameBytes: prepared.frame.size, seekMs: prepared.seekMs,
+                })
+            })
 
             publishResults()
+            performanceTracker.publish()
+            const finalizationStartedAt = performance.now()
             const result = await finishProcessing(ws);
+            performanceTracker.publish(performance.now() - finalizationStartedAt)
             completeProcessing(result.processing_time_ms)
 
             await queryClient.invalidateQueries({
@@ -342,6 +400,8 @@ export function useFileDetection() {
         if (!selectedAlgorithm) return
 
         stopStreamRef.current = false
+        const setupStartedAt = performance.now()
+        streamFrameRendererRef.current?.([])
 
         startProcessing()
         setDetectionError(null)
@@ -393,6 +453,7 @@ export function useFileDetection() {
             let lastUiUpdate = 0
             let frameNumber = 0
             const streamStart = performance.now()
+            const performanceTracker = createPerformanceTracker(setDetectionPerformance, streamStart - setupStartedAt)
 
 
             // Stream loop
@@ -406,19 +467,31 @@ export function useFileDetection() {
                 const frameStart = performance.now()
 
                 // Capture current frame
-                const frame = await capture(video)
+                // Keep original dimensions so stored frames and box coordinates still match.
+                const frame = await capture(video, 0.85)
+                const capturedAt = performance.now()
 
                 // Check if detection was stopped while capturing
                 if (stopStreamRef.current) {
                     break
                 }
 
-                const frameDetections = await processFrame(ws, frame, {
+                // One request at a time: capture a fresh frame instead of queuing old images.
+                const result = await processFrameWithTiming(ws, frame, {
                     frame_number: ++frameNumber, timestamp_ms: frameStart - streamStart,
                 })
 
                 // Accumulate new tracks before publishing the current frame.
-                recordFrame(frameDetections)
+                const responseAt = performance.now()
+                const drawingMs = streamFrameRendererRef.current?.(result.detections) ?? 0
+                recordFrame(result.detections, false)
+                performanceTracker.record({
+                    completedAt: responseAt, seekMs: null,
+                    captureMs: capturedAt - frameStart,
+                    roundTripMs: responseAt - capturedAt,
+                    inferenceMs: result.inferenceTimeMs, drawingMs,
+                    detectionDelayMs: responseAt - frameStart, frameBytes: frame.size,
+                })
 
                 // Update UI at most 5 times per second
                 const now = performance.now()
@@ -443,7 +516,10 @@ export function useFileDetection() {
             }
 
             publishResults()
+            performanceTracker.publish()
+            const finalizationStartedAt = performance.now()
             const result = await finishProcessing(ws)
+            performanceTracker.publish(performance.now() - finalizationStartedAt)
             completeProcessing(result.processing_time_ms)
 
             await queryClient.invalidateQueries({
@@ -497,6 +573,9 @@ export function useFileDetection() {
         stopStreamDetection,
         loading,
         processingSeconds,
+        streamFrameRendererRef,
+        videoFrameRendererRef,
+        detectionPerformance,
         detectionError,
 
         selectedClasses,

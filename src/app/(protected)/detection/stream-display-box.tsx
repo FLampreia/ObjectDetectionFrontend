@@ -2,7 +2,8 @@
 
 import { EmptyFile } from "./empty-file"
 
-import { RefObject, useEffect, useRef } from "react"
+import { RefObject, useCallback, useEffect, useLayoutEffect, useRef } from "react"
+import type { StreamFrameRenderer } from "@/types/stream-performance"
 
 import { Area, Detection, DrawingColors, Line, ReportConfig } from "@/types"
 
@@ -17,7 +18,7 @@ interface StreamDisplayBoxProps {
     line: Line | null
     colors: DrawingColors
     drawingConfig: ReportConfig
-    detections: Detection[]
+    streamFrameRendererRef: RefObject<StreamFrameRenderer | null>
     videoRef: RefObject<HTMLVideoElement | null>
     loading: boolean
     onImageLoad: (width: number, height: number) => void
@@ -32,34 +33,25 @@ export function StreamDisplayBox({
     colors,
     drawingConfig,
     videoRef,
-    detections,
+    streamFrameRendererRef,
     loading,
     onImageLoad,
     onVideoReady,
 }: StreamDisplayBoxProps) {
 
     const canvasRef = useRef<HTMLCanvasElement>(null)
+    const latestDetectionsRef = useRef<Detection[]>([])
 
-    const clearCanvas = (
-        canvas: HTMLCanvasElement | null
-    ) => {
-        if (!canvas) return
-
-        const ctx = canvas.getContext("2d")
-        if (!ctx) return
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-    }
-
-    const draw = (
+    const draw = useCallback((
         video: HTMLVideoElement | null,
         canvas: HTMLCanvasElement | null
     ) => {
         if (!video || !canvas) return
         if (!video.videoWidth || !video.videoHeight) return
 
-        canvas.width = video.videoWidth
-        canvas.height = video.videoHeight
+        // Resizing clears and reallocates the canvas; do it only when resolution changes.
+        if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth
+        if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight
 
         canvas.style.left = `${video.offsetLeft}px`
         canvas.style.top = `${video.offsetTop}px`
@@ -92,12 +84,12 @@ export function StreamDisplayBox({
             drawNotations({
                 canvas,
                 source: video,
-                detections,
+                detections: latestDetectionsRef.current,
                 drawingConfig,
                 area
             })
         }
-    }
+    }, [area, line, drawingConfig, colors.lineColor, loading])
 
     // Connect the MediaStream or URL to the <video> element.
     useEffect(() => {
@@ -133,10 +125,24 @@ export function StreamDisplayBox({
         }
     }, [videoStream, streamUrl, videoRef])
 
-    // Redraw whenever the area, detections, or loading state changes.
-    useEffect(() => {
+    // Draw responses immediately, without waiting for a React render of the whole form.
+    useLayoutEffect(() => {
+        if (!loading) latestDetectionsRef.current = []
+        const renderFrame: StreamFrameRenderer = (detections) => {
+            const startedAt = performance.now()
+            latestDetectionsRef.current = detections
+            draw(videoRef.current, canvasRef.current)
+            return performance.now() - startedAt
+        }
+        streamFrameRendererRef.current = renderFrame
         draw(videoRef.current, canvasRef.current)
-    }, [detections, area, line, loading, colors, drawingConfig])
+        const observer = new ResizeObserver(() => draw(videoRef.current, canvasRef.current))
+        if (videoRef.current) observer.observe(videoRef.current)
+        return () => {
+            observer.disconnect()
+            if (streamFrameRendererRef.current === renderFrame) streamFrameRendererRef.current = null
+        }
+    }, [draw, loading, videoRef, streamFrameRendererRef, videoStream, streamUrl])
 
     return (
         <div className="w-full h-64 lg:h-112 rounded-lg overflow-hidden flex items-center justify-center bg-secondary ring-secondary ring-inset lg:rounded-xl lg:ring-1">

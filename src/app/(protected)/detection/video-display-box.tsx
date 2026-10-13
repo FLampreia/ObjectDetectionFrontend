@@ -3,7 +3,7 @@
 import { FullScreenModal } from "@/components/custom/detection/full-screen-modal"
 import { EmptyFile } from "./empty-file"
 import { Maximize02 } from "@untitledui/icons"
-import { RefObject, useEffect, useRef, useState } from "react"
+import { RefObject, useLayoutEffect, useRef } from "react"
 import { Area, Detection, DrawingColors, Line, ReportConfig } from "@/types"
 import { drawNotations } from "@/utils/draw-notations"
 import { drawArea } from "@/utils/draw-area"
@@ -16,6 +16,7 @@ interface VideoDisplayBoxProps {
     colors: DrawingColors
     drawingConfig: ReportConfig
     detections: Detection[]
+    videoFrameRendererRef: RefObject<((canvas: HTMLCanvasElement, detections: Detection[]) => void) | null>
     videoRef: RefObject<HTMLVideoElement | null>
     loading: boolean
     onImageLoad: (width: number, height: number) => void
@@ -31,12 +32,15 @@ export function VideoDisplayBox({
     drawingConfig,
     videoRef,
     detections,
+    videoFrameRendererRef,
     loading,
     onImageLoad,
     onDurationChange,
     onCurrentTimeChange,
 }: VideoDisplayBoxProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
+    const previewRef = useRef<HTMLCanvasElement | null>(null)
+    const previewDetectionsRef = useRef<Detection[]>([])
 
 
     const draw = (
@@ -46,8 +50,8 @@ export function VideoDisplayBox({
         if (!canvas || !video) return
         if (!video.videoWidth || !video.videoHeight) return
 
-        canvas.width = video.videoWidth
-        canvas.height = video.videoHeight
+        if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth
+        if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight
 
         canvas.style.left = `${video.offsetLeft}px`
         canvas.style.top = `${video.offsetTop}px`
@@ -58,6 +62,7 @@ export function VideoDisplayBox({
         if (!ctx) return
 
         ctx.clearRect(0, 0, canvas.width, canvas.height)
+        if (loading && previewRef.current) ctx.drawImage(previewRef.current, 0, 0)
 
         // Area always draw
         drawArea({
@@ -80,17 +85,31 @@ export function VideoDisplayBox({
             drawNotations({
                 canvas,
                 source: video,
-                detections,
+                detections: previewRef.current ? previewDetectionsRef.current : detections,
                 drawingConfig,
                 area,
             })
         }
     }
 
-    useEffect(() => {
+    useLayoutEffect(() => {
+        if (!loading) previewRef.current = null
+        const render = (source: HTMLCanvasElement, frameDetections: Detection[]) => {
+            // Copy before the pipeline reuses its capture canvas two frames later.
+            const preview = previewRef.current ?? document.createElement("canvas")
+            previewRef.current = preview
+            if (preview.width !== source.width) preview.width = source.width
+            if (preview.height !== source.height) preview.height = source.height
+            preview.getContext("2d")?.drawImage(source, 0, 0)
+            previewDetectionsRef.current = frameDetections
+            draw(videoRef.current, canvasRef.current)
+        }
+        videoFrameRendererRef.current = render
         draw(videoRef.current, canvasRef.current)
-
-    }, [detections, area, line, loading, colors, drawingConfig])
+        return () => {
+            if (videoFrameRendererRef.current === render) videoFrameRendererRef.current = null
+        }
+    }, [detections, area, line, loading, colors, drawingConfig, videoFrameRendererRef, videoRef])
 
     return (
         <>
