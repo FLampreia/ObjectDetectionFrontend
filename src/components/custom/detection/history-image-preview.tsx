@@ -6,11 +6,12 @@ import type { DetectionImage, ListObjects } from "@/types"
 import { Button } from "@/components/base/buttons/button"
 import { Dialog, Modal, ModalOverlay } from "@/components/application/modals/modal"
 
-function AnnotatedImage({ image, selectedObjectId, objectNumbers, showArea, expanded = false }: {
+function AnnotatedImage({ image, selectedObjectId, objectNumbers, showArea, showCenters, expanded = false }: {
     image: DetectionImage
     selectedObjectId: string | null
     objectNumbers: Readonly<Record<string, number>>
     showArea: boolean
+    showCenters: boolean
     expanded?: boolean
 }) {
     const [size, setSize] = useState<{ width: number; height: number } | null>(null)
@@ -37,6 +38,24 @@ function AnnotatedImage({ image, selectedObjectId, objectNumbers, showArea, expa
                     aria-label="Detection annotations"
                     role="img"
                 >
+                    {image.line && (() => {
+                        const line = image.line
+                        const dx = line.x2 - line.x1, dy = line.y2 - line.y1
+                        const length = Math.hypot(dx, dy)
+                        const fontSize = Math.max(14, size.width / 50)
+                        const offset = fontSize * 1.5
+                        return <g aria-label="Counting line">
+                            <line x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2}
+                                stroke="#a78bfa" strokeWidth="3" vectorEffect="non-scaling-stroke" />
+                            {length > 0 && [-1, 1].map(sign => <text key={sign}
+                                x={(line.x1 + line.x2) / 2 - sign * dy / length * offset}
+                                y={(line.y1 + line.y2) / 2 + sign * dx / length * offset}
+                                fill="#a78bfa" stroke="#000" strokeWidth="2" paintOrder="stroke"
+                                fontSize={fontSize} fontWeight="700" textAnchor="middle" dominantBaseline="middle">
+                                {sign < 0 ? "A" : "B"}
+                            </text>)}
+                        </g>
+                    })()}
                     {showArea && image.area && <rect
                         x={image.area.x1} y={image.area.y1}
                         width={Math.max(0, image.area.x2 - image.area.x1)}
@@ -51,6 +70,10 @@ function AnnotatedImage({ image, selectedObjectId, objectNumbers, showArea, expa
                         const selected = object.id === selectedObjectId
                         const label = `${objectNumbers[object.id] ? `#${objectNumbers[object.id]} · ` : ""}${object.obj_name}`
                         const color = selected ? "#fbbf24" : "#22d3ee"
+                        const centerX = (box.x1 + box.x2) / 2
+                        const centerY = (box.y1 + box.y2) / 2
+                        const centerRadius = Math.max(5, size.width / 120)
+                        const isCrossingObject = image.crossings?.some(event => event.object_id === object.id)
                         return <g key={object.id} opacity={selectedObjectId && !selected ? 0.3 : 1}>
                             <title>{`${label}${selected ? " (selected)" : ""}`}</title>
                             <rect
@@ -67,6 +90,15 @@ function AnnotatedImage({ image, selectedObjectId, objectNumbers, showArea, expa
                                 fill={color} stroke="#111827" strokeWidth="3" paintOrder="stroke" strokeLinejoin="round">
                                 {label}
                             </text>
+                            {showCenters && isCrossingObject && <g aria-label={`${label} bounding-box center`}>
+                                <title>Bounding-box center used for line crossing</title>
+                                <circle cx={centerX} cy={centerY} r={centerRadius * 1.8}
+                                    fill="none" stroke="#111827" strokeWidth="4" vectorEffect="non-scaling-stroke" />
+                                <circle cx={centerX} cy={centerY} r={centerRadius * 1.8}
+                                    fill="none" stroke={color} strokeWidth="2" vectorEffect="non-scaling-stroke" />
+                                <circle cx={centerX} cy={centerY} r={centerRadius}
+                                    fill={color} stroke="#111827" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+                            </g>}
                         </g>
                     })}
                 </svg>}
@@ -76,10 +108,11 @@ function AnnotatedImage({ image, selectedObjectId, objectNumbers, showArea, expa
 }
 
 export function HistoryImagePreview({ image, selectedObject, type, isLoading, error, onClearSelection,
-    selectedObjectIndex, objectCount, onNavigateObject, objectNumbers }: {
+    selectedObjectIndex, objectCount, onNavigateObject, objectNumbers, showCenters = false }: {
     image: DetectionImage | null
     selectedObject: ListObjects | null
     objectNumbers: Readonly<Record<string, number>>
+    showCenters?: boolean
     type: "photo" | "video" | "stream"
     isLoading: boolean
     error: boolean
@@ -109,12 +142,13 @@ export function HistoryImagePreview({ image, selectedObject, type, isLoading, er
             </div>
             {isLoading ? <p className="py-8 text-center text-sm text-tertiary" role="status">Loading saved images...</p>
                 : error ? <p className="py-8 text-center text-sm text-tertiary" role="alert">Failed to load saved images.</p>
-                : image ? <AnnotatedImage key={image.image_url} image={image} selectedObjectId={selectedObject?.id ?? null} objectNumbers={objectNumbers} showArea={showArea} />
+                : image ? <AnnotatedImage key={image.image_url} image={image} selectedObjectId={selectedObject?.id ?? null} objectNumbers={objectNumbers} showArea={showArea} showCenters={showCenters} />
                 : <p className="py-8 text-center text-sm text-tertiary" role="status">{selectedObject ? "No saved image is available for this object." : "No saved images available."}</p>}
             {image && type !== "photo" && <p className="mt-2 text-xs text-tertiary">
                 Frame {image.frame_number ?? "—"}{image.timestamp_ms !== null && ` · ${(image.timestamp_ms / 1000).toFixed(2)} s`}
-                {" · "}First detections saved in this frame
+                {" · "}{image.crossings?.length ? `Line passages: ${image.crossings.length}` : "First detections saved in this frame"}
             </p>}
+            {image && showCenters && <p className="mt-2 text-xs text-tertiary">Dots mark the bounding-box centers used to count passages. The selected object's center is yellow.</p>}
             {selectedObject ? <div className="mt-3 flex items-center justify-between gap-2">
                 <p className="text-sm text-secondary" aria-live="polite">Selected: <span className="font-semibold">#{objectNumbers[selectedObject.id]} · {selectedObject.obj_name}</span></p>
                 <Button color="tertiary" size="sm" onClick={onClearSelection}>Clear</Button>
@@ -143,7 +177,7 @@ export function HistoryImagePreview({ image, selectedObject, type, isLoading, er
                             </div>
                         </div>
                         <div className="min-h-0 flex-1">
-                            {image ? <AnnotatedImage key={image.image_url} image={image} selectedObjectId={selectedObject?.id ?? null} objectNumbers={objectNumbers} showArea={showArea} expanded />
+                            {image ? <AnnotatedImage key={image.image_url} image={image} selectedObjectId={selectedObject?.id ?? null} objectNumbers={objectNumbers} showArea={showArea} showCenters={showCenters} expanded />
                                 : <p className="py-16 text-center text-sm text-tertiary" role="status">No saved image is available for this object.</p>}
                         </div>
                         <div className="flex shrink-0 items-center justify-between gap-3 border-t border-secondary pt-3">

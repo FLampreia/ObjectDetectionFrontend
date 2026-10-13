@@ -1,6 +1,6 @@
 import config from "@/config/api";
 import { authFetch, getAccessToken } from "./auth";
-import type { Detection } from "@/types";
+import type { Detection, CrossingEvent } from "@/types";
 
 
 export async function askSocketSessionId() {
@@ -97,7 +97,7 @@ function requestMessage<T>(
 export function processFrameWithTiming(
     ws: WebSocket, frame: Blob,
     metadata: { frame_number: number; timestamp_ms: number },
-): Promise<{ detections: Detection[]; inferenceTimeMs: number }> {
+): Promise<{ detections: Detection[]; inferenceTimeMs: number; crossings: CrossingEvent[] }> {
     return requestMessage(ws, (message) => {
         if (!Array.isArray(message.detections_per_frame)) throw new Error("Invalid frame response");
         if (message.frame_number !== metadata.frame_number) throw new Error("Frame response does not match the submitted frame");
@@ -107,6 +107,7 @@ export function processFrameWithTiming(
         return {
             detections: message.detections_per_frame as Detection[],
             inferenceTimeMs: message.processing_time_per_frame,
+            crossings: (Array.isArray(message.crossings) ? message.crossings : []) as CrossingEvent[],
         };
     }, () => {
         ws.send(JSON.stringify({ type: "frame", ...metadata }));

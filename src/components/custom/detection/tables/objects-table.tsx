@@ -41,7 +41,7 @@ export function ObjectsTable({ objects, objectNumbers, sortDescriptor, setSortCh
 
                 </Table.Header>
 
-                <Table.Body items={objects}>
+                <Table.Body items={objects} dependencies={[selectedObjectId, objectNumbers]}>
                     {(objects) => (
                         <Table.Row id={objects.id} className={onSelectObject ? "cursor-pointer" : undefined}>
                             <Table.Cell className="px-3 text-center md:px-3">

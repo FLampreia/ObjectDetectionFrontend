@@ -36,6 +36,7 @@ export function StreamDetectionSection() {
         streamFrameRendererRef,
         detectionPerformance,
         processingSeconds,
+        crossingCounts,
         detectionError,
         selectedClasses,
         setSelectedClasses,
@@ -430,6 +431,7 @@ export function StreamDetectionSection() {
                 </section>
 
                 <TextResultDisplay
+                    crossingCounts={crossingCounts}
                     processingSeconds={processingSeconds}
                     isProcessing={loading}
                     layout="expanded"

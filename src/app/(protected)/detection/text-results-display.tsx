@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/base/badges/badges";
-import type { Area, Detection, Line } from "@/types";
+import type { Area, Detection, Line, CrossingCounts } from "@/types";
 import { ScanSearch } from "lucide-react";
 import { Tab, TabList, TabPanel, Tabs } from "react-aria-components";
 import { cx } from "@/utils/cx";
@@ -15,6 +15,7 @@ interface TextDisplayBoxProps {
     trackedDetections?: Detection[];
     area: Area | null;
     line?: Line | null;
+    crossingCounts?: CrossingCounts;
     imageWidth: number;
     imageHeight: number;
     videoDuration?: number;
@@ -51,6 +52,7 @@ export const TextResultDisplay = memo(function TextResultDisplay({
     trackedDetections,
     area,
     line = null,
+    crossingCounts = { A_to_B: 0, B_to_A: 0 },
     imageWidth,
     imageHeight,
     videoDuration,
@@ -153,6 +155,11 @@ export const TextResultDisplay = memo(function TextResultDisplay({
                         : "Session totals count each tracking ID once."}
                 </p>
 
+                {!isImage && line && <div className="mt-3 rounded-lg border border-secondary p-3">
+                    <p className="text-sm font-semibold text-primary">Line passages: {crossingCounts.A_to_B + crossingCounts.B_to_A}</p>
+                    <p className="mt-1 text-xs text-tertiary">A → B: {crossingCounts.A_to_B} · B → A: {crossingCounts.B_to_A}</p>
+                    <p className="mt-1 text-xs text-tertiary">Counts bbox-center crossings. Repeated passages count separately.</p>
+                </div>}
                 <dl className="mt-4 grid grid-cols-2 gap-y-3 rounded-lg border border-secondary bg-secondary py-3 sm:grid-cols-4">
                     {[
                         { label: isImage ? "Objects" : "Total unique objects", value: String(summaryDetections.length) },

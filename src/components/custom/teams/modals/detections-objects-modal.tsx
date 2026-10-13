@@ -10,7 +10,7 @@ import { useDetectionImages } from "@/hooks/use-detection-images"
 import { HistoryImagePreview } from "../../detection/history-image-preview"
 import { selectDetectionImage } from "@/utils/select-detection-image"
 import { createObjectNumbers } from "@/utils/object-numbers"
-import { ListDetection } from "@/types"
+import { ListDetection, type ListObjects, type LineCrossing } from "@/types"
 import { ChevronLeft, ChevronRight, Trash, X } from "lucide-react"
 import { NotFoundTable } from "../../not-found-table"
 import { MultiSelect } from "@/components/base/select/multi-select"
@@ -37,9 +37,15 @@ export function DetectionObjectsModal({
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [selection, setSelection] = useState<{ detectionId: string; objectId: string } | null>(null)
     const imagesQuery = useDetectionImages(detection.id, isOpen)
+    const [tableMode, setTableMode] = useState<"objects" | "crossings">("objects")
+    const [selectedCrossingId, setSelectedCrossingId] = useState<string | null>(null)
 
     useEffect(() => {
-        if (!isOpen) setSelection(null)
+        if (!isOpen) {
+            setSelection(null)
+            setSelectedCrossingId(null)
+            setTableMode("objects")
+        }
     }, [isOpen])
 
     const {
@@ -65,13 +71,31 @@ export function DetectionObjectsModal({
     } = useDetectionObjects(detection.id, isOpen)
 
     // Only highlight objects that are present on the visible table page.
-    const selectedObject = selection?.detectionId === detection.id
+    const allCrossings = (imagesQuery.data ?? []).flatMap(image => image.crossings ?? [])
+        .sort((a, b) => a.frame_number - b.frame_number || a.track_id - b.track_id)
+    const crossings = allCrossings.filter(event => selectedClasses === null || selectedClasses.has(event.obj_class_id))
+    const crossingAsObject = (event: LineCrossing): ListObjects => ({ ...event, id: event.object_id })
+    const selectedCrossing = tableMode === "crossings" ? crossings.find(event => event.id === selectedCrossingId) : null
+    const selectedObject = selectedCrossing ? crossingAsObject(selectedCrossing) : tableMode === "objects" && selection?.detectionId === detection.id
         ? paginatedObjects.find(object => object.id === selection.objectId) ?? null : null
-    const selectedImage = selectDetectionImage(imagesQuery.data ?? [], selectedObject)
+    const savedImage = selectDetectionImage(imagesQuery.data ?? [], selectedObject)
+    const selectedImage = savedImage && selectedCrossing ? { ...savedImage,
+        objects: [...new Map([...savedImage.objects, ...(savedImage.crossings ?? []).map(crossingAsObject)]
+            .map(object => [object.id, object])).values()] } : savedImage
     const objectNumbers = useMemo(() => createObjectNumbers(objects), [objects])
-    const selectedObjectIndex = selectedObject ? sortedObjects.findIndex(object => object.id === selectedObject.id) : -1
+    const selectedObjectIndex = tableMode === "crossings" ? crossings.findIndex(event => event.id === selectedCrossingId)
+        : selectedObject ? sortedObjects.findIndex(object => object.id === selectedObject.id) : -1
+    const tablePages = tableMode === "crossings" ? Math.ceil(crossings.length / itemsPerPage) : totalPages
+    const displayPage = Math.min(currentPage, Math.max(1, tablePages))
     const navigateObject = (direction: -1 | 1) => {
         const nextIndex = selectedObjectIndex + direction
+        if (tableMode === "crossings") {
+            const nextCrossing = crossings[nextIndex]
+            if (!nextCrossing) return
+            setSelectedCrossingId(nextCrossing.id)
+            setCurrentPage(Math.floor(nextIndex / itemsPerPage) + 1)
+            return
+        }
         const nextObject = sortedObjects[nextIndex]
         if (!nextObject) return
         setSelection({ detectionId: detection.id, objectId: nextObject.id })
@@ -212,14 +236,15 @@ export function DetectionObjectsModal({
                                 <HistoryImagePreview
                                     key={detection.id}
                                     image={selectedImage}
+                                    showCenters={tableMode === "crossings"}
                                     selectedObject={selectedObject}
                                     objectNumbers={objectNumbers}
                                     type={detection.type}
                                     isLoading={imagesQuery.isLoading}
                                     error={imagesQuery.isError}
-                                    onClearSelection={() => setSelection(null)}
+                                    onClearSelection={() => { setSelection(null); setSelectedCrossingId(null) }}
                                     selectedObjectIndex={selectedObjectIndex}
-                                    objectCount={sortedObjects.length}
+                                    objectCount={tableMode === "crossings" ? crossings.length : sortedObjects.length}
                                     onNavigateObject={navigateObject}
                                 />
                                 <h3 className="text-sm font-semibold text-primary">
@@ -327,10 +352,17 @@ export function DetectionObjectsModal({
                             >
                                 <TableCard.Header
                                     className="shrink-0"
-                                    title="Objects Detected"
-                                    badge={filteredObjects.length}
+                                    title={tableMode === "objects" ? "Objects Detected" : "Line passages"}
+                                    badge={tableMode === "objects" ? filteredObjects.length : crossings.length}
                                     description="Select an object to highlight it in the image."
                                 />
+                                {(imagesQuery.data ?? []).some(image => image.line) && <div className="shrink-0 border-b border-secondary px-4 py-3">
+                                    <div className="flex gap-2">
+                                        <Button size="sm" color={tableMode === "objects" ? "secondary" : "tertiary"} onClick={() => { setTableMode("objects"); setCurrentPage(1) }}>Objects</Button>
+                                        <Button size="sm" color={tableMode === "crossings" ? "secondary" : "tertiary"} onClick={() => { setTableMode("crossings"); setCurrentPage(1) }}>Passages</Button>
+                                    </div>
+                                    <p className="mt-2 text-xs text-tertiary">Total: {allCrossings.length} · A → B: {allCrossings.filter(event => event.direction === "A_to_B").length} · B → A: {allCrossings.filter(event => event.direction === "B_to_A").length}</p>
+                                </div>}
                                 <div className="shrink-0 border-b border-secondary px-4 py-3">
                                         <MultiSelect
                                             size="sm"
@@ -372,7 +404,26 @@ export function DetectionObjectsModal({
 
                                 <div className="min-h-0 flex-1 overflow-auto">
                                     <div className="min-w-0">
-                                        {isLoading ? (
+                                        {tableMode === "crossings" ? <table className="w-full table-fixed text-sm">
+                                            <thead className="bg-secondary text-xs text-tertiary"><tr>
+                                                <th className="w-14 px-3 py-2 text-center">#</th><th className="px-3 py-2 text-left">Passage</th><th className="w-24 px-3 py-2 text-right">Time</th>
+                                            </tr></thead>
+                                            <tbody>{crossings.slice((displayPage - 1) * itemsPerPage, displayPage * itemsPerPage).map(event => <tr key={event.id} className={`border-b border-secondary ${selectedCrossingId === event.id ? "bg-secondary" : ""}`}>
+                                                <td className="px-3 py-3 text-center">
+                                                    <button type="button" onClick={() => setSelectedCrossingId(event.id)}
+                                                        aria-label={`Select passage for object ${objectNumbers[event.object_id]}`}
+                                                        aria-pressed={selectedCrossingId === event.id}
+                                                        className={`inline-flex min-w-7 cursor-pointer items-center justify-center rounded-md px-1.5 py-1 text-xs font-semibold tabular-nums ${selectedCrossingId === event.id ? "bg-amber-400/15 text-amber-500 ring-1 ring-amber-400/40" : "bg-secondary text-secondary"}`}>
+                                                        {objectNumbers[event.object_id]}
+                                                    </button>
+                                                </td>
+                                                <td className="px-3 py-3"><button type="button" className="w-full cursor-pointer text-left text-primary" onClick={() => setSelectedCrossingId(event.id)}>
+                                                    <span className="block truncate font-medium">{event.obj_name} · {event.direction === "A_to_B" ? "A → B" : "B → A"}</span>
+                                                    <span className="text-xs text-tertiary">Frame {event.frame_number}</span>
+                                                </button></td><td className="px-3 py-3 text-right tabular-nums text-secondary">{(event.timestamp_ms / 1000).toFixed(2)} s</td>
+                                            </tr>)}</tbody>
+                                            {crossings.length === 0 && <tfoot><tr><td colSpan={3} className="p-6 text-center text-tertiary">No line passages recorded.</td></tr></tfoot>}
+                                        </table> : isLoading ? (
                                             <div className="flex justify-center py-8">
                                                 Loading objects...
                                             </div>
@@ -397,10 +448,10 @@ export function DetectionObjectsModal({
                                 </div>
                                 <div className="flex shrink-0 items-center justify-between gap-2 border-t border-secondary bg-primary px-4 py-3">
                                     <Button color="secondary" size="sm" iconLeading={<ChevronLeft size={18} />}
-                                        aria-label="Previous objects page" isDisabled={currentPage <= 1} onClick={() => setCurrentPage(currentPage - 1)} />
-                                    <span className="text-sm tabular-nums text-secondary">Page {currentPage} of {Math.max(1, totalPages)}</span>
+                                        aria-label="Previous objects page" isDisabled={displayPage <= 1} onClick={() => setCurrentPage(displayPage - 1)} />
+                                    <span className="text-sm tabular-nums text-secondary">Page {displayPage} of {Math.max(1, tablePages)}</span>
                                     <Button color="secondary" size="sm" iconLeading={<ChevronRight size={18} />}
-                                        aria-label="Next objects page" isDisabled={currentPage >= totalPages} onClick={() => setCurrentPage(currentPage + 1)} />
+                                        aria-label="Next objects page" isDisabled={displayPage >= tablePages} onClick={() => setCurrentPage(displayPage + 1)} />
                                 </div>
                             </TableCard.Root>
                         </div>

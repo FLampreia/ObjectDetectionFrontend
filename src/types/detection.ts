@@ -64,9 +64,19 @@ export type ListObjects = {
 
 export type DetectionImage = {
     area?: Area | null;
+    line?: Line | null;
+    crossings?: LineCrossing[];
     id: string;
     frame_number: number | null;
     timestamp_ms: number | null;
     image_url: string;
     objects: ListObjects[];
+}
+
+export type CrossingCounts = { A_to_B: number; B_to_A: number }
+export type CrossingEvent = Detection & { track_id: number; direction: "A_to_B" | "B_to_A" }
+export type LineCrossing = {
+    id: string; object_id: string; image_id: string; track_id: number;
+    obj_name: string; obj_class_id: number; confidence: number;
+    direction: "A_to_B" | "B_to_A"; frame_number: number; timestamp_ms: number; bbox: Area;
 }

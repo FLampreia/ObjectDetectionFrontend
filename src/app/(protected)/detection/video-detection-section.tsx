@@ -34,6 +34,7 @@ export function VideoDetectionSection() {
         detectVideo,
         loading,
         processingSeconds,
+        crossingCounts,
         detectionPerformance,
         videoFrameRendererRef,
         detectionError,
@@ -275,6 +276,7 @@ export function VideoDetectionSection() {
                 </section>
 
                 <TextResultDisplay
+                    crossingCounts={crossingCounts}
                     processingSeconds={processingSeconds}
                     isProcessing={loading}
                     layout="expanded"

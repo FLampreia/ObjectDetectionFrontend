@@ -4,7 +4,7 @@ import type { StreamFrameRenderer } from "@/types/stream-performance"
 import type { DetectionPerformance } from "@/types/detection-performance"
 import { summarizePerformance, type PerformanceSample } from "@/utils/detection-performance"
 import { processVideoFrames } from "@/utils/video-frame-pipeline"
-import { Detection, Area, Line, DrawingColors } from "@/types"
+import { Detection, Area, Line, DrawingColors, type CrossingEvent, type CrossingCounts } from "@/types"
 import { DEFAULT_AREA_LINE_COLORS } from "@/config/drawing"
 import { cocoClassesItems } from "@/utils/coco-classes"
 import { useQueryClient } from "@tanstack/react-query"
@@ -92,6 +92,8 @@ export function useFileDetection() {
     const [imageUrl, setImageUrl] = useState<string | null>(null)
     const [area, setArea] = useState<Area | null>(null)
     const [line, setLine] = useState<Line | null>(null)
+    const crossingCountsRef = useRef<CrossingCounts>({ A_to_B: 0, B_to_A: 0 })
+    const [crossingCounts, setCrossingCounts] = useState<CrossingCounts>({ A_to_B: 0, B_to_A: 0 })
     const [drawingColors, setDrawingColors] = useState<DrawingColors>({ ...DEFAULT_AREA_LINE_COLORS })
     const [detections, setDetections] = useState<Detection[]>([])
     const [summaryDetections, setSummaryDetections] = useState<Detection[]>([])
@@ -104,6 +106,8 @@ export function useFileDetection() {
     const processingStartedRef = useRef<number | null>(null)
 
     const startProcessing = () => {
+        crossingCountsRef.current = { A_to_B: 0, B_to_A: 0 }
+        setCrossingCounts({ ...crossingCountsRef.current })
         setDetectionPerformance(null)
         processingStartedRef.current = performance.now()
         setProcessingSeconds(0)
@@ -164,9 +168,14 @@ export function useFileDetection() {
     }
 
     const publishResults = () => {
+        setCrossingCounts({ ...crossingCountsRef.current })
         setDetections(detectionsRef.current)
         setSummaryDetections(detectionsRef.current)
         setTrackedDetections(new Map(trackedDetectionsRef.current))
+    }
+
+    const recordCrossings = (events: CrossingEvent[]) => {
+        for (const event of events) crossingCountsRef.current[event.direction] += 1
     }
 
     const captureCanvas = useRef<HTMLCanvasElement | null>(null);
@@ -191,6 +200,8 @@ export function useFileDetection() {
     useEffect(() => {
         setProcessingSeconds(null)
         setDetectionPerformance(null)
+        crossingCountsRef.current = { A_to_B: 0, B_to_A: 0 }
+        setCrossingCounts({ ...crossingCountsRef.current })
         if (!file) return
 
         setDetections([])
@@ -308,6 +319,7 @@ export function useFileDetection() {
                 algorithm: selectedAlgorithm,
                 detection_type: "video",
                 area,
+                line,
                 chosen_team_id: selectedTeamId,
                 conf_threshold:
                     minConfidence !== null
@@ -356,6 +368,7 @@ export function useFileDetection() {
                 // Show the submitted pixels, even while the video seeks ahead.
                 videoFrameRendererRef.current?.(prepared.canvas, response.detections)
                 recordFrame(response.detections)
+                recordCrossings(response.crossings)
                 if (responseAt - lastUiUpdate > 200) {
                     publishResults()
                     lastUiUpdate = responseAt
@@ -430,6 +443,7 @@ export function useFileDetection() {
                 algorithm: selectedAlgorithm,
                 detection_type: "stream",
                 area,
+                line,
                 chosen_team_id: selectedTeamId,
                 conf_threshold:
                     minConfidence !== null
@@ -485,6 +499,7 @@ export function useFileDetection() {
                 const responseAt = performance.now()
                 const drawingMs = streamFrameRendererRef.current?.(result.detections) ?? 0
                 recordFrame(result.detections, false)
+                recordCrossings(result.crossings)
                 performanceTracker.record({
                     completedAt: responseAt, seekMs: null,
                     captureMs: capturedAt - frameStart,
@@ -573,6 +588,7 @@ export function useFileDetection() {
         stopStreamDetection,
         loading,
         processingSeconds,
+        crossingCounts,
         streamFrameRendererRef,
         videoFrameRendererRef,
         detectionPerformance,
