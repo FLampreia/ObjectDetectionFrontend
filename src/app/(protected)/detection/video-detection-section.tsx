@@ -5,7 +5,7 @@ import { MinConfidenceInput } from "@/components/custom/detection/min-confidence
 import { MultiSelectClassesBox } from "@/components/custom/detection/multi-select-class-box"
 import { SelectTeamBox } from "@/components/custom/detection/select-team-box"
 import { Camera01 } from "@untitledui/icons"
-import { Film, PenLine, SlidersHorizontal } from "lucide-react"
+import { Film, PenLine, SlidersHorizontal, Square } from "lucide-react"
 import { useRef, useState } from "react"
 import { useAlgorithms } from "@/hooks/use-algorithms"
 import { useFileDetection } from "@/hooks/use-file-detection"
@@ -32,6 +32,8 @@ export function VideoDetectionSection() {
         trackedDetections,
         setTrackedDetections,
         detectVideo,
+        stopVideoDetection,
+        isFinishingVideo,
         loading,
         processingSeconds,
         crossingCounts,
@@ -238,8 +240,18 @@ export function VideoDetectionSection() {
                         isLoading={loading}
                         showTextWhileLoading
                     >
-                        {loading ? "Detecting..." : "Detect"}
+                        {loading ? (isFinishingVideo ? "Finishing and saving..." : "Detecting...") : "Detect"}
                     </Button>
+                    {loading && (
+                        <Button
+                            iconLeading={<Square />}
+                            color="secondary"
+                            onClick={stopVideoDetection}
+                            isDisabled={isFinishingVideo}
+                        >
+                            Finish detection
+                        </Button>
+                    )}
 
                 </div>
             </section>

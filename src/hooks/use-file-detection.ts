@@ -104,6 +104,13 @@ export function useFileDetection() {
     const [loading, setLoading] = useState(false)
     const [processingSeconds, setProcessingSeconds] = useState<number | null>(null)
     const processingStartedRef = useRef<number | null>(null)
+    const stopVideoRef = useRef(false)
+    const [isFinishingVideo, setIsFinishingVideo] = useState(false)
+
+    const stopVideoDetection = () => {
+        stopVideoRef.current = true
+        setIsFinishingVideo(true)
+    }
 
     const startProcessing = () => {
         crossingCountsRef.current = { A_to_B: 0, B_to_A: 0 }
@@ -147,8 +154,11 @@ export function useFileDetection() {
 
     const recordFrame = (frameDetections: Detection[], updatePreview = true) => {
         detectionsRef.current = frameDetections
+
         if (updatePreview) setDetections(frameDetections)
+
         const frameTracks = new Set<number>()
+
         for (const detection of frameDetections) {
             const trackId = detection.track_id
             if (trackId == null || frameTracks.has(trackId)) continue
@@ -289,6 +299,7 @@ export function useFileDetection() {
     const detectVideo = async (video: HTMLVideoElement) => {
         if (!file || !selectedAlgorithm) return
 
+        setIsFinishingVideo(false)
         const setupStartedAt = performance.now()
         startProcessing()
         setDetectionError(null)
@@ -300,6 +311,7 @@ export function useFileDetection() {
         detectionsRef.current = []
         trackedDetectionsRef.current = new Map()
         confidenceTotalsRef.current = new Map()
+        stopVideoRef.current = false
 
         let ws: WebSocket | null = null
 
@@ -380,8 +392,9 @@ export function useFileDetection() {
                     detectionDelayMs: responseAt - prepared.frameStart,
                     frameBytes: prepared.frame.size, seekMs: prepared.seekMs,
                 })
-            })
+            }, () => stopVideoRef.current)
 
+            setIsFinishingVideo(true)
             publishResults()
             performanceTracker.publish()
             const finalizationStartedAt = performance.now()
@@ -406,6 +419,7 @@ export function useFileDetection() {
 
             publishResults()
             setLoading(false)
+            setIsFinishingVideo(false)
         }
     }
 
@@ -584,6 +598,8 @@ export function useFileDetection() {
         trackedDetections: trackedDetectionList,
         detectImage,
         detectVideo,
+        stopVideoDetection,
+        isFinishingVideo,
         detectStream,
         stopStreamDetection,
         loading,
