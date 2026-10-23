@@ -77,11 +77,17 @@ export function DrawAreaModal({
     useEffect(() => {
         const video = videoRef.current;
         if (!isLive || !video) return;
+        let cancelled = false;
         setVideoReady(false);
         if (videoStream) video.srcObject = videoStream;
         else video.src = streamUrl;
-        video.play().catch((error) => console.error("Failed to play drawing preview:", error));
+        video.play().catch((error: unknown) => {
+            // Cleanup pauses the video and can reject a pending play request.
+            if (cancelled) return;
+            console.error("Failed to play drawing preview:", error);
+        });
         return () => {
+            cancelled = true;
             video.pause();
             video.srcObject = null;
             video.removeAttribute("src");

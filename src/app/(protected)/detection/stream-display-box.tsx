@@ -5,17 +5,19 @@ import { EmptyFile } from "./empty-file"
 import { RefObject, useCallback, useEffect, useLayoutEffect, useRef } from "react"
 import type { StreamFrameRenderer } from "@/types/stream-performance"
 
-import { Area, Detection, DrawingColors, Line, ReportConfig } from "@/types"
+import { Area, CrossingCounts, Detection, DrawingColors, Line, ReportConfig } from "@/types"
 
 import { drawNotations } from "@/utils/draw-notations"
 import { drawArea } from "@/utils/draw-area"
 import { drawLine } from "@/utils/draw-line"
+import { drawCounter } from "@/utils/draw-counts"
 
 interface StreamDisplayBoxProps {
     videoStream: MediaStream | null
     streamUrl: string
     area: Area | null
     line: Line | null
+    crossingCounts?: CrossingCounts
     colors: DrawingColors
     drawingConfig: ReportConfig
     streamFrameRendererRef: RefObject<StreamFrameRenderer | null>
@@ -30,6 +32,7 @@ export function StreamDisplayBox({
     streamUrl,
     area,
     line,
+    crossingCounts,
     colors,
     drawingConfig,
     videoRef,
@@ -79,6 +82,17 @@ export function StreamDisplayBox({
             lineColor: colors.lineColor,
         })
 
+        // Draw passages counter in the corner
+        if (line) {
+            drawCounter({
+                canvas,
+                source: video,
+                crossingCounts
+            })
+        }
+
+
+
         // Detections only draw during processing
         if (loading) {
             drawNotations({
@@ -89,7 +103,7 @@ export function StreamDisplayBox({
                 area
             })
         }
-    }, [area, line, drawingConfig, colors.lineColor, loading])
+    }, [area, line, crossingCounts, drawingConfig, colors.lineColor, loading])
 
     // Connect the MediaStream or URL to the <video> element.
     useEffect(() => {

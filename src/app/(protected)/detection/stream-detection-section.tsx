@@ -410,6 +410,7 @@ export function StreamDetectionSection() {
                         </p>
                     </div>
                     <StreamDisplayBox
+                        crossingCounts={crossingCounts}
                         drawingConfig={drawingConfig}
                         colors={drawingColors}
                         videoRef={videoRef}

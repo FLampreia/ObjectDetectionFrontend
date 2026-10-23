@@ -273,6 +273,7 @@ export function VideoDetectionSection() {
                         videoUrl={videoUrl}
                         area={area}
                         line={line}
+                        crossingCounts={crossingCounts}
                         detections={detections}
                         onImageLoad={(width, height) =>
                             setVideoInfo({

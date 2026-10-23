@@ -18,7 +18,7 @@ import Header from "@/components/custom/layout/header";
 import FeatureCard from "@/components/custom/welcome/featureCard";
 import { Button } from "@/components/base/buttons/button";
 import { useAuth } from "@/hooks/use-auth";
-import detectionPreview from "../../public/images/image.png";
+import detectionPreview from "../../public/images/detections_test_image.png";
 
 const features = [
     {

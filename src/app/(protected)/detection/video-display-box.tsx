@@ -4,15 +4,17 @@ import { FullScreenModal } from "@/components/custom/detection/full-screen-modal
 import { EmptyFile } from "./empty-file"
 import { Maximize02 } from "@untitledui/icons"
 import { RefObject, useLayoutEffect, useRef } from "react"
-import { Area, Detection, DrawingColors, Line, ReportConfig } from "@/types"
+import { Area, CrossingCounts, Detection, DrawingColors, Line, ReportConfig } from "@/types"
 import { drawNotations } from "@/utils/draw-notations"
 import { drawArea } from "@/utils/draw-area"
 import { drawLine } from "@/utils/draw-line"
+import { drawCounter } from "@/utils/draw-counts"
 
 interface VideoDisplayBoxProps {
     videoUrl: string | null,
     area: Area | null,
     line: Line | null
+    crossingCounts?: CrossingCounts
     colors: DrawingColors
     drawingConfig: ReportConfig
     detections: Detection[]
@@ -28,6 +30,7 @@ export function VideoDisplayBox({
     videoUrl,
     area,
     line,
+    crossingCounts,
     colors,
     drawingConfig,
     videoRef,
@@ -79,6 +82,15 @@ export function VideoDisplayBox({
             line,
             lineColor: colors.lineColor,
         })
+
+        // Draw passages counter in the corner
+        if (line) {
+            drawCounter({
+                canvas,
+                source: video,
+                crossingCounts
+            })
+        }
 
         // Detections only draw during processing
         if (loading) {

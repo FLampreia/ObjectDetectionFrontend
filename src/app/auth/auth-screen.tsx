@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useResizeObserver } from "@/hooks/use-resize-observer";
 import { signup } from "@/services/auth";
 import { cx } from "@/utils/cx";
-import detectionPreview from "../../../public/images/image.png";
+import detectionPreview from "../../../public/images/detections_test_image.png";
 
 type AuthMode = "login" | "signup";
 
