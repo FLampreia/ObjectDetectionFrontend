@@ -316,7 +316,7 @@ export default function AuthScreen() {
             </main>
 
             <footer className="px-4 py-6 text-center text-xs text-tertiary">
-                ObjectDetection © {new Date().getFullYear()} · Developed by Francisco Lampreia
+                ObjectDetection {new Date().getFullYear()} · Developed by Francisco Lampreia
             </footer>
         </div>
     );

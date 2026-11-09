@@ -204,7 +204,7 @@ export const WelcomeScreen = () => {
 
             <footer className="border-t border-primary bg-primary">
                 <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-6 text-sm text-tertiary sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
-                    <p>ObjectDetection © {new Date().getFullYear()}</p>
+                    <p>ObjectDetection {new Date().getFullYear()}</p>
                     <p>Developed by Francisco Lampreia</p>
                 </div>
             </footer>
