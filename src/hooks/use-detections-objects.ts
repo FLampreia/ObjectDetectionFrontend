@@ -5,6 +5,7 @@ import { SortDescriptor } from "react-aria-components"
 
 import { ListObjects } from "@/types"
 import { getObjects } from "@/services/detections"
+import { createObjectNumbers } from "@/utils/object-numbers"
 
 export function useDetectionObjects(
     detectionId: string,
@@ -16,8 +17,8 @@ export function useDetectionObjects(
     const [selectedClasses, setSelectedClasses] = useState<Set<number> | null>(null)
 
     const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
-        column: "obj_name",
-        direction: "descending",
+        column: "object_number",
+        direction: "ascending",
     })
 
     const {
@@ -31,6 +32,11 @@ export function useDetectionObjects(
         staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
     })
+
+    const objectNumbers = useMemo(
+        () => createObjectNumbers(objects),
+        [objects]
+    )
 
     const classes = useMemo(() => {
         const uniqueClasses = new Map<number, string>()
@@ -80,7 +86,10 @@ export function useDetectionObjects(
                     first = a.confidence
                     second = b.confidence
                     break
-
+                case "object_number":
+                    first = objectNumbers[a.id]
+                    second = objectNumbers[b.id]
+                    break
                 default:
                     return 0
             }
@@ -103,7 +112,7 @@ export function useDetectionObjects(
                 ? -result
                 : result
         })
-    }, [filteredObjects, sortDescriptor])
+    }, [filteredObjects, sortDescriptor, objectNumbers])
 
     const totalPages = Math.ceil(
         sortedObjects.length / itemsPerPage

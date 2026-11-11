@@ -32,7 +32,7 @@ export function ObjectsTable({ objects, objectNumbers, sortDescriptor, setSortCh
                 } : undefined}
             >
                 <Table.Header>
-                    <Table.Head id="object_number" label="#" width={64} minWidth={64} maxWidth={64}
+                    <Table.Head id="object_number" label="#" width={64} allowsSorting minWidth={64} maxWidth={64}
                         className="w-16! px-3 md:px-3 [&>div]:justify-center" />
                     <Table.Head id="obj_name" label="Object" isRowHeader allowsSorting width="1fr"
                         className="px-3 md:px-3" />

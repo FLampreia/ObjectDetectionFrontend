@@ -81,9 +81,11 @@ export function DetectionObjectsModal({
     const selectedObject = selectedCrossing ? crossingAsObject(selectedCrossing) : tableMode === "objects" && selection?.detectionId === detection.id
         ? paginatedObjects.find(object => object.id === selection.objectId) ?? null : null
     const savedImage = selectDetectionImage(imagesQuery.data ?? [], selectedObject)
-    const selectedImage = savedImage && selectedCrossing ? { ...savedImage,
+    const selectedImage = savedImage && selectedCrossing ? {
+        ...savedImage,
         objects: [...new Map([...savedImage.objects, ...(savedImage.crossings ?? []).map(crossingAsObject)]
-            .map(object => [object.id, object])).values()] } : savedImage
+            .map(object => [object.id, object])).values()]
+    } : savedImage
     const objectNumbers = useMemo(() => createObjectNumbers(objects), [objects])
     const selectedObjectIndex = tableMode === "crossings" ? crossings.findIndex(event => event.id === selectedCrossingId)
         : selectedObject ? sortedObjects.findIndex(object => object.id === selectedObject.id) : -1
@@ -165,6 +167,39 @@ export function DetectionObjectsModal({
             ? detectedClasses.length
             : selectedClasses.size
 
+    const selectObjectFromImage = (objectId: string) => {
+        
+        if (selectedObject?.id === objectId) {
+            setSelection(null)
+            setSelectedCrossingId(null)
+            return
+        }
+
+        if (tableMode === "crossings") {
+            const index = crossings.findIndex(
+                event => event.object_id === objectId
+            )
+
+            if (index === -1) return
+
+            setSelectedCrossingId(crossings[index].id)
+            setCurrentPage(Math.floor(index / itemsPerPage) + 1)
+            return
+        }
+
+        const index = sortedObjects.findIndex(
+            object => object.id === objectId
+        )
+
+        if (index === -1) return
+
+        setSelection({
+            detectionId: detection.id,
+            objectId,
+        })
+
+        setCurrentPage(Math.floor(index / itemsPerPage) + 1)
+    }
 
     return (
         <>
@@ -230,7 +265,7 @@ export function DetectionObjectsModal({
                                     onClick={() => {
                                         setIsDeleteOpen(true)
                                     }}
-                                    iconLeading = {<Trash size={20}/>}
+                                    iconLeading={<Trash size={20} />}
                                 />
 
                                 <Button
@@ -260,6 +295,7 @@ export function DetectionObjectsModal({
                                     selectedObjectIndex={selectedObjectIndex}
                                     objectCount={tableMode === "crossings" ? crossings.length : sortedObjects.length}
                                     onNavigateObject={navigateObject}
+                                    onSelectObject={selectObjectFromImage}
                                 />
                                 <h3 className="text-sm font-semibold text-primary">
                                     Detection Summary
@@ -378,42 +414,42 @@ export function DetectionObjectsModal({
                                     <p className="mt-2 text-xs text-tertiary">Total: {allCrossings.length} · A → B: {allCrossings.filter(event => event.direction === "A_to_B").length} · B → A: {allCrossings.filter(event => event.direction === "B_to_A").length}</p>
                                 </div>}
                                 <div className="shrink-0 border-b border-secondary px-4 py-3">
-                                        <MultiSelect
-                                            size="sm"
-                                            placeholder="Select classes"
-                                            className="w-full"
-                                            items={detectedClasses}
-                                            selectedKeys={
-                                                selectedClasses === null
-                                                    ? new Set(detectedClasses.map((item) => item.id))
-                                                    : new Set([...selectedClasses].map(String))
+                                    <MultiSelect
+                                        size="sm"
+                                        placeholder="Select classes"
+                                        className="w-full"
+                                        items={detectedClasses}
+                                        selectedKeys={
+                                            selectedClasses === null
+                                                ? new Set(detectedClasses.map((item) => item.id))
+                                                : new Set([...selectedClasses].map(String))
+                                        }
+                                        onSelectionChange={(keys) => {
+                                            if (keys === "all") {
+                                                setSelectedClasses(null)
+                                                return
                                             }
-                                            onSelectionChange={(keys) => {
-                                                if (keys === "all") {
-                                                    setSelectedClasses(null)
-                                                    return
-                                                }
 
-                                                const values = new Set(
-                                                    [...keys].map(Number)
-                                                )
+                                            const values = new Set(
+                                                [...keys].map(Number)
+                                            )
 
-                                                setSelectedClasses(values)
-                                            }}
-                                            supportingText={`${selectedClassCount} classes`}
-                                            onReset={() => setSelectedClasses(new Set())}
-                                            onSelectAll={() => setSelectedClasses(null)}
-                                        >
-                                            {(item) => (
-                                                <MultiSelect.Item
-                                                    id={item.id}
-                                                    selectionIndicator="checkbox"
-                                                    selectionIndicatorAlign="left"
-                                                >
-                                                    {item.label}
-                                                </MultiSelect.Item>
-                                            )}
-                                        </MultiSelect>
+                                            setSelectedClasses(values)
+                                        }}
+                                        supportingText={`${selectedClassCount} classes`}
+                                        onReset={() => setSelectedClasses(new Set())}
+                                        onSelectAll={() => setSelectedClasses(null)}
+                                    >
+                                        {(item) => (
+                                            <MultiSelect.Item
+                                                id={item.id}
+                                                selectionIndicator="checkbox"
+                                                selectionIndicatorAlign="left"
+                                            >
+                                                {item.label}
+                                            </MultiSelect.Item>
+                                        )}
+                                    </MultiSelect>
                                 </div>
 
                                 <div ref={tableContainerRef} className="min-h-0 flex-1 overflow-auto">
