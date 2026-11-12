@@ -73,13 +73,17 @@ export default function ExampleCarousel({
 
   return (
     <figure id={id} className={`min-w-0 scroll-mt-28 overflow-hidden rounded-2xl border border-primary bg-primary shadow-xl ${className}`}>
+      
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-secondary px-5 py-4">
         <div className="flex items-center gap-2 text-sm font-semibold text-primary">
           <ScanLine aria-hidden="true" className="size-4 shrink-0 text-brand-secondary" />
           {images[selectedIndex].title}
         </div>
+
         <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary">Example result</span>
+      
       </div>
+
       <div className="relative w-full overflow-hidden">
         <div
           className={`flex w-full ease-in-out ${isResetting || prefersReducedMotion ? "transition-none" : "transition-transform duration-500"}`}
@@ -92,6 +96,7 @@ export default function ExampleCarousel({
             }
           }}
         >
+
           {slides.map((image, index) => (
             <div
               key={`${image.src.src}-${index}`}
@@ -99,6 +104,7 @@ export default function ExampleCarousel({
               style={{ aspectRatio: `${detectionPreview1.width} / ${detectionPreview1.height}` }}
               aria-hidden={index !== activeIndex}
             >
+
               <Image
                 src={image.src}
                 alt={image.alt}
@@ -111,8 +117,10 @@ export default function ExampleCarousel({
             </div>
           ))}
         </div>
+
         <div className="absolute inset-x-0 bottom-2 flex justify-center">
           <div className="flex flex-col items-center rounded-full bg-black/55 px-2 py-1 shadow-sm backdrop-blur-sm">
+            
             <div role="group" aria-label="Choose a preview image" className="flex items-center">
               {images.map((image, index) => (
                 <button
@@ -129,6 +137,7 @@ export default function ExampleCarousel({
                 </button>
               ))}
             </div>
+
             {!prefersReducedMotion && (
               <div aria-hidden="true" className="h-0.5 w-12 overflow-hidden rounded-full bg-white/25">
                 <motion.div
@@ -140,12 +149,15 @@ export default function ExampleCarousel({
                 />
               </div>
             )}
+
           </div>
         </div>
       </div>
+
       <figcaption className="border-t border-secondary px-5 py-4 text-sm leading-6 text-tertiary">
         <p className="line-clamp-2 h-12">{images[selectedIndex].description}</p>
       </figcaption>
+      
     </figure>
   );
 }
