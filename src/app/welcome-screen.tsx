@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import {
     Activity,
     ArrowRight,
@@ -18,7 +17,7 @@ import Header from "@/components/custom/layout/header";
 import FeatureCard from "@/components/custom/welcome/featureCard";
 import { Button } from "@/components/base/buttons/button";
 import { useAuth } from "@/hooks/use-auth";
-import detectionPreview from "../../public/images/detections_test_image.png";
+import ExampleCarousel from "@/components/custom/welcome/exemple-carousel";
 
 const features = [
     {
@@ -120,27 +119,7 @@ export const WelcomeScreen = () => {
                         </ul>
                     </div>
 
-                    <figure id="demo" className="min-w-0 scroll-mt-28 overflow-hidden rounded-2xl border border-primary bg-primary shadow-xl">
-                        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-secondary px-5 py-4">
-                            <div className="flex items-center gap-2 text-sm font-semibold text-primary">
-                                <ScanLine aria-hidden="true" className="size-4 text-brand-secondary" />
-                                Detection preview
-                            </div>
-                            <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary">Example result</span>
-                        </div>
-
-                        <Image
-                            src={detectionPreview}
-                            alt="Example of object detection on a city street, with boxes identifying people, vehicles and traffic lights."
-                            sizes="(max-width: 1023px) calc(100vw - 48px), 560px"
-                            preload
-                            className="h-auto w-full"
-                        />
-
-                        <figcaption className="border-t border-secondary px-5 py-4 text-sm leading-6 text-tertiary">
-                            See what was detected, where it appears and how objects are classified.
-                        </figcaption>
-                    </figure>
+                    <ExampleCarousel id="demo" preload />
                 </section>
 
                 <section id="features" aria-labelledby="features-title" className="scroll-mt-28 border-t-2 border-primary py-12 sm:py-16">

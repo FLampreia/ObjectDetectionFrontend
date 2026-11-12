@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { ArrowLeft, ArrowRight, FileBarChart, LogIn, ScanLine, UserPlus, Users } from "lucide-react";
 import { Button } from "@/components/base/buttons/button";
 import { Input } from "@/components/base/input/input";
@@ -13,7 +12,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useResizeObserver } from "@/hooks/use-resize-observer";
 import { signup } from "@/services/auth";
 import { cx } from "@/utils/cx";
-import detectionPreview from "../../../public/images/detections_test_image.png";
+import ExampleCarousel from "@/components/custom/welcome/exemple-carousel";
 
 type AuthMode = "login" | "signup";
 
@@ -144,17 +143,7 @@ export default function AuthScreen() {
                         ))}
                     </ul>
 
-                    <figure className="mt-8 overflow-hidden rounded-xl border border-primary bg-primary shadow-sm">
-                        <Image
-                            src={detectionPreview}
-                            alt="Example detection showing labeled people and vehicles on a city street."
-                            sizes="(min-width: 1024px) 520px, 100vw"
-                            className="h-auto w-full"
-                        />
-                        <figcaption className="border-t border-secondary px-4 py-3 text-xs text-tertiary">
-                            From photos to live streams, keep every result in view.
-                        </figcaption>
-                    </figure>
+                    <ExampleCarousel className="mt-8" sizes="(min-width: 1024px) 520px, 100vw" />
                 </section>
 
                 <motion.section
