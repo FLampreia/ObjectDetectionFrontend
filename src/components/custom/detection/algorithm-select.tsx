@@ -40,9 +40,9 @@ export function AlgorithmSelect({
         <Select
             isRequired
             size="md"
-            label="2. Select the Algorithm"
-            tooltip="Select the algorithm to process your upload"
-            placeholder="Select an algorithm"
+            label="2. Select the Model"
+            tooltip="Select the model to process your upload"
+            placeholder="Select a model"
             items={algorithmItems}
             value={safeSelectedAlgorithm}
             onChange={(key) => {

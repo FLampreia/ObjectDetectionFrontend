@@ -6,7 +6,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ScanLine } from "lucide-react";
 import detectionPreview1 from "../../../../public/images/pessoas1.png";
 import detectionPreview2 from "../../../../public/images/vaca1.png";
-import detectionPreview3 from "../../../../public/images/carros1.png";
+import detectionPreview3 from "../../../../public/images/carros2.png";
 
 const images = [
   {

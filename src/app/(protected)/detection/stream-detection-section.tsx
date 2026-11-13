@@ -4,7 +4,7 @@ import { MinConfidenceInput } from "@/components/custom/detection/min-confidence
 import { MultiSelectClassesBox } from "@/components/custom/detection/multi-select-class-box"
 import { SelectTeamBox } from "@/components/custom/detection/select-team-box"
 import { Camera01 } from "@untitledui/icons"
-import { PenLine, SlidersHorizontal, Tv } from "lucide-react"
+import { PenLine, SlidersHorizontal, Tv, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { useAlgorithms } from "@/hooks/use-algorithms"
 import { useFileDetection } from "@/hooks/use-file-detection"
@@ -20,6 +20,7 @@ import { ImageAnnotationSettings } from "@/components/custom/detection/image-ann
 import { DEFAULT_DRAWING_CONFIG } from "@/config/drawing"
 import { ReportConfig } from "@/types"
 import { DetectionPerformanceInfo } from "@/components/custom/detection/detection-performance-info"
+import { ButtonUtility } from "@/components/base/buttons/button-utility"
 
 type StreamInputType = "camera" | "url"
 
@@ -61,7 +62,7 @@ export function StreamDetectionSection() {
     const [isAreaOpen, setIsAreaOpen] = useState(false)
 
     const [inputType, setInputType] =
-        useState<StreamInputType>("url")
+        useState<StreamInputType>("camera")
 
     const [cameraId, setCameraId] = useState<string | null>(null)
     const [streamUrl, setStreamUrl] = useState("")
@@ -70,6 +71,7 @@ export function StreamDetectionSection() {
     const [videoReady, setVideoReady] = useState(false)
 
     const videoRef = useRef<HTMLVideoElement | null>(null);
+    const cameraRequestRef = useRef(0)
 
     const [cameraStream, setCameraStream] =
         useState<MediaStream | null>(null)
@@ -114,7 +116,17 @@ export function StreamDetectionSection() {
         getCameras()
     }, [inputType])
 
+    const clearCamera = () => {
+        cameraRequestRef.current += 1
+        stopStreamDetection()
+        cameraStream?.getTracks().forEach(track => track.stop())
+        setCameraStream(null)
+        setCameraId(null)
+        setVideoReady(false)
+    }
+
     const startCamera = async (deviceId: string) => {
+        const requestId = ++cameraRequestRef.current
         try {
             if (cameraStream) {
                 cameraStream
@@ -131,6 +143,11 @@ export function StreamDetectionSection() {
                     },
                     audio: false,
                 })
+
+            if (requestId !== cameraRequestRef.current) {
+                stream.getTracks().forEach(track => track.stop())
+                return
+            }
 
             setCameraStream(stream)
 
@@ -183,16 +200,7 @@ export function StreamDetectionSection() {
 
         // Camera -> URL
         if (key === "url") {
-            if (cameraStream) {
-                cameraStream
-                    .getTracks()
-                    .forEach(track => track.stop())
-
-                setCameraStream(null)
-            }
-
-            setCameraId(null)
-            setVideoReady(false)
+            clearCamera()
         }
 
         setInputType(key)
@@ -241,15 +249,13 @@ export function StreamDetectionSection() {
                             value={inputType}
                             onChange={handleInputTypeChange}
                         >
-
-                            <Select.Item id="url">
-                                URL
-                            </Select.Item>
-
                             <Select.Item id="camera">
                                 Camera
                             </Select.Item>
 
+                            <Select.Item id="url">
+                                URL
+                            </Select.Item>
 
                         </Select>
                     </div>
@@ -257,34 +263,47 @@ export function StreamDetectionSection() {
                     <div className="min-w-0 sm:col-span-2 xl:col-span-4">
                         {/* Camera */}
                         {inputType === "camera" && (
-                            <Select
-                                isRequired
-                                size="md"
-                                label="Select the Camera"
-                                placeholder="Select a camera"
-                                key={cameraId ?? undefined}
-                                onChange={key => {
-                                    if (!key) {
-                                        setCameraId(null)
-                                        return
-                                    }
+                            <div className="flex items-end gap-2">
+                                <Select
+                                    isRequired
+                                    size="md"
+                                    label="Select the Camera"
+                                    placeholder="Select a camera"
+                                    className="min-w-0 flex-1"
+                                    key={cameraId ?? undefined}
+                                    onChange={key => {
+                                        if (!key) {
+                                            clearCamera()
+                                            return
+                                        }
 
-                                    const deviceId = String(key)
+                                        const deviceId = String(key)
 
-                                    setCameraId(deviceId)
-                                    startCamera(deviceId)
-                                }}
-                            >
-                                {cameras.map(camera => (
-                                    <Select.Item
-                                        key={camera.deviceId}
-                                        id={camera.deviceId}
-                                    >
-                                        {camera.label ||
-                                            `Camera ${camera.deviceId.slice(0, 5)}`}
-                                    </Select.Item>
-                                ))}
-                            </Select>
+                                        setCameraId(deviceId)
+                                        startCamera(deviceId)
+                                    }}
+                                >
+                                    {cameras.map(camera => (
+                                        <Select.Item
+                                            key={camera.deviceId}
+                                            id={camera.deviceId}
+                                        >
+                                            {camera.label ||
+                                                `Camera ${camera.deviceId.slice(0, 5)}`}
+                                        </Select.Item>
+                                    ))}
+                                </Select>
+                                {cameraId && (
+                                    <ButtonUtility
+                                        type="button"
+                                        icon={X}
+                                        tooltip="Clear camera"
+                                        aria-label="Clear selected camera"
+                                        className="size-10 shrink-0"
+                                        onClick={clearCamera}
+                                    />
+                                )}
+                            </div>
                         )}
 
                         {/* URL */}
