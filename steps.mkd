@@ -1,3 +1,0 @@
-# Steps
-
-Colocar o ip da API no .env.local
